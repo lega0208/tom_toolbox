@@ -1,0 +1,79 @@
+
+html,
+body {
+  tab-size: 2;
+}
+
+.btn,
+.btn-group-sm > .btn,
+.btn-group > label {
+  font-size: 0.8rem;
+}
+
+@media (min-width: 992px) {
+  .btn,
+  .btn-group-sm > .btn,
+  .btn-group > label {
+    font-size: 1rem;
+  }
+}
+
+:root > li > ol {
+  list-style-type: lower-alpha;
+}
+
+:root li li > ol {
+  list-style-type: lower-roman;
+}
+
+ul li {
+  list-style-type: disc;
+}
+
+:root > li > ul {
+  list-style-type: circle;
+}
+
+:root li li > ul {
+  list-style-type: square;
+}
+
+nav.navbar li {
+  list-style-type: none !important;
+}
+
+tr.center th {
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+tr.center td {
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+tr.center td.nocenter {
+  text-align: left;
+  vertical-align: middle !important;
+}
+
+.nowrap {
+  text-wrap: none !important;
+  white-space: nowrap !important;
+}
+
+.btn {
+  box-shadow: none !important;
+}
+
+.btn-outline-info {
+  box-shadow: none !important;
+}
+
+.btn-outline-info:hover {
+  cursor: pointer;
+}
+
+.btn-group-vertical > .btn {
+  white-space: unset;
+}
