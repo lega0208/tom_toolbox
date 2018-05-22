@@ -40,7 +40,6 @@ const nbsp = [
 ];
 
 function replaceAll(string, arr) {
-
 	for (const [ findVal, replaceVal ] of arr) {
 		const regex = new RegExp(findVal, 'g');
 		while (regex.test(string)) {

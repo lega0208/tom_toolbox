@@ -49,7 +49,7 @@ function wrapLists($) {
 		otherTypeClass: 'MsoList',
 	};
 	const wrapList = ({ selectorClass, tag, otherTypeClass }) => {
-		const selector = `body > li.${selectorClass}`;
+		const selector = `li.${selectorClass}`;
 		$(selector).each((i, el) => {
 			const elRef = $(el);
 			if (elRef.parent().is(tag)) {

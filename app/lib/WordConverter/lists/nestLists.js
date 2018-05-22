@@ -20,39 +20,45 @@ const getType = (elRef, className = elRef.attr('class')) =>
 		: className.includes('Bullet')
 			? 'ul'
 			: 'error';
-const getLvlLiClass = (el, level) => {
-	const className = (el.tagName === 'ol') ? 'MsoList' : 'Bullet';
-	return (className === 'MsoList' && level === 1)
-		? className
-		: className + level
-};
+const getLvlLiSelector = (level) => `li.MsoList${level === 1 ? '' : level}, li.Bullet${level}`;
 
 export default function recurseLists($, ctx = 'body', level = 1) {
-	$('ol', ctx).add('ul', ctx).each((i, parent) => {
-		const lvlLiselector = 'li.' + getLvlLiClass(parent, level);
-		const lvlLis = $(lvlLiselector, parent);
+	$('ol, ul', ctx).each((i, parent) => {
+		const bothTypeSelector = getLvlLiSelector(level);
+		const lvlLis = $(bothTypeSelector, parent);
+
 		lvlLis.each((i, li) => {
+
 			const liRef = $(li);
 			const currentLvl = getLevel(liRef);
 			const nextSameLvlLi = lvlLis.get(i+1);
-
 			const nextSiblings = nextSameLvlLi ? liRef.nextUntil(nextSameLvlLi) : liRef.nextAll();
+
+			// console.log('nextSiblings:');
 			nextSiblings.each((i, nextSibling) => {
 				const nextSibRef = $(nextSibling);
 				const nextLvl = getLevel(nextSibRef);
+				// console.log('level' + level);
+				// console.log('current: ' + liRef.html());
+				// console.log('currentLevel: ' + currentLvl);
+				// console.log('nextSibling: ' + nextSibRef.html());
+				// console.log('nextLevel: ' + nextLvl);
+
 				if (nextLvl > currentLvl) {
+					console.log('nextLvl > currentLvl');
 					const tagType = getType(nextSibRef);
 					const liLastChild = liRef.children().last();
-					if (!liLastChild.get() || !liLastChild.is(tagType)) {
+					if (!liLastChild.get() || (!liLastChild.is(tagType) && nextLvl === currentLvl + 1)) {
 						$(`<${tagType}></${tagType}>`).appendTo(li);
 					}
 					nextSibRef.appendTo(liRef.children().last());
 				}
+
 				if (nextLvl === currentLvl) {
 					if (nextSibling.tagName !== 'li') {
 						nextSibRef.appendTo(li);
 					} else {
-						console.log('Same level but is li? what.');
+						console.log('Same level and not different type but is li? what.');
 					}
 				}
 
@@ -65,6 +71,7 @@ export default function recurseLists($, ctx = 'body', level = 1) {
 					}
 				}
 			});
+
 			if (level < 3) {
 				recurseLists($, li, level + 1);
 			}

@@ -26,9 +26,18 @@ export default function fixTableHTML($, opts) {
 				}
 			});
 		}
+		tbodyRef.children().each((i, tr) => {
+			const trRef = $(tr);
+			const firstChildP = trRef.children().first().find('p');
+			if (/^<strong>[\s\S]+?<\/strong>$/.test(firstChildP.html())) {
+				const strong = $('strong', firstChildP);
+				strong.replaceWith(strong.contents());
+				firstChildP.parent().get(0).tagName = 'th';
+			}
+		});
 
 		// remove <p>s in <td>s (todo: maybe they should be kept?)
-		$('td > p', table).each((i, p) => {
+		$('td > p, th > p', table).each((i, p) => {
 			const pRef = $(p);
 			const tdRef = pRef.parent();
 			pRef.replaceWith(pRef.text());

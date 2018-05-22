@@ -20,7 +20,7 @@ function getDBPath() {
 class DataInterface { // this done?
   constructor(dbPath) {
 		this.dbPath = dbPath || getDBPath() || 'C:\\Users\\Marc\\Desktop\\AcroDB.mdb'; // todo: add default db path?
-		this.datasource = `Provider=Microsoft.Jet.OLEDB.4.0;Data Source=${this.dbPath};Persist Security Info=False;`; // todo get data provider dynamically (check if driver exists)
+		this.datasource = `Provider=Microsoft.Ace.OLEDB.12.0;Data Source=${this.dbPath};Persist Security Info=False;`; // todo get data provider dynamically (check if driver exists)
 		this.db = ADODB.open(this.datasource);
   }
   async select(query) {

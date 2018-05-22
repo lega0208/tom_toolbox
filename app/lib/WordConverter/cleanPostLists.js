@@ -5,12 +5,14 @@ export default function cleanPostLists($) {
 	// remove unnecessary attributes
 	allRef.removeAttr('style')
 		.removeAttr('width')
+		.removeAttr('height')
 		.removeAttr('border')
 		.removeAttr('cellpadding')
 		.removeAttr('cellspacing')
 		.removeAttr('align')
 		.removeAttr('valign')
 		.removeAttr('bgcolor')
+		.removeAttr('nowrap')
 		.not('p.Note').removeAttr('class');
 
 	// change <b>s to <strong>s
