@@ -33,8 +33,8 @@ const superscript = [
 	['(\\d)ième', '$1<sup>ième</sup>'],
 ];
 const nbsp = [
-	['(\S\s?)»', '$1&nbsp;»'],
-	['«(\s?\S)', '«&nbsp;$1'],
+	['(\\S\\s?)»', '$1&nbsp;»'],
+	['«(\\s?\\S)', '«&nbsp;$1'],
 	['(\\d) \\$', '$1&nbsp;$'],
 	['(\\d) (\\d)', '$1&nbsp;$2'],
 ];

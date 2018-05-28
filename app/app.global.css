@@ -2,6 +2,16 @@
 html,
 body {
   tab-size: 2;
+  min-height: 100%;
+}
+#reactroot {
+  min-height: 95vh;
+}
+
+.position-fixed {
+    z-index: 1200;
+    left: 30%;
+    opacity: 0.85;
 }
 
 .btn,

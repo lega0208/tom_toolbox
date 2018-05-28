@@ -2,25 +2,42 @@ import moment from 'moment';
 import { ensureFile, readFile, outputFile } from 'fs-extra';
 import db from './data-interface';
 import cache from './cache';
-// import { getAcrosModel } from './models.js';
 import { LAST_CACHE } from '../constants';
 
 export default async function checkCache(forceCache: ?boolean): void {
 	const dbCache = cache();
-	const lastCache = await readLastCache() || '';
-	if (!lastCache || forceCache) {
-		console.log('No lastCache, caching data');
-		await cacheData(dbCache);
-	} else if (await shouldUpdateCache(lastCache)) {
-		await cacheData(dbCache, lastCache);
-	} else {
-		console.log('Data not cached');
+	try {
+		const lastCache = await readLastCache() || '';
+		if (shouldCheck() && (!lastCache || forceCache)) {
+			console.log('No lastCache, caching data');
+			await cacheData(dbCache);
+		} else if (shouldCheck() && (await shouldUpdateCache(lastCache))) {
+			await cacheData(dbCache, lastCache);
+		} else {
+			console.log('Data not cached');
+		}
+		localStorage.setItem('lastCheck', moment().toISOString());
+	} catch (e) {
+		throw new Error(e);
 	}
 	await dbCache.close();
 }
 
+function shouldCheck() {
+	// todo: switch to file or something
+	const lastCheck = localStorage.getItem('lastCheck') ? localStorage.getItem('lastCheck') : null;
+	console.log(`lastCheck: ${lastCheck}`);
+	if (lastCheck) {
+		const _lastCheck = moment(lastCheck);
+		const today = moment().startOf('day');
+		return _lastCheck.isBefore(today);
+	} else {
+		return true;
+	}
+}
+
 async function cacheData(dbCache, lastCache) {
-	// const acros = await getAcrosModel(dbCache);
+	// only update data that's been updated since last cache
 	try {
 		const data = lastCache ? await getUpdatedData(lastCache) : await getUpdatedData();
 		console.log(`Results found: ${data.length}`);
@@ -67,18 +84,18 @@ async function shouldUpdateCache(lastCache = '1970-01-01') {
 		console.log('Already cached data today.');
 		return false;
 	}
-	try {
-		const query = 'SELECT MAX ([Date Modified]) FROM Acronyms';
-		const result = (await db.query(query))[0].Expr1000;
+	const query = 'SELECT MAX ([Date Modified]) FROM Acronyms';
+	const resultArr = (await db.query(query)) || [];
+	const result = ( resultArr.length && resultArr[0].hasOwnProperty('Expr1000')) ? resultArr[0].Expr1000 : null;
 
+	if (result) {
 		const lastUpdate = moment(result);
 		console.log(`Last update: ${lastUpdate.format('YYYY-MM-DD')}`);
 		const _lastCache = moment(lastCache);
 		console.log(`Last cache: ${_lastCache.format('YYYY-MM-DD')}`);
 
 		return lastUpdate.isAfter(_lastCache, 'day');
-	} catch (e) {
-		console.error(e);
-		return false;
+	} else {
+		throw new Error('Error getting result from database.')
 	}
 }

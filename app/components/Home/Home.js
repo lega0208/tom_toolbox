@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clipboard } from 'electron';
+import { clipboard, remote } from 'electron';
 
 import ModalPreview from './HTMLPreview';
 import CodeView from './CodeView';
 import Alert from "./Alert";
 import TopButtonRow from './TopButtonRow'
+import ScriptsBar from "./ScriptsBar";
 import BottomButtonRow from './BottomButtonRow';
-import FindAcronyms from './FindAcrosModal'; // for now
+import FindAcronyms from './FindAcrosModal';
 
 import cacheCheck from '../../database/cacheCheck';
 import convertWord from '../../actions/wordConverter';
@@ -16,9 +17,9 @@ import {
 	fireAlert,
 	undo,
 } from '../../actions/home';
+import { setWarning, hideWarning } from '../../actions/home/alert';
 
-import Loadable from '../Loadable.js';
-import ScriptsBar from "./ScriptsBar";
+const { Menu, MenuItem } = remote;
 
 class Home extends Component {
   constructor(props) {
@@ -33,7 +34,6 @@ class Home extends Component {
   }
   copy(toCopy) {
     try {
-    	console.log(clipboard.availableFormats('text/html'));
       clipboard.writeText(toCopy);
 
 			this.props.dispatch(setTextContent(toCopy));
@@ -42,6 +42,10 @@ class Home extends Component {
 			this.props.dispatch(fireAlert(e));
     }
   }
+
+  paste() {
+		this.props.dispatch(convertWord());
+	}
 
 	undo() {
   	clipboard.writeText(this.props.state.priorText);
@@ -52,14 +56,22 @@ class Home extends Component {
 		this.configListeners('add', this.listeners);
 
 		// todo: write .dbpath if none is found
-		cacheCheck().then(() => console.log('Done checking cache'))
-								.catch(e => console.error('Error in cacheCheck():\n' + e));
+		cacheCheck().then(() => {
+			console.log('Done checking cache');
+			this.props.dispatch(hideWarning());
+		})
+			.catch(e => {
+				console.error('Error in cacheCheck():\n' + e);
+				this.props.dispatch(setWarning({
+					message: 'There was a problem connecting to the database, please verify you have the correct path.',
+					error: e.message,
+				}));
+			});
   }
 
   render() {
     const textContent = this.props.state.textContent;
     const opts = this.props.options;
-		// const FindAcronyms = Loadable({loader: () => import('./FindAcrosModal'), hide: true});
     return (
       <div>
         <Alert {...this.props.alert} />
@@ -101,7 +113,7 @@ class Home extends Component {
 	}
 	initListeners() {
 		this.pasteListener = e => e.ctrlKey && e.key === 'v'
-			? this.props.dispatch(convertWord())
+			? this.paste()
 			: null;
 		this.copyListener = e => e.ctrlKey && e.key === 'c'
 			? this.copy(this.props.state.textContent)
@@ -116,6 +128,26 @@ class Home extends Component {
 		} else if (operation === 'remove') {
 			listeners.forEach(listener => window.removeEventListener('keydown', listener));
 		}
+		const contextMenu = new Menu();
+		contextMenu.append(new MenuItem({
+				label: 'Copy',
+				click: () => this.copy.bind(this)(this.props.state.textContent)
+			})
+		);
+		contextMenu.append(new MenuItem({
+				label: 'Paste',
+				click: this.paste.bind(this)
+			})
+		);
+		contextMenu.append(new MenuItem({
+				label: 'Undo',
+				click: this.undo.bind(this)
+			})
+		);
+		window.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			contextMenu.popup({ window: remote.getCurrentWindow() });
+		}, false);
 	}
 }
 

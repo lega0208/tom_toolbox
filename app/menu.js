@@ -1,7 +1,7 @@
 // @flow
 import { app, Menu, shell, BrowserWindow, dialog } from 'electron';
 import fs from 'fs';
-import { DB_PATH } from './constants';
+import { DB_PATH, LAST_CACHE, CACHE_FILE } from './constants';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -50,15 +50,23 @@ export default class MenuBuilder {
 					try {
 						const path = await dialog.showOpenDialog(mainWindow, {properties: ['openFile']});
 						if (typeof path !== 'undefined') {
-							fs.writeFile(DB_PATH, path, 'utf-8',
-									e => e ? console.error(e) : console.log(`"${path}" saved as new db path`));
+							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DIRECTORATE_SERVICES/,
+								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES');
+							fs.writeFile(DB_PATH, fixedPath, 'utf-8',
+									e => e ? console.error(e) : console.log(`"${fixedPath}" saved as new db path`));
+							this.mainWindow.webContents.reload();
 						} else console.error('path chosen is undefined');
 					} catch (e) {
 						console.log('Error selecting db path: ' + e);
 					}
 				}
 			}, {
-				label: 'Recache', // todo: use the remote thing to do caching from renderer (so as to not duplicate the dep.)
+				label: 'Clear cache',
+				click: () => {
+					fs.writeFileSync(CACHE_FILE, '', 'utf-8');
+					fs.writeFileSync(LAST_CACHE, '', 'utf-8');
+					this.mainWindow.webContents.reload();
+				}
 			}]
 		}, {
       label: '&View',

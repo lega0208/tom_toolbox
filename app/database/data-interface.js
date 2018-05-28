@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import moment from 'moment';
 import { ensureFileSync } from 'fs-extra';
 import ADODB from 'node-adodb-electronfork';
-import { DB_PATH } from '../constants';
+import { DB_PATH, DEFAULT_DB_PATH } from '../constants';
 
 process.env.DEBUG = 'ADODB';
 
@@ -19,8 +19,9 @@ function getDBPath() {
 
 class DataInterface { // this done?
   constructor(dbPath) {
-		this.dbPath = dbPath || getDBPath() || 'C:\\Users\\Marc\\Desktop\\AcroDB.mdb'; // todo: add default db path?
-		this.datasource = `Provider=Microsoft.Ace.OLEDB.12.0;Data Source=${this.dbPath};Persist Security Info=False;`; // todo get data provider dynamically (check if driver exists)
+		this.dbPath = dbPath || getDBPath() || DEFAULT_DB_PATH;
+		// todo: get data provider dynamically (check if driver exists) / add ability to toggle driver
+		this.datasource = `Provider=Microsoft.Ace.OLEDB.12.0;Data Source=${this.dbPath};Persist Security Info=False;`;
 		this.db = ADODB.open(this.datasource);
   }
   async select(query) {
@@ -72,9 +73,11 @@ class DataInterface { // this done?
 			try {
 				return await this.db.query(statement);
 			} catch (e) {
+
 				console.error(`Error in DataInterface\nQuery: ${statement}\n${e}`);
 			}
 		} else {
+			throw new Error('Error: No active database connection');
 			console.error('Error: No active connection');
 		}
 	}

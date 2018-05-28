@@ -30,7 +30,7 @@ function fixNotes($, wetVersion) {
 				$('<div class="clear"/>').insertAfter(div);
 			}
 		} else {
-			console.error('Wrong wetVersion somehow');
+			console.error('Wrong wetVersion?');
 		}
 	});
 }

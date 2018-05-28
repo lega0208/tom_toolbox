@@ -7,7 +7,7 @@ import fixTables from './fixTables';
 import wetTransforms from './wetTransforms';
 
 export default function WordConverter(html: string, opts?: Object): string {
-	const $ = cheerio.load(html, { decodeEntities: false });
+	const $ = cheerio.load(html, { decodeEntities: true });
 	const funcs = [
 		cleanPreLists,
 		cleanLists,
