@@ -10,3 +10,7 @@ export const LAST_CACHE = path.join(APP_DIR, '.lastCache');
 export const CACHE_FILE = path.join(APP_DIR, 'cache.db');
 export const DEFAULT_DB_PATH =
 	'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES\\TOM_online\\HELP\\AcroDB.accdb';
+
+export const DB_DRIVER_PATH = path.join(APP_DIR, '.dbdriver');
+export const DB_DRIVER = 'Ace.OLEDB.12';
+export const DB_DRIVER_ALT = 'Jet.OLEDB.4';

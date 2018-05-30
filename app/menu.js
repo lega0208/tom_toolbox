@@ -1,7 +1,14 @@
 // @flow
 import { app, Menu, shell, BrowserWindow, dialog } from 'electron';
 import fs from 'fs';
-import { DB_PATH, LAST_CACHE, CACHE_FILE } from './constants';
+import {
+	DB_PATH,
+	LAST_CACHE,
+	CACHE_FILE,
+	DB_DRIVER_PATH,
+	DB_DRIVER,
+	DB_DRIVER_ALT,
+} from './constants';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -14,7 +21,7 @@ export default class MenuBuilder {
     // if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
     //   this.setupDevelopmentEnvironment();
     // }
-	  this.setupDevelopmentEnvironment(); // while I'm still working on it, so I can debug prod
+	  this.setupDevelopmentEnvironment(); // todo: remove after. for while I'm still working on it, so I can debug prod
 
     const template = this.buildDefaultTemplate();
 
@@ -48,13 +55,14 @@ export default class MenuBuilder {
 				label: 'Select database file',
 				click: async () => {
 					try {
-						const path = await dialog.showOpenDialog(mainWindow, {properties: ['openFile']});
+						const path = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'] });
 						if (typeof path !== 'undefined') {
 							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DIRECTORATE_SERVICES/,
 								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES');
-							fs.writeFile(DB_PATH, fixedPath, 'utf-8',
-									e => e ? console.error(e) : console.log(`"${fixedPath}" saved as new db path`));
+							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => e ? console.error(e)
+																															 : console.log(`"${fixedPath}" saved as new db path`));
 							this.mainWindow.webContents.reload();
+
 						} else console.error('path chosen is undefined');
 					} catch (e) {
 						console.log('Error selecting db path: ' + e);
@@ -67,6 +75,9 @@ export default class MenuBuilder {
 					fs.writeFileSync(LAST_CACHE, '', 'utf-8');
 					this.mainWindow.webContents.reload();
 				}
+			}, {
+				label: 'Toggle DB Driver',
+				click: toggleDbDriver
 			}]
 		}, {
       label: '&View',
@@ -117,4 +128,15 @@ export default class MenuBuilder {
       }]
     }];
   }
+}
+
+function toggleDbDriver() {
+	const dbDriver = fs.readFileSync(DB_DRIVER_PATH, 'utf-8');
+	const writeDriver = (driver) => fs.writeFileSync(DB_DRIVER_PATH, driver, 'utf-8');
+
+	switch (dbDriver) {
+		case DB_DRIVER: writeDriver(DB_DRIVER_ALT); break;
+		case DB_DRIVER_ALT: writeDriver(DB_DRIVER); break;
+		default: writeDriver(DB_DRIVER);
+	}
 }

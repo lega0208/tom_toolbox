@@ -1,10 +1,15 @@
 /* eslint-disable flowtype-errors/show-errors */
 // @flow
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import moment from 'moment';
 import { ensureFileSync } from 'fs-extra';
 import ADODB from 'node-adodb-electronfork';
-import { DB_PATH, DEFAULT_DB_PATH } from '../constants';
+import {
+	DB_PATH,
+	DEFAULT_DB_PATH,
+	DB_DRIVER_PATH,
+	DB_DRIVER,
+} from '../constants';
 
 process.env.DEBUG = 'ADODB';
 
@@ -16,12 +21,27 @@ function getDBPath() {
 		console.error(e);
 	}
 }
+function getDBDriver() {
+	ensureFileSync(DB_DRIVER_PATH);
+	try {
+		const dbDriver = readFileSync(DB_DRIVER_PATH, 'utf-8');
+		if (!dbDriver) {
+			writeFileSync(DB_DRIVER_PATH, DB_DRIVER, 'utf-8');
+			return DB_DRIVER;
+		} else {
+			return dbDriver
+		}
+	} catch (e) {
+		console.error(e);
+	}
+}
 
 class DataInterface { // this done?
   constructor(dbPath) {
 		this.dbPath = dbPath || getDBPath() || DEFAULT_DB_PATH;
+		this.dbDriver = getDBDriver();
 		// todo: get data provider dynamically (check if driver exists) / add ability to toggle driver
-		this.datasource = `Provider=Microsoft.Ace.OLEDB.12.0;Data Source=${this.dbPath};Persist Security Info=False;`;
+		this.datasource = `Provider=Microsoft.${this.dbDriver}.0;Data Source=${this.dbPath};Persist Security Info=False;`;
 		this.db = ADODB.open(this.datasource);
   }
   async select(query) {
@@ -78,7 +98,6 @@ class DataInterface { // this done?
 			}
 		} else {
 			throw new Error('Error: No active database connection');
-			console.error('Error: No active connection');
 		}
 	}
 }
