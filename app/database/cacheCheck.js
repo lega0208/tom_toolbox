@@ -11,12 +11,13 @@ export default async function checkCache(forceCache: ?boolean): void {
 		if (shouldCheck() && (!lastCache || forceCache)) {
 			console.log('No lastCache, caching data');
 			await cacheData(dbCache);
+			localStorage.setItem('lastCheck', moment().toISOString());
 		} else if (shouldCheck() && (await shouldUpdateCache(lastCache))) {
 			await cacheData(dbCache, lastCache);
+			localStorage.setItem('lastCheck', moment().toISOString());
 		} else {
 			console.log('Data not cached');
 		}
-		localStorage.setItem('lastCheck', moment().toISOString());
 	} catch (e) {
 		throw new Error(e);
 	}
@@ -39,12 +40,13 @@ function shouldCheck() {
 async function cacheData(dbCache, lastCache) {
 	// only update data that's been updated since last cache
 	try {
-		const data = lastCache ? await getUpdatedData(lastCache) : await getUpdatedData();
+		const data = (lastCache ? await getUpdatedData(lastCache) : await getUpdatedData()) || [];
 		console.log(`Results found: ${data.length}`);
 		await dbCache.insertAll(data);
 		await writeLastCache();
 	} catch (e) {
-		console.error(`Error caching data:\n${e}`);
+		console.error(`Error caching data:`);
+		throw e;
 	}
 }
 
@@ -52,7 +54,8 @@ async function writeLastCache() {
 	try {
 		await outputFile(LAST_CACHE, moment().toISOString(), 'utf-8');
 	} catch (e) {
-		console.error(`Error writing .lastCache:\n${e}`);
+		console.error(`Error writing .lastCache:`);
+		throw e;
 	}
 }
 async function readLastCache() {
@@ -60,7 +63,8 @@ async function readLastCache() {
 		await ensureFile(LAST_CACHE);
 		return await readFile(LAST_CACHE, 'utf-8');
 	} catch (e) {
-		console.error(`Error reading .lastCache:\n${e}`);
+		console.error(`Error reading .lastCache:`);
+		throw e;
 	}
 }
 
@@ -75,7 +79,8 @@ async function getUpdatedData(lastCache) {
 		const query = 'SELECT [Acronym], [Definition], [Language] FROM Acronyms';
 		return db.query(query);
 	} catch (e) {
-		console.error(`Error getting updated data:\n${e}`);
+		console.error(`Error getting updated data:`);
+		throw e;
 	}
 }
 

@@ -1,31 +1,15 @@
 /**
  * Clean up HTML a bit before parsing lists
  */
-export default function preListClean($) {
+export default function preListClean(html) {
 	const funcs = [
 		removeEmptyTags,
 		addClassQuotes,
 		removeListComments,
 		removeTags,
+		handleKbd,
 	];
-	const bodyRef = $('body');
-	const html = bodyRef.html();
-	const reducedHTML = funcs.reduce((acc, func) => func(acc), html);
-	bodyRef.html(reducedHTML);
-
-	boldFigureCaptions($);
-}
-
-function boldFigureCaptions($) {
-	$('p.FigureCaption').each((i, caption) => {
-		const captionRef = $(caption);
-		if (captionRef.next().get(0).tagName === 'table') {
-			captionRef.prependTo(captionRef.next());
-			caption.tagName = 'caption';
-		} else {
-			captionRef.replaceWith(`<p><strong>${captionRef.contents()}</strong></p>`)
-		}
-	});
+	return funcs.reduce((acc, func) => func(acc), html);
 }
 
 function removeListComments(html) {
@@ -65,4 +49,34 @@ function removeTags(html) {
 		}
 		return html;
 	}, html);
+}
+
+function handleKbd(html) {
+	const tags = [
+		'a',
+		'b',
+		'br', // self-closing!!**
+		'div',
+		'em',
+		'h\\d',
+		'i',
+		'kbd',
+		'li',
+		'span',
+		'strong',
+		'sup',
+		'table',
+		'td',
+		'th',
+	];
+	const tagsRE = '(?:' + tags.join('|') + ')';
+
+	const regex = new RegExp(`<(?!\/?${tagsRE}(?:\s[^>]+?>|>| ?\/>))([^>]+?)>`, 'g'); // this regex clearly does not work properly. *finds "/a" and "/kbd"
+	let count = 0;
+	while (regex.test(html) && count < 100) {
+		count++;
+		console.log(regex.exec(html)[1]);
+		html = html.replace(regex, '<kbd>$1</kbd>');
+	}
+	return html;
 }

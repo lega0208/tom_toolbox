@@ -16,13 +16,14 @@ export default function ScriptsBar(props) {
 		specChars,
 		supNbsp,
 	} = props.state;
-	const btnClasses = (optionName) => 'btn btn-sm btn-outline-primary' + (props.state[optionName] ? ' active' : '');
+	const btnClasses = (optionName) => `btn btn-sm btn-outline-primary${(props.state[optionName] ? ' active' : '')}`;
+
 	return (
 		<div className="col-2 px-0">
 			<div className="card">
 				<h6 className="card-header p-2">Scripts</h6>
 				<div className="card-body p-2">
-					<div className="btn-group btn-group-sm btn-group-vertical">
+					<div className="btn-group btn-group-sm btn-group-vertical" style={{ minWidth: '100%' }}>
 						<button className={btnClasses('autoAcro')} onClick={() => dispatch(toggleAutoAcro())}>
 							<span className="nowrap">Acronyms <Checkbox option={autoAcro} /></span>
 						</button>

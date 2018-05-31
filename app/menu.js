@@ -1,5 +1,5 @@
 // @flow
-import { app, Menu, shell, BrowserWindow, dialog } from 'electron';
+import { app, Menu, shell, BrowserWindow, dialog, session } from 'electron';
 import fs from 'fs';
 import {
 	DB_PATH,
@@ -18,13 +18,10 @@ export default class MenuBuilder {
   }
 
   buildMenu() {
-    // if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
-    //   this.setupDevelopmentEnvironment();
-    // }
-	  this.setupDevelopmentEnvironment(); // todo: remove after. for while I'm still working on it, so I can debug prod
-
+    if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+      this.setupDevelopmentEnvironment();
+    }
     const template = this.buildDefaultTemplate();
-
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
 
@@ -36,14 +33,11 @@ export default class MenuBuilder {
     this.mainWindow.webContents.on('context-menu', (e, props) => {
       const { x, y } = props;
 
-      Menu
-        .buildFromTemplate([{
-          label: 'Inspect element',
-          click: () => {
-            this.mainWindow.inspectElement(x, y);
-          }
-        }])
-        .popup(this.mainWindow);
+      Menu.buildFromTemplate([{
+				label: 'Inspect element',
+				click: () => this.mainWindow.inspectElement(x, y)
+			}])
+			.popup(this.mainWindow);
     });
   }
 
@@ -61,6 +55,7 @@ export default class MenuBuilder {
 								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES');
 							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => e ? console.error(e)
 																															 : console.log(`"${fixedPath}" saved as new db path`));
+							clearCache();
 							this.mainWindow.webContents.reload();
 
 						} else console.error('path chosen is undefined');
@@ -71,17 +66,19 @@ export default class MenuBuilder {
 			}, {
 				label: 'Clear cache',
 				click: () => {
-					fs.writeFileSync(CACHE_FILE, '', 'utf-8');
-					fs.writeFileSync(LAST_CACHE, '', 'utf-8');
+					clearCache();
 					this.mainWindow.webContents.reload();
 				}
 			}, {
 				label: 'Toggle DB Driver',
-				click: toggleDbDriver
+				click: () => {
+					toggleDbDriver();
+					this.mainWindow.webContents.reload();
+				}
 			}]
 		}, {
       label: '&View',
-      submenu: (process.env.NODE_ENV === 'development') ? [{
+      submenu: (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') ? [{
         label: '&Reload',
         accelerator: 'Ctrl+R',
         click: () => {
@@ -111,13 +108,7 @@ export default class MenuBuilder {
         click: () => {
           this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
         }
-      }, {
-				label: 'Toggle &Developer Tools',
-				accelerator: 'Alt+Ctrl+I',
-				click: () => {
-					this.mainWindow.toggleDevTools();
-				}
-			}]
+      }]
     }, {
       label: 'Help',
       submenu: [{
@@ -139,4 +130,11 @@ function toggleDbDriver() {
 		case DB_DRIVER_ALT: writeDriver(DB_DRIVER); break;
 		default: writeDriver(DB_DRIVER);
 	}
+	clearCache();
+}
+
+function clearCache() {
+	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
+	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
+	session.defaultSession.clearStorageData({ storages: ['localStorage'] });
 }

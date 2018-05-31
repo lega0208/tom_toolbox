@@ -42,7 +42,13 @@ class DataInterface { // this done?
 		this.dbDriver = getDBDriver();
 		// todo: get data provider dynamically (check if driver exists) / add ability to toggle driver
 		this.datasource = `Provider=Microsoft.${this.dbDriver}.0;Data Source=${this.dbPath};Persist Security Info=False;`;
-		this.db = ADODB.open(this.datasource);
+		console.log(`db path: ${this.dbPath}`);
+		console.log(`db driver: ${this.dbDriver}`);
+		try {
+			this.db = ADODB.open(this.datasource);
+		} catch (e) {
+			throw e;
+		}
   }
   async select(query) {
     await this.query(query);
@@ -60,6 +66,7 @@ class DataInterface { // this done?
 			await this.execute(statement);
 		} catch (e) {
 			console.error(`Error inserting in db:\n${e}`);
+			throw e;
 		}
 
 		const getMaxID = `SELECT Max([ID]) from ${table}`; // not sure how I feel about an insert function returning a query result
@@ -83,9 +90,11 @@ class DataInterface { // this done?
 				return await this.db.execute(statement);
 			} catch (e) {
 				console.error(`Error in DataInterface\nQuery: ${statement}\n${e}`);
+				throw e;
 			}
 		} else {
-			console.error('Error: No active connection');
+			console.error('No active connection');
+			throw new Error('No active connection');
 		}
 	}
 	async query(statement) {
@@ -93,11 +102,11 @@ class DataInterface { // this done?
 			try {
 				return await this.db.query(statement);
 			} catch (e) {
-
-				console.error(`Error in DataInterface\nQuery: ${statement}\n${e}`);
+				console.error(`Error in DataInterface\nQuery: ${statement}`);
+				throw e;
 			}
 		} else {
-			throw new Error('Error: No active database connection');
+			throw new Error('No active database connection');
 		}
 	}
 }

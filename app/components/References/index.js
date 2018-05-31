@@ -24,7 +24,7 @@ export default class References extends Component {
 						<Sidebar wetVersion={this.state.wetVersion} navigate={this.navigate} />
 					</div>
 					<div className="col-8 col-md-9 col-lg-10 embed-responsive embed-responsive-1by1" style={{maxHeight: '92vh', minHeight: '90vh'}}>
-						<iframe src={this.state.url} className="embed-responsive-item border h-100" />
+						<webview src={this.state.url} className="embed-responsive-item border h-100" />
 					</div>
 				</div>
 			</div>

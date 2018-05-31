@@ -61,11 +61,15 @@ class Home extends Component {
 			this.props.dispatch(hideWarning());
 		})
 			.catch(e => {
-				console.error('Error in cacheCheck():\n' + e);
+				const error = e.message.includes('cscript.exe error')
+					? 'Error: Database connection could not be established.'
+					: e.message;
 				this.props.dispatch(setWarning({
-					message: 'There was a problem connecting to the database, please verify you have the correct path.',
-					error: e.message,
+					message: 'There was a problem connecting to the database, please verify you have the correct path. '
+						+ 'Otherwise, try toggling the DB driver.',
+					error,
 				}));
+				console.error(e.message);
 			});
   }
 
@@ -128,26 +132,28 @@ class Home extends Component {
 		} else if (operation === 'remove') {
 			listeners.forEach(listener => window.removeEventListener('keydown', listener));
 		}
-		const contextMenu = new Menu();
-		contextMenu.append(new MenuItem({
-				label: 'Copy',
-				click: () => this.copy.bind(this)(this.props.state.textContent)
-			})
-		);
-		contextMenu.append(new MenuItem({
-				label: 'Paste',
-				click: this.paste.bind(this)
-			})
-		);
-		contextMenu.append(new MenuItem({
-				label: 'Undo',
-				click: this.undo.bind(this)
-			})
-		);
-		window.addEventListener('contextmenu', (e) => {
-			e.preventDefault();
-			contextMenu.popup({ window: remote.getCurrentWindow() });
-		}, false);
+		if (process.env.NODE_ENV !== 'development') {
+			const contextMenu = new Menu();
+			contextMenu.append(new MenuItem({
+					label: 'Copy',
+					click: () => this.copy.bind(this)(this.props.state.textContent)
+				})
+			);
+			contextMenu.append(new MenuItem({
+					label: 'Paste',
+					click: this.paste.bind(this)
+				})
+			);
+			contextMenu.append(new MenuItem({
+					label: 'Undo',
+					click: this.undo.bind(this)
+				})
+			);
+			window.addEventListener('contextmenu', (e) => {
+				e.preventDefault();
+				contextMenu.popup({ window: remote.getCurrentWindow() });
+			}, false);
+		}
 	}
 }
 

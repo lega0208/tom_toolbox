@@ -7,9 +7,11 @@ import fixTables from './fixTables';
 import wetTransforms from './wetTransforms';
 
 export default function WordConverter(html: string, opts?: Object): string {
-	const $ = cheerio.load(html, { decodeEntities: true });
+	const _html = cleanPreLists(html);
+
+	const $ = cheerio.load(_html, { decodeEntities: false });
 	const funcs = [
-		cleanPreLists,
+		boldFigureCaptions,
 		cleanLists,
 		cleanPostLists,
 		fixTables,
@@ -17,6 +19,18 @@ export default function WordConverter(html: string, opts?: Object): string {
 	];
 	funcs.forEach(func => func($, opts));
 	return beautify($);
+}
+
+function boldFigureCaptions($) {
+	$('p.FigureCaption').each((i, caption) => {
+		const captionRef = $(caption);
+		if (captionRef.next().get(0).tagName === 'table') {
+			captionRef.prependTo(captionRef.next());
+			caption.tagName = 'caption';
+		} else {
+			captionRef.replaceWith(`<p><strong>${captionRef.contents()}</strong></p>`)
+		}
+	});
 }
 
 function beautify($) {
