@@ -1,7 +1,30 @@
 
-export default function wetTransforms($, { wetVersion }) {
+export default function wetTransforms($, { wetVersion, lang }) {
 	fixNotes($, wetVersion);
+	tableOfContents($, wetVersion, lang);
 	addWETClasses($, wetVersion);
+}
+
+function tableOfContents($, wetVersion, lang) {
+	const title = (lang === 'en') ? 'Table of contents'
+																: (lang === 'fr') ? 'Table des matières' : console.error('lang error?');
+	const outerClass = (wetVersion === 4) ? 'panel panel-default'
+																				: 'span-4 module-table-contents';
+	const header = (wetVersion === 4) ? `<div class="panel-heading"><h3 class="panel-title">${title}</h3></div>`
+																		: `<p>${title}</p>`;
+
+	$('div.TOC').each((i, div) => {
+		const divRef = $(div);
+		divRef.removeClass('TOC');
+		divRef.addClass(outerClass);
+		const headerRef = $(header);
+		headerRef.prependTo(div);
+		if (wetVersion === 4) {
+			const bodyDiv = $('<div class="panel-body"/>');
+			bodyDiv.insertAfter(headerRef);
+			divRef.children('ul').appendTo($('div.panel-body', div).get(0));
+		}
+	});
 }
 
 function fixNotes($, wetVersion) {
@@ -39,7 +62,8 @@ function addWETClasses($, wetVersion) {
 	// add list classes
 	const listClass = wetVersion === 4 ? 'mrgn-tp-sm' : 'margin-top-medium';
 	const listPClass = wetVersion === 4 ? 'mrgn-lft-0' : 'indent-none';
-	$('li').addClass(listClass);
+	// add spacing to <li>s, but not the ones in the TOC
+	$('li').not('div.panel-body > ul li, div.module-table-contents > ul li').addClass(listClass);
 	$('li > p').addClass(listPClass);
 
 	if (wetVersion === 4) {

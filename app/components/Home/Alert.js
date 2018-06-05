@@ -8,7 +8,7 @@ export default function Alert(props) {
 	const display = props.show ? 'show' : 'hide';
 
 	return (
-		<div className={'container' + ((!warning.message && !props.show) ? ' mb-5' : '')}>
+		<div className={'container' + ((!warning.message) ? ' mb-5' : '')}>
 			{
 				warning.message ? (
 					<div className="row mt-2">
@@ -24,7 +24,7 @@ export default function Alert(props) {
 						</div>
 						<div className="col-auto" />
 					</div>
-				) : null
+				) : <div className="row mt-2"><div className="col" /></div>
 			}
 			{
 				props.show ? (

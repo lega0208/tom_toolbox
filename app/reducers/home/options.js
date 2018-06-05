@@ -6,7 +6,7 @@ const initialState = localStorage.getItem('home.options')
 													listType: 'ol',
 													lang: 'en',
 													wetVersion: 2,
-													autoAcro: false,
+													autoAcro: true,
 													specChars: true,
 													supNbsp: true,
 												};

@@ -33,22 +33,25 @@ const superscript = [
 	['(\\d)ième', '$1<sup>ième</sup>'],
 ];
 const nbsp = [
-	['(\\S\\s?)»', '$1&nbsp;»'],
-	['«(\\s?\\S)', '«&nbsp;$1'],
-	['(\\d) \\$', '$1&nbsp;$'],
-	['(\\d) (\\d)', '$1&nbsp;$2'],
+	['([^;])\\s*»', '$1&nbsp;»'],
+	['«\\s*([^&])', '«&nbsp;$1'],
+	['(\\d)\s\\$', '$1&nbsp;$'],
+	['(\\d)\s(\\d)', '$1&nbsp;$2'],
 ];
 
 function replaceAll(string, arr) {
 	for (const [ findVal, replaceVal ] of arr) {
-		const regex = new RegExp(findVal, 'g');
-		while (regex.test(string)) {
+		const regex = new RegExp(findVal);
+		let counter = 0;
+		while (regex.test(string) && counter < 100) {
 			string = string.replace(regex, replaceVal);
+			counter++;
 		}
 	}
 	return string;
 }
 const cleanup = (string, opts) => {
+	console.log('cleanup');
 	const cleanupArr = [];
 	if (opts.specChars) cleanupArr.push(...specChars);
 	if (opts.supNbsp) cleanupArr.push(...superscript);

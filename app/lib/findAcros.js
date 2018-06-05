@@ -43,8 +43,8 @@ function findNonStandard(string) {
 }
 
 export default async function findAcros(string) {
-  const regex = /[\s>\W]([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/abbr>)[:?!<), .\r\n]/gu;
-  const startEndRegex = /^([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/abbr>)[:?!<), .\r\n]|[:?!>), .\r\n]([\p{Uppercase_Letter}.-]{2,9}$)/gum;
+  const regex = /[\s>\W]([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n]/gu;
+  const startEndRegex = /^([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n]|[:?!>),\s.\r\n]([\p{Uppercase_Letter}.-]{2,9}$)/gum;
 
   const results = [
   	...findAll(string, regex, true),

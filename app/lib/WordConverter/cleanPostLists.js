@@ -1,4 +1,6 @@
 
+const replaceWithContents = (cheerioObject) => cheerioObject.replaceWith(cheerioObject.contents());
+
 export default function cleanPostLists($) {
 	const allRef = $('*');
 
@@ -13,17 +15,17 @@ export default function cleanPostLists($) {
 		.removeAttr('valign')
 		.removeAttr('bgcolor')
 		.removeAttr('nowrap')
-		.not('p.Note').removeAttr('class');
+		.not('p.Note, p.MsoToc1, p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5, div.alert, div.module-note')
+		.removeAttr('class');
 
 	// change <b>s to <strong>s
-	$('b').each((i, elem) => {
-		elem.tagName = 'strong';
-	});
+	$('b').each((i, elem) => elem.tagName = 'strong');
 
 	// change <i>s to <em>s
-	$('i').each((i, elem) => {
-		elem.tagName = 'em';
-	});
+	$('i').each((i, elem) => elem.tagName = 'em');
+
+	// remove <u> tags
+	$('u').each((i, u) => replaceWithContents($(u)));
 
 	// fix header ids
 	const headers = $('h2').add('h3').add('h4').add('h5');
@@ -32,10 +34,11 @@ export default function cleanPostLists($) {
 		let counter = 0;
 		while (counter < 100 && elRef.children('span').length) {
 			counter++;
-			elRef.children('span').each((i, span) => $(span).replaceWith($(span).contents()))
+			elRef.children('span').each((i, span) => replaceWithContents($(span)))
 		}
-		const anchor = elRef.children('a').each((i, a) => $(a).replaceWith($(a).contents()));
-		anchor.replaceWith(anchor.contents());
+		const anchor = elRef.children('a').each((i, a) => replaceWithContents($(a)));
+		replaceWithContents(anchor);
+		elRef.children('strong').each((i, strong) => replaceWithContents($(strong)))
 	});
 
 	// convert anchors to ids
@@ -43,9 +46,8 @@ export default function cleanPostLists($) {
 		const elRef = $(el);
 		if (elRef.attr('name')) {
 			const id = elRef.attr('name');
-			const contents = elRef.contents();
 			elRef.parent().attr('id', id);
-			elRef.replaceWith(contents);
+			replaceWithContents(elRef);
 		}
 	});
 }

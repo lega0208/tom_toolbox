@@ -31,9 +31,13 @@ function addClassQuotes(html) {
 }
 
 function removeEmptyTags(html) {
-	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>\s*?<\/\1>/g;
+	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>\s*?<\/\1>/;
 	while (regex.test(html)) {
-		html = html.replace(regex, '');
+		if (regex.exec(html) && !regex.exec(html)[0].includes('mso-spacerun')) {
+			html = html.replace(regex, '');
+		} else {
+			html = html.replace(/<span[^>]+?>\s+?<\/span>/, ' ');
+		}
 	}
 	return html;
 }
@@ -52,31 +56,32 @@ function removeTags(html) {
 }
 
 function handleKbd(html) {
-	const tags = [
-		'a',
-		'b',
-		'br', // self-closing!!**
-		'div',
-		'em',
-		'h\\d',
-		'i',
-		'kbd',
-		'li',
-		'span',
-		'strong',
-		'sup',
-		'table',
-		'td',
-		'th',
-	];
-	const tagsRE = '(?:' + tags.join('|') + ')';
+	// const tags = [
+	// 	'a',
+	// 	'b',
+	// 	'br', // self-closing!!**
+	// 	'div',
+	// 	'em',
+	// 	'h\\d',
+	// 	'i',
+	// 	'kbd',
+	// 	'li',
+	// 	'span',
+	// 	'strong',
+	// 	'sup',
+	// 	'table',
+	// 	'td',
+	// 	'th',
+	// ];
+	// const tagsRE = '(?:' + tags.join('|') + ')';
 
-	const regex = new RegExp(`<(?!\/?${tagsRE}(?:\s[^>]+?>|>| ?\/>))([^>]+?)>`, 'g'); // this regex clearly does not work properly. *finds "/a" and "/kbd"
+	// const regex = new RegExp(`<(?!\/?\\w+|${tagsRE}(?:\\s[^>]+?>|>| ?\/>))([^>]+?)>`, 'g'); // finds angle brackets
+	const regex = new RegExp(`&lt;([^&>]+?)&gt;`);
 	let count = 0;
-	while (regex.test(html) && count < 100) {
+	let _html = html;
+	while (regex.test(_html) && count < 100) {
 		count++;
-		console.log(regex.exec(html)[1]);
-		html = html.replace(regex, '<kbd>$1</kbd>');
+		_html = _html.replace(regex, '<kbd>$1</kbd>');
 	}
-	return html;
+	return _html;
 }

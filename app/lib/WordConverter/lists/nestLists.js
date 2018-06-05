@@ -45,7 +45,7 @@ export default function recurseLists($, ctx = 'body', level = 1) {
 				// console.log('nextLevel: ' + nextLvl);
 
 				if (nextLvl > currentLvl) {
-					console.log('nextLvl > currentLvl');
+					// console.log('nextLvl > currentLvl');
 					const tagType = getType(nextSibRef);
 					const liLastChild = liRef.children().last();
 					if (!liLastChild.get() || (!liLastChild.is(tagType) && nextLvl === currentLvl + 1)) {
@@ -58,7 +58,7 @@ export default function recurseLists($, ctx = 'body', level = 1) {
 					if (nextSibling.tagName !== 'li') {
 						nextSibRef.appendTo(li);
 					} else {
-						console.log('Same level and not different type but is li? what.');
+						console.error('Same level and not different type but is li? what.');
 					}
 				}
 
