@@ -10,16 +10,21 @@ export default function convertWord() {
 		const opts = getState().home.options;
 		dispatch({type: 'SET_CLIPBOARD', payload: wordHTML});
 
-		let html = WordConverter(wordHTML, opts);
+		try {
+			const html = WordConverter(wordHTML, opts);
 
-		if (opts.autoAcro === true) {
-			clipboard.writeText(html);
-			dispatch(startAutoAcro(html));
-		} else {
-			html = cleanup(html, opts);
-			clipboard.writeText(html);
-			dispatch(setTextContent(html));
-			dispatch(fireAlert());
+			if (opts.autoAcro === true) {
+				clipboard.writeText(html);
+				dispatch(startAutoAcro(html));
+			} else {
+				const cleanHtml = cleanup(html, opts);
+				clipboard.writeText(cleanHtml);
+				dispatch(setTextContent(cleanHtml));
+				dispatch(fireAlert());
+			}
+		} catch (e) {
+			console.error('Error in Word conversion:\n' + e);
+			dispatch(fireAlert(e));
 		}
 	};
 }

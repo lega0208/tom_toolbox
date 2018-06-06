@@ -34,24 +34,22 @@ export default function recurseLists($, ctx = 'body', level = 1) {
 			const nextSameLvlLi = lvlLis.get(i+1);
 			const nextSiblings = nextSameLvlLi ? liRef.nextUntil(nextSameLvlLi) : liRef.nextAll();
 
-			// console.log('nextSiblings:');
 			nextSiblings.each((i, nextSibling) => {
 				const nextSibRef = $(nextSibling);
 				const nextLvl = getLevel(nextSibRef);
-				// console.log('level' + level);
-				// console.log('current: ' + liRef.html());
-				// console.log('currentLevel: ' + currentLvl);
-				// console.log('nextSibling: ' + nextSibRef.html());
-				// console.log('nextLevel: ' + nextLvl);
 
 				if (nextLvl > currentLvl) {
-					// console.log('nextLvl > currentLvl');
 					const tagType = getType(nextSibRef);
 					const liLastChild = liRef.children().last();
-					if (!liLastChild.get() || (!liLastChild.is(tagType) && nextLvl === currentLvl + 1)) {
-						$(`<${tagType}></${tagType}>`).appendTo(li);
+					if (nextSibling.tagName === 'p' && nextLvl === currentLvl + 1) {
+						nextSibRef.appendTo(li);
+					} else {
+						// Verify that <li>s are being appended to the right tag
+						if (!liLastChild.get() || (!liLastChild.is(tagType) && nextLvl === currentLvl + 1)) {
+							$(`<${tagType}></${tagType}>`).appendTo(li);
+						}
+						nextSibRef.appendTo(liRef.children().last());
 					}
-					nextSibRef.appendTo(liRef.children().last());
 				}
 
 				if (nextLvl === currentLvl) {

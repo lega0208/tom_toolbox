@@ -63,13 +63,15 @@ function cleanTOC($) {
 		});
 	} else {
 		const toc = $('p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5');
-		const divWrapper = $('<div class="TOC"><ul></ul></div>');
-		divWrapper.insertBefore(toc.get(0));
-		toc.map((i, tocItem) => {
-			if (tocItem.tagName === 'p') tocItem.tagName = 'li';
-			$('a', tocItem).attr('href', '#');
-			return tocItem;
-		}).appendTo(toc.first().prev('div.TOC').children().get(0));
+		if (toc.length) {
+			const divWrapper = $('<div class="TOC"><ul></ul></div>');
+			divWrapper.insertBefore(toc.get(0));
+			toc.map((i, tocItem) => {
+				if (tocItem.tagName === 'p') tocItem.tagName = 'li';
+				$('a', tocItem).attr('href', '#');
+				return tocItem;
+			}).appendTo(toc.first().prev('div.TOC').children().get(0));
+		}
 	}
 	$('div.TOC').each((i, tocDiv) => {
 		const ul = $('ul', tocDiv).get(0);
