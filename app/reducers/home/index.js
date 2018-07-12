@@ -37,8 +37,17 @@ function state(state = initialHomeState, action) {
 	}
 }
 
+function wordConvert(state = '', action) {
+	switch (action.type) {
+		case 'SET_WORDCONVERT': return action.payload;
+		case 'RESET_WORDCONVERT': return '';
+		default: return state;
+	}
+}
+
 export default combineReducers({
 	options,
 	alert,
 	state,
+	wordConvert
 });

@@ -1,7 +1,7 @@
 
 const specChars = [
 	['–', '&ndash;'],
-	['\s&\s', ' &amp; '],
+	['\\s&\\s', ' &amp; '],
 	['Á', '&Aacute;'],
 	['À', '&Agrave;'],
 	['Â', '&Acirc;'],
@@ -26,6 +26,7 @@ const specChars = [
 	['œ', '&oelig;'],
 	['⅓', '<abbr title=\"one third\"><sup>1</sup>&frasl;<sub>3</sub></abbr>'],
 	['’', '\''],
+	['“|”', '"'],
 ];
 const superscript = [
 	['(\\d)e ', '$1<sup>e</sup> '],
@@ -42,16 +43,14 @@ const nbsp = [
 function replaceAll(string, arr) {
 	for (const [ findVal, replaceVal ] of arr) {
 		const regex = new RegExp(findVal);
-		let counter = 0;
-		while (regex.test(string) && counter < 100) {
+
+		while (regex.test(string)) {
 			string = string.replace(regex, replaceVal);
-			counter++;
 		}
 	}
 	return string;
 }
 const cleanup = (string, opts) => {
-	console.log('cleanup');
 	const cleanupArr = [];
 	if (opts.specChars) cleanupArr.push(...specChars);
 	if (opts.supNbsp) cleanupArr.push(...superscript);

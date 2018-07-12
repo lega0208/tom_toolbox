@@ -3,19 +3,30 @@
  */
 export default function preListClean(html) {
 	const funcs = [
+		replaceImgSrcs,
 		removeEmptyTags,
 		addClassQuotes,
 		removeListComments,
 		removeTags,
 		handleKbd,
+		fixStrongSpaces,
 	];
 	return funcs.reduce((acc, func) => func(acc), html);
+}
+
+function replaceImgSrcs(html) {
+	const regex = /<!--\[if gte vml 1\]>[\s\S]+?<v:imagedata src="(.+?)"[\s\S]+?<img[^>]+?><!(?:--)?\[endif\](?:--)?>/gi;
+
+	while (regex.test(html)) {
+		html = html.replace(regex, '<img src="$1">');
+	}
+	return html;
 }
 
 function removeListComments(html) {
 	const msoListIgnore = /<!\-{0,2}[if !supportLists\]-{0,2}>[\s\S]+?<!-{0,2}\[endif\]-{0,2}>/g;
 
-	while(msoListIgnore.test(html)) {
+	while (msoListIgnore.test(html)) {
 		html = html.replace(msoListIgnore, '');
 	}
 	return html;
@@ -31,6 +42,7 @@ function addClassQuotes(html) {
 }
 
 function removeEmptyTags(html) {
+
 	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>\s*?<\/\1>/;
 	while (regex.test(html)) {
 		if (regex.exec(html) && !regex.exec(html)[0].includes('mso-spacerun')) {
@@ -39,13 +51,25 @@ function removeEmptyTags(html) {
 			html = html.replace(/<span[^>]+?>\s+?<\/span>/, ' ');
 		}
 	}
+	// Get rid of br tags
+	const brRegex = /<br[^>]*?>/;
+	while (brRegex.test(html)) {
+		html = html.replace(brRegex, '');
+	}
+
+	// Get rid of strong tags that close and immediately open
+	const strongRegex = /<\/strong><strong>/;
+	while (strongRegex.test(html)) {
+		html = html.replace(strongRegex, '');
+	}
+
 	return html;
 }
 function removeTags(html) {
 	return [
 		'font',
 		'span',
-		'o:p'
+		'o:p',
 	].reduce((acc, tag) => {
 		const regex = new RegExp(`<${tag}[\\s\\S]*?>([\\s\\S]*?)</${tag}>`, 'g');
 		while(regex.test(html)) {
@@ -56,32 +80,19 @@ function removeTags(html) {
 }
 
 function handleKbd(html) {
-	// const tags = [
-	// 	'a',
-	// 	'b',
-	// 	'br', // self-closing!!**
-	// 	'div',
-	// 	'em',
-	// 	'h\\d',
-	// 	'i',
-	// 	'kbd',
-	// 	'li',
-	// 	'span',
-	// 	'strong',
-	// 	'sup',
-	// 	'table',
-	// 	'td',
-	// 	'th',
-	// ];
-	// const tagsRE = '(?:' + tags.join('|') + ')';
+	const regex = new RegExp(`&lt;(?:\\s|&nbsp;)?([^&>]+?)(?:\\s|&nbsp;)?&gt;`);
 
-	// const regex = new RegExp(`<(?!\/?\\w+|${tagsRE}(?:\\s[^>]+?>|>| ?\/>))([^>]+?)>`, 'g'); // finds angle brackets
-	const regex = new RegExp(`&lt;([^&>]+?)&gt;`);
-	let count = 0;
-	let _html = html;
-	while (regex.test(_html) && count < 100) {
-		count++;
-		_html = _html.replace(regex, '<kbd>$1</kbd>');
+	while (regex.test(html)) {
+		html = html.replace(regex, '<kbd>$1</kbd>');
 	}
-	return _html;
+
+	return html;
+}
+
+function fixStrongSpaces(html) {
+	const regex = /\s<\/strong>(?!\s)/g;
+	const regex2 = /(\S)<strong>\s/g;
+
+	return html.replace(regex, '</strong> ')
+						 .replace(regex2, '$1 <strong>');
 }

@@ -39,10 +39,10 @@ export default {
       path.join(__dirname, 'app'),
       'node_modules',
     ],
-		// alias: {
-		// 	'@fortawesome/fontawesome-free-solid$': 'node_modules/@fortawesome/fontawesome-free-solid/shakable.es.js',
-		// 	'@fortawesome/fontawesome-free-regular$': 'node_modules/@fortawesome/fontawesome-free-regular/shakable.es.js',
-		// },
+		alias: {
+			'@fortawesome/fontawesome-free-solid$': 'node_modules/@fortawesome/fontawesome-free-solid/shakable.es.js',
+			'@fortawesome/fontawesome-free-regular$': 'node_modules/@fortawesome/fontawesome-free-regular/shakable.es.js',
+		},
   },
   mode: JSON.stringify(process.env.NODE_ENV || 'production'),
   plugins: [

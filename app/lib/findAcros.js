@@ -32,7 +32,6 @@ function findNonStandard(string) {
 				let replaceRegex = /\\\./g;
 				while ((replaceRegex.test(replacedAcro))) {
 					replacedAcro = replacedAcro.replace(replaceRegex, '.');
-					console.log(replacedAcro)
 				}
 				return replacedAcro;
 			} else {
@@ -43,8 +42,8 @@ function findNonStandard(string) {
 }
 
 export default async function findAcros(string) {
-  const regex = /[\s>\W]([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n]/gu;
-  const startEndRegex = /^([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n]|[:?!>),\s.\r\n]([\p{Uppercase_Letter}.-]{2,9}$)/gum;
+  const regex = /[\s>\W]([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n/]|^([\p{Uppercase_Letter}.-]{2,9})$/gu;
+  const startEndRegex = /^([\p{Uppercase_Letter}.-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)[:?!<),\s.\r\n/]|[:?!>),\s.\r\n]([\p{Uppercase_Letter}.-]{2,9}$)/gum;
 
   const results = [
   	...findAll(string, regex, true),
@@ -65,6 +64,8 @@ const findAll = (string, regex, checkParen) => {
 			const regex = new RegExp(`\\(${acro}\\)`);
 			if (!regex.test(match)) { // if acro is not parenthesized
 				results.push(acro);
+			} else {
+				console.log(`${acro} is parenthesized`);
 			}
 		} else {
 			results.push(acro);

@@ -23,15 +23,14 @@ export default class AcroList extends React.Component {
 	async textChange(e) {
 		const index = e.target.name;
 		const value = e.target.value;
-		const acrosProxy = this.props.acros;
+		const acrosProxy = [...this.props.acros];
 
 		acrosProxy[index] = value;
 		await this.props.dispatch(setAcros(acrosProxy));
 	}
 	render() {
-		const acros = this.props.acros || [];
-		if (acros.length > 0) {
-			const renderedAcros = acros.map((acro, i) => (
+		if (this.props.acros.length > 0) {
+			const renderedAcros = this.props.acros.map((acro, i) => (
 				<div className="form-group form-inline mb-1" key={'wrapper-' + i}>
 					<div className="form-check form-check-inline" key={'formcheck-' + i}>
 						<label className="form-check-label">

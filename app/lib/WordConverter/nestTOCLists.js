@@ -9,8 +9,6 @@ function recursiveNest($, ctx) {
 	const liRef = $(ctx);
 	const className = ctx.attribs.class;
 	const siblings = liRef.nextUntil(`li.${className}`);
-	console.log('current li: ' + liRef.text());
-	console.log('ctx: ' + liRef.parent().html());
 	if (siblings.length) {
 		$('<ul/>').appendTo(ctx);
 		$('ul', ctx).first().append(siblings);

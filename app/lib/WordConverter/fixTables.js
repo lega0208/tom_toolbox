@@ -39,9 +39,8 @@ export default function fixTableHTML($, opts) {
 		// remove <p>s in <td>s (todo: maybe they should be kept?)
 		$('td > p, th > p', table).each((i, p) => {
 			const pRef = $(p);
-			const tdRef = pRef.parent();
 			pRef.replaceWith(pRef.text());
-			tdRef.html(tdRef.html().trim());
 		});
+		$('td, th').each((i, el) => $(el).html($(el).html().trim()))
 	});
 }

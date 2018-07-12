@@ -4,11 +4,12 @@ import { clipboard, remote } from 'electron';
 
 import ModalPreview from './HTMLPreview';
 import CodeView from './CodeView';
-import Alert from "./Alert";
+import Alert from './Alert';
 import TopButtonRow from './TopButtonRow'
-import ScriptsBar from "./ScriptsBar";
+import ScriptsBar from './ScriptsBar';
 import BottomButtonRow from './BottomButtonRow';
 import FindAcronyms from './FindAcrosModal';
+import ImageModal from './ImageModal';
 
 import cacheCheck from '../../database/cacheCheck';
 import convertWord from '../../actions/wordConverter';
@@ -25,12 +26,15 @@ class Home extends Component {
   constructor(props) {
     super(props);
 
-    this.initListeners();
-		this.listeners = [
-			this.pasteListener,
-			this.copyListener,
-			this.undoListener,
-		];
+		this.pasteListener = e => (e.ctrlKey && e.key === 'v') ? this.paste() : null;
+		this.copyListener = e => (e.ctrlKey && e.key === 'c') ? this.copy(this.props.state.textContent) : null;
+		this.undoListener = e => (e.ctrlKey && e.key === 'z') ? this.undo() : null;
+		// this.listeners = [
+		// 	this.pasteListener,
+		// 	this.copyListener,
+		// 	this.undoListener,
+		// ];
+		this.keydown = this.keydown.bind(this);
   }
   copy(toCopy) {
     try {
@@ -52,8 +56,19 @@ class Home extends Component {
   	this.props.dispatch(undo());
 	}
 
+	keydown(e) {
+  	if (e.ctrlKey) {
+  		switch (e.key) {
+				case 'v': this.paste(); break;
+				case 'c': this.copy(); break;
+				case 'z': this.undo(); break;
+			}
+		}
+	}
+
   componentDidMount() {
-		this.configListeners('add', this.listeners);
+		// this.configListeners('add', this.listeners);
+		this.elemRef.focus();
 
 		// todo: write .dbpath if none is found
 		cacheCheck().then(() => {
@@ -77,7 +92,7 @@ class Home extends Component {
     const textContent = this.props.state.textContent;
     const opts = this.props.options;
     return (
-      <div>
+      <div ref={elem => this.elemRef = elem} onKeyDown={this.keydown} tabIndex="-1" style={{ minHeight: '91vh' }}>
         <Alert {...this.props.alert} />
 	      <div className="container-fluid">
 		      <div className="row">
@@ -92,8 +107,12 @@ class Home extends Component {
 			      <ScriptsBar dispatch={this.props.dispatch} state={opts} />
 		      </div>
 	      </div>
-        <ModalPreview modalTitle="Preview" modalId="preview" modalText={textContent}/>
-        <FindAcronyms modalTitle="Select acronyms to replace:" modalId="acronyms" clipboard={this.props.state.clipboard}/>
+        <ModalPreview modalTitle="Preview" modalId="preview" modalText={textContent} />
+        <FindAcronyms modalTitle="Select acronyms to replace:"
+											modalId="acronyms"
+											clipboard={this.props.state.clipboard}
+											/>
+				<ImageModal />
       </div>
     );
   }
@@ -102,7 +121,7 @@ class Home extends Component {
    * Housekeeping
    */
   componentWillUnmount() {
-		this.configListeners('remove', this.listeners);
+		// this.configListeners('remove');
 		this.setStorage();
   }
   setStorage() {
@@ -115,46 +134,35 @@ class Home extends Component {
   		localStorage.setItem(`home.${prop}`, JSON.stringify(this.props[prop]));
 		});
 	}
-	initListeners() {
-		this.pasteListener = e => e.ctrlKey && e.key === 'v'
-			? this.paste()
-			: null;
-		this.copyListener = e => e.ctrlKey && e.key === 'c'
-			? this.copy(this.props.state.textContent)
-			: null;
-		this.undoListener = e => e.ctrlKey && e.key === 'z'
-			? this.undo()
-			: null;
-	}
-	configListeners(operation, listeners) {
-		if (operation === 'add') {
-			listeners.forEach(listener => window.addEventListener('keydown', listener));
-		} else if (operation === 'remove') {
-			listeners.forEach(listener => window.removeEventListener('keydown', listener));
-		}
-		if (process.env.NODE_ENV !== 'development') {
-			const contextMenu = new Menu();
-			contextMenu.append(new MenuItem({
-					label: 'Copy',
-					click: () => this.copy.bind(this)(this.props.state.textContent)
-				})
-			);
-			contextMenu.append(new MenuItem({
-					label: 'Paste',
-					click: this.paste.bind(this)
-				})
-			);
-			contextMenu.append(new MenuItem({
-					label: 'Undo',
-					click: this.undo.bind(this)
-				})
-			);
-			window.addEventListener('contextmenu', (e) => {
-				e.preventDefault();
-				contextMenu.popup({ window: remote.getCurrentWindow() });
-			}, false);
-		}
-	}
+	// configListeners(operation) {
+	// 	if (operation === 'add') {
+	// 		this.listeners.forEach(listener => document.body.addEventListener('keydown', listener));
+	// 	} else if (operation === 'remove') {
+	// 		this.listeners.forEach(listener => document.body.removeEventListener('keydown', listener));
+	// 	}
+	// 	if (process.env.NODE_ENV !== 'development') {
+	// 		const contextMenu = new Menu();
+	// 		contextMenu.append(new MenuItem({
+	// 				label: 'Copy',
+	// 				click: () => this.copy.bind(this)(this.props.state.textContent)
+	// 			})
+	// 		);
+	// 		contextMenu.append(new MenuItem({
+	// 				label: 'Paste',
+	// 				click: this.paste.bind(this)
+	// 			})
+	// 		);
+	// 		contextMenu.append(new MenuItem({
+	// 				label: 'Undo',
+	// 				click: this.undo.bind(this)
+	// 			})
+	// 		);
+	// 		window.addEventListener('contextmenu', (e) => {
+	// 			e.preventDefault();
+	// 			contextMenu.popup({ window: remote.getCurrentWindow() });
+	// 		}, false);
+	// 	}
+	// }
 }
 
 const mapStateToProps = ({ home }) => home;

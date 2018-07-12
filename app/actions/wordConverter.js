@@ -11,20 +11,64 @@ export default function convertWord() {
 		dispatch({type: 'SET_CLIPBOARD', payload: wordHTML});
 
 		try {
-			const html = WordConverter(wordHTML, opts);
-
-			if (opts.autoAcro === true) {
-				clipboard.writeText(html);
-				dispatch(startAutoAcro(html));
+			const cheerioRef = WordConverter(wordHTML, opts);
+			if (!hasImg(cheerioRef)) {
+				dispatch(setWordConvert(cheerioRef));
+				dispatch(postConvert());
 			} else {
-				const cleanHtml = cleanup(html, opts);
-				clipboard.writeText(cleanHtml);
-				dispatch(setTextContent(cleanHtml));
-				dispatch(fireAlert());
+				const imageModal = $('#imageModal');
+				dispatch(setWordConvert(cheerioRef));
+				imageModal.modal('show');
 			}
 		} catch (e) {
 			console.error('Error in Word conversion:\n' + e);
 			dispatch(fireAlert(e));
 		}
 	};
+}
+
+export function setWordConvert($) {
+	const html = beautify($);
+	return dispatch => dispatch({ type: 'SET_WORDCONVERT', payload: html });
+}
+
+export function postConvert() {
+	$('#imageModal').modal('hide');
+	return (dispatch, getState) => {
+		const { home } = getState();
+		const opts = home.options;
+		const html = home.wordConvert;
+
+		if (opts.autoAcro === true) {
+			clipboard.writeText(html);
+			dispatch(startAutoAcro(html));
+		} else {
+			const cleanHtml = cleanup(html, opts);
+			clipboard.writeText(cleanHtml);
+			dispatch(setTextContent(cleanHtml));
+			dispatch(fireAlert());
+		}
+	};
+}
+
+function hasImg($) {
+	return !!$('img').length;
+}
+
+function beautify($) {
+	const bodyRef = $('body');
+	const text = bodyRef.html();
+	const beautify = require('js-beautify').html;
+	const config = {
+		indent_size: 2,
+		indent_char: '  ',
+		indent_with_tabs: true,
+		eol: '\r\n',
+		unescape_strings: true,
+		wrap_line_length: 0,
+		extra_liners: 'h2',
+		preserve_newlines: false,
+	};
+
+	return beautify(text, config);
 }

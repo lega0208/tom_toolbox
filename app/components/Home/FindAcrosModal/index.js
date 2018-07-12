@@ -38,17 +38,25 @@ class FindAcronyms extends Component {
 		clipboard.writeText(this.props.clipboard); // todo: random bug when pasting results back into converter
 	}
 
+
+	// componentDidUpdate(newProps) {
+  	// console.log(`newProps.show:\n${newProps.show}`);
+  	// if (newProps.show) {
+  	// 	newProps.configListeners('remove');
+	// 	} else if (!newProps.show) {
+	// 		newProps.configListeners('add');
+	// 	}
+	// }
+
   render() {
 		let findAcrosTitle;
-		if (this.props.display === 'acroList') {
-			findAcrosTitle = 'Select acronyms to replace:';
-		} else if (this.props.display === 'promptDefs') {
-			findAcrosTitle = 'No definitions found for the following acronyms, add definition or uncheck :';
-		} else if (this.props.display === 'chooseAcros') {
-			findAcrosTitle = 'Multiple definitions found, please choose which to use:';
-		} else {
-			findAcrosTitle = 'Select acronyms to replace:';
+		switch (this.props.display) {
+			case 'acroList': findAcrosTitle = 'Select acronyms to replace:'; break;
+			case 'promptDefs': findAcrosTitle = 'No definitions found for the following acronyms, add definition or uncheck :'; break;
+			case 'chooseAcros': findAcrosTitle = 'Multiple definitions found, please choose which to use:'; break;
+			default: findAcrosTitle = 'Select acronyms to replace:';
 		}
+
     return (
       <Modal modalId={this.props.modalId}
 						 modalTitle={findAcrosTitle}
@@ -76,6 +84,7 @@ const mapStateToProps = ({ autoAcro }) => ({
 	acros: autoAcro.acros,
 	display: autoAcro.display,
 	noDefs: autoAcro.noDefs,
+	show: autoAcro.show,
 });
 export default connect(mapStateToProps)(FindAcronyms);
 

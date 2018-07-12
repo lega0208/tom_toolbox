@@ -2,10 +2,12 @@
 const replaceWithContents = (cheerioObject) => cheerioObject.replaceWith(cheerioObject.contents());
 
 export default function cleanPostLists($) {
-	const allRef = $('*');
+	// Remove "WordSection"s
+	$('div').filter((i, div) => ($(div).attr('class') || '').includes('WordSection'))
+		.each((i, div) => replaceWithContents($(div)));
 
 	// remove unnecessary attributes
-	allRef.removeAttr('style')
+	$('*').removeAttr('style')
 		.removeAttr('width')
 		.removeAttr('height')
 		.removeAttr('border')
@@ -15,6 +17,10 @@ export default function cleanPostLists($) {
 		.removeAttr('valign')
 		.removeAttr('bgcolor')
 		.removeAttr('nowrap')
+		.removeAttr('paragraphcxspfirst')
+		.removeAttr('paragraphcxspmiddle')
+		.removeAttr('paragraphcxsplast')
+		.removeAttr('type')
 		.not('p.Note, p.MsoToc1, p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5, div.alert, div.module-note')
 		.removeAttr('class');
 
@@ -50,4 +56,5 @@ export default function cleanPostLists($) {
 			replaceWithContents(elRef);
 		}
 	});
+
 }

@@ -16,20 +16,39 @@ type optsType = {
 	supNbsp: boolean,
 }
 
-export default function WordConverter(html: string, opts?: optsType): string {
+export default function WordConverter(html: string, opts?: optsType): any {
 	const _html = cleanPreLists(html);
 
 	const $ = cheerio.load(_html, { decodeEntities: false });
 	const funcs = [
 		boldFigureCaptions,
+		handleComments,
 		cleanLists,
 		cleanPostLists,
 		fixTables,
 		cleanTOC,
 		wetTransforms,
+		removeEmptyPs,
 	];
 	funcs.forEach(func => func($, opts));
-	return beautify($);
+
+	// const $ = cheerio.load(html, { decodeEntities: false });
+	return $;
+}
+
+function removeEmptyPs($) {
+	$('p').filter((i, p) => /^\s*$/.test($(p).html()))
+		.each((i, el) => $(el).remove());
+}
+
+function handleComments($) {
+	// Get rid of comment anchors
+	$('a').filter((i, el) => ($(el).attr('style') || '').includes('mso-comment-reference'))
+		.each((i, el) => $(el).replaceWith($(el).contents()));
+
+	// Get rid of comment divs
+	$('div').filter((i, el) => ($(el).attr('style') || '').includes('mso-element:comment-list'))
+		.each((i, el) => $(el).remove());
 }
 
 function boldFigureCaptions($) {
@@ -68,7 +87,7 @@ function cleanTOC($) {
 			divWrapper.insertBefore(toc.get(0));
 			toc.map((i, tocItem) => {
 				if (tocItem.tagName === 'p') tocItem.tagName = 'li';
-				$('a', tocItem).attr('href', '#');
+				// $('a', tocItem).attr('href', '#');
 				return tocItem;
 			}).appendTo(toc.first().prev('div.TOC').children().get(0));
 		}
@@ -76,24 +95,29 @@ function cleanTOC($) {
 	$('div.TOC').each((i, tocDiv) => {
 		const ul = $('ul', tocDiv).get(0);
 		nestTOCList($, ul);
-		$(ul).find('.MsoToc1, .MsoToc2, .MsoToc3, .MsoToc4, .MsoToc5').each((i, li) => $(li).attr('class', null))
+
+		$('li.MsoToc2', tocDiv).each((i, el) => {
+			const elRef = $(el);
+			const href = `#_sec${i+1}`;
+			addSecNumsToChildren(elRef, href, $);
+		});
+		$(ul).find('.MsoToc1, .MsoToc2, .MsoToc3, .MsoToc4, .MsoToc5').each((i, li) => $(li).attr('class', null));
+
+
 	});
 }
 
-function beautify($) {
-	const bodyRef = $('body');
-	const text = bodyRef.html();
-	const beautify = require('js-beautify').html;
-	const config = {
-		indent_size: 2,
-		indent_char: '  ',
-		indent_with_tabs: true,
-		eol: '\r\n',
-		unescape_strings: true,
-		wrap_line_length: 0,
-		extra_liners: 'h2',
-		preserve_newlines: false,
-	};
+function addSecNumsToChildren(elRef, href, $) {
+	const children = elRef.children();
 
-	return beautify(text, config);
+	elRef.attr('class', null);
+	children.filter('a').first().attr('href', href);
+
+	if (children.length > 1) {
+		children.filter('ul').first().children('li').each((i, el) => {
+			const childHref = href + `_${i+1}`;
+			addSecNumsToChildren($(el), childHref, $);
+		});
+	}
 }
+
