@@ -1,6 +1,6 @@
 {
   "name": "tom-toolbox",
-  "productName": "TOMToolbox",
+  "productName": "TOM_Toolbox",
   "version": "1.0.0",
   "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
   "scripts": {
@@ -31,7 +31,7 @@
   },
   "browserslist": "electron 1.8",
   "build": {
-    "productName": "TOMToolbox",
+    "productName": "TOM_Toolbox",
     "appId": "app.tom.toolbox",
     "files": [
       "dist/",

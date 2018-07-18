@@ -247,13 +247,20 @@ export function hideModal() {
 function findAndReplace(text, acroMap) {
 	const reduceFunc = (replacedText, [acro, def]) => {
 		const regex = new RegExp(`([\\s>\\W])${acro}(?!<\/abbr>|[A-Z])`, 'g');
-		const firstLastRegex = new RegExp(`^${acro}(?!<\/abbr>)|${acro}$`, 'gm');
+		const firstLastRegex = new RegExp(`^${acro}|${acro}$`, 'gm');
+		const parenRegex = new RegExp(`\\(${def}\\)`, 'g');
+		
 		if (!regex.test(text)) {
-			return replacedText.replace(firstLastRegex, def);
+			replacedText = replacedText.replace(firstLastRegex, def);
 		} else {
-			return replacedText.replace(regex, `$1${def}`);
+			replacedText = replacedText.replace(regex, `$1${def}`);
 		}
+		if (parenRegex.test(replacedText)) {
+			replacedText = replacedText.replace(parenRegex, `(${acro})`);
+		}
+		return replacedText;
 	};
+	
 
 	return Object.entries(acroMap).reduce(reduceFunc, text);
 }

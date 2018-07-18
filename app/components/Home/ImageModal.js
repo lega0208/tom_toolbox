@@ -38,7 +38,7 @@ class ImageModal extends React.Component {
 
 	componentDidMount() {
 		$(document).on('hidden.bs.modal', '#imageModal', () => this.props.dispatch(postConvert()));
-		$(document).on('show.bs.modal', '#imageModal', () => $(`#save-image`).val(''))
+		$(document).on('show.bs.modal', '#imageModal', () => $(`#save-image`).val(''));
 	}
 
 	render() {

@@ -90,9 +90,11 @@ function handleKbd(html) {
 }
 
 function fixStrongSpaces(html) {
-	const regex = /\s<\/strong>(?!\s)/g;
-	const regex2 = /(\S)<strong>\s/g;
+	const regex = /\s<\/(strong|b)>(?!\s)/g;
+	const regex2 = /(\S)<(strong|b)>\s/g;
+	console.log(html);
+	console.log(regex.test(html));
 
-	return html.replace(regex, '</strong> ')
-						 .replace(regex2, '$1 <strong>');
+	return html.replace(regex, '</$1> ')
+						 .replace(regex2, '$1 <$2>');
 }
