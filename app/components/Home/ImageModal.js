@@ -14,8 +14,8 @@ class ImageModal extends React.Component {
 		const _$ = cheerio.load(this.props.wordConvert, { decodeEntities: false });
 		const img = _$('img').first();
 		const srcPath = img.attr('src').replace(/file:\/+/, '');
-		console.log(`srcPath: ${srcPath}`);
 		const destPath = $(`#save-image`).val();
+		const imgSrc = destPath.replace(/.+?[\\/]([^\\/]+?[\\/][^\\/]+?\.[a-z]+)$/i, '$1');
 
 		if (srcPath) {
 			try {
@@ -26,18 +26,28 @@ class ImageModal extends React.Component {
 		}
 
 		// replace src
-		img.attr('src', destPath);
+		img.attr('src', imgSrc);
+		// remove wrapping <p>
+		img.parent().replaceWith(img);
+
 		await this.props.dispatch(setWordConvert(_$));
 		await this.props.dispatch(postConvert());
 	};
-	getSavePath (e) {
+	getSavePath(e) {
 		e.preventDefault();
-		const savePath = dialog.showSaveDialog({ filters: [{ name: 'image', extensions: ['png', 'jpg'] }] });
+		const dialogSettings = {
+			filters: [{
+				name: 'image',
+				extensions: ['png', 'jpg']
+			}]
+		};
+		const savePath = (dialog.showSaveDialog(dialogSettings) || '');
+
 		$(`#save-image`).val(savePath);
 	};
 
 	componentDidMount() {
-		$(document).on('hidden.bs.modal', '#imageModal', () => this.props.dispatch(postConvert()));
+		// $(document).on('hidden.bs.modal', '#imageModal', () => this.props.dispatch(postConvert()));
 		$(document).on('show.bs.modal', '#imageModal', () => $(`#save-image`).val(''));
 	}
 
@@ -47,10 +57,11 @@ class ImageModal extends React.Component {
 									 submitText="Save"
 									 submit={e => this.saveImage(e)}
 									 modalId="imageModal"
-									 modalRef={elem => this.modalRef = elem} >
+									 modalRef={elem => this.modalRef = elem}>
 				<form>
 					<div className="form-group">
-						<label className="w-100">Select save path:
+						<label className="w-100">
+							Select save path:
 							<input id="save-image" className="form-control-file" onClick={this.getSavePath} />
 						</label>
 					</div>
@@ -60,7 +71,8 @@ class ImageModal extends React.Component {
 	}
 
 	componentWillUnmount() {
-		$(document).off('hidden.bs.modal', '#imageModal');
+		// $(document).off('hidden.bs.modal', '#imageModal');
+		$(document).off('show.bs.modal', '#imageModal');
 	}
 }
 

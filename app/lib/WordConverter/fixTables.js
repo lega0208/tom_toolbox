@@ -1,5 +1,6 @@
-export default function fixTableHTML($, opts) {
+export default function fixTableHTML($) {
 	const tablesRef = $('table');
+
 	tablesRef.each((i, table) => {
 		const tbodyRef = $('tbody', table);
 		// check that first row contains headers
@@ -7,6 +8,7 @@ export default function fixTableHTML($, opts) {
 		// if first two <td>s are bold, it's most likely a header row
 		const first = headerRow.children().first().children().first(); // is <p>
 		const second = first.parent().next().children().first(); // is <p>
+
 		if (first.find('strong').length && second.find('strong').length) {
 			// prepend thead to table
 			$('<thead />').insertBefore(tbodyRef);
@@ -16,31 +18,41 @@ export default function fixTableHTML($, opts) {
 			$('thead > tr', table).find('td').each((i, item) => {
 				item.tagName = 'th';
 			});
-			// remove <p>s from <th>s
-			$('th', table).find('p').each((i, item) => {
-				const itemRef = $(item);
-				if (!!itemRef.children('strong').length) {
-					const text = itemRef.children().first().text();
-					itemRef.parent().empty().text(text);
-
-				}
-			});
 		}
+		// if first cell of the row is bolded, it's probably a header
 		tbodyRef.children().each((i, tr) => {
 			const trRef = $(tr);
-			const firstChildP = trRef.children().first().find('p');
-			if (/^<strong>[\s\S]+?<\/strong>$/.test(firstChildP.html())) {
-				const strong = $('strong', firstChildP);
-				strong.replaceWith(strong.contents());
-				firstChildP.parent().get(0).tagName = 'th';
+			const firstTd = trRef.children().first();
+
+			if (!!firstTd.find('strong').length) {
+				const strong = $('strong', firstTd);
+				strong.each((i, str) => $(str).replaceWith($(str).contents()));
+				firstTd.get(0).tagName = 'th';
 			}
 		});
 
-		// remove <p>s in <td>s (todo: maybe they should be kept?)
-		$('td > p, th > p', table).each((i, p) => {
-			const pRef = $(p);
-			pRef.replaceWith(pRef.text());
+		// remove <p>s in <td>s and <th>s if there's only 1 line
+		$('td, th', table).each((i, cell) => {
+			const cellRef = $(cell);
+			const children = cellRef.children();
+			const parent = children.parent();
+			// remove empty children
+			children.each(
+				(i, child) => !$(child).text().trim() ? $(child).remove() : null
+			);
+
+			// need to recalculate children or something apparently
+			const newChildren = parent.children();
+
+			if (newChildren.length === 1 && newChildren.get(0).tagName === 'p') {
+				const p = children.first();
+				p.replaceWith(p.contents());
+			}
 		});
-		$('td, th').each((i, el) => $(el).html($(el).html().trim()))
+
+		// trim any extra whitespace
+		$('td, th').each(
+			(i, el) => $(el).html($(el).html().trim())
+		);
 	});
 }

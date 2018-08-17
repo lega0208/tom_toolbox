@@ -40,7 +40,7 @@ class DataInterface { // this done?
   constructor(dbPath) {
 		this.dbPath = dbPath || getDBPath() || DEFAULT_DB_PATH;
 		this.dbDriver = getDBDriver();
-		// todo: get data provider dynamically (check if driver exists) / add ability to toggle driver
+		// todo: get data provider dynamically (check if driver exists)
 		this.datasource = `Provider=Microsoft.${this.dbDriver}.0;Data Source=${this.dbPath};Persist Security Info=False;`;
 		console.log(`db path: ${this.dbPath}`);
 		console.log(`db driver: ${this.dbDriver}`);
@@ -69,6 +69,7 @@ class DataInterface { // this done?
 			throw e;
 		}
 
+		// todo: change to scalar
 		const getMaxID = `SELECT Max([ID]) from ${table}`; // not sure how I feel about an insert function returning a query result
     return this.query(getMaxID);
   }

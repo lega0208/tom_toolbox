@@ -2,17 +2,18 @@ import { combineReducers } from 'redux';
 import options from './options';
 import alert from './alert';
 
-const initialHomeState = localStorage.getItem('home.state')
-	? {
-			...JSON.parse(localStorage.getItem('home.state'))
-		}
-	: {
+const initialHomeState = {
 		clipboard: '',
 		textContent: '',
 		priorText: '',
 	};
 
 function state(state = initialHomeState, action) {
+	const mergeState = (propName, replaceVal) => ({
+		...state,
+		[propName]: replaceVal || action.payload,
+	});
+
 	switch (action.type) {
 		case 'SET_CLIPBOARD': return mergeState('clipboard');
 		case 'SET_PRIORTEXT': return mergeState('priorText');
@@ -27,13 +28,6 @@ function state(state = initialHomeState, action) {
 			priorText: state.textContent
 		};
 		default: return state;
-	}
-
-	function mergeState(propName, replaceVal) {
-		return {
-			...state,
-			[propName]: replaceVal || action.payload,
-		}
 	}
 }
 

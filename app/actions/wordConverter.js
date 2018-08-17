@@ -1,14 +1,25 @@
-import WordConverter from '../lib/WordConverter';
-import cleanup from '../lib/cleanup';
+import WordConverter from 'lib/WordConverter';
+import cleanup from 'lib/cleanup';
 import { clipboard } from 'electron';
 import { fireAlert, setTextContent } from './home';
 import { startAutoAcro } from './home/autoAcro';
+
+const hasImg = ($) => !!$('img').length;
+
+const setClipboard = (dispatch) => {
+	const wordHTML = clipboard.readHTML('text/html') || clipboard.readText();
+	dispatch({type: 'SET_CLIPBOARD', payload: wordHTML});
+	return wordHTML;
+};
+
+export const setWordConvert = ($) =>
+	(dispatch) => dispatch({ type: 'SET_WORDCONVERT', payload: beautify($) });
 
 export default function convertWord() {
 	return (dispatch, getState) => {
 		const wordHTML = clipboard.readHTML('text/html') || clipboard.readText();
 		const opts = getState().home.options;
-		dispatch({type: 'SET_CLIPBOARD', payload: wordHTML});
+		dispatch({ type: 'SET_CLIPBOARD', payload: wordHTML });
 
 		try {
 			const cheerioRef = WordConverter(wordHTML, opts);
@@ -17,6 +28,7 @@ export default function convertWord() {
 				dispatch(postConvert());
 			} else {
 				const imageModal = $('#imageModal');
+
 				dispatch(setWordConvert(cheerioRef));
 				imageModal.modal('show');
 			}
@@ -27,11 +39,6 @@ export default function convertWord() {
 	};
 }
 
-export function setWordConvert($) {
-	const html = beautify($);
-	return dispatch => dispatch({ type: 'SET_WORDCONVERT', payload: html });
-}
-
 export function postConvert() {
 	$('#imageModal').modal('hide');
 	return (dispatch, getState) => {
@@ -39,7 +46,7 @@ export function postConvert() {
 		const opts = home.options;
 		const html = home.wordConvert;
 
-		if (opts.autoAcro === true) {
+		if (!!opts.autoAcro) {
 			clipboard.writeText(html);
 			dispatch(startAutoAcro(html));
 		} else {
@@ -49,10 +56,6 @@ export function postConvert() {
 			dispatch(fireAlert());
 		}
 	};
-}
-
-function hasImg($) {
-	return !!$('img').length;
 }
 
 function beautify($) {

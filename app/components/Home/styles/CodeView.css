@@ -1,5 +1,12 @@
 .codeView {
-  height: 60vh;
-  font-size: 14px;
+  height: 62vh;
+  font-size: 12px;
   overflow-x: scroll;
+}
+
+@media (min-width: 992px) {
+  .codeView {
+    height: 67vh;
+    font-size: 14px;
+  }
 }

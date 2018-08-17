@@ -13,7 +13,7 @@
 import { app, BrowserWindow, } from 'electron';
 import MenuBuilder from './menu';
 
-console.log('Main process');
+console.log('Starting main process');
 
 let mainWindow = null;
 
@@ -42,6 +42,8 @@ if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true')
 //     .catch(console.log);
 // };
 
+// add harmony flags
+app.commandLine.appendSwitch('js-flags', '--harmony_regexp_lookbehind --harmony_regexp_property');
 
 /**
  * Add event listeners...
@@ -65,6 +67,9 @@ app.on('ready', async () => {
     show: false,
     width: 1024,
     height: 728,
+		webPreferences: {
+			nodeIntegrationInWorker: true
+		}
   });
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);

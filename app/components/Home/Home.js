@@ -20,20 +20,12 @@ import {
 } from '../../actions/home';
 import { setWarning, hideWarning } from '../../actions/home/alert';
 
-const { Menu, MenuItem } = remote;
+// const { Menu, MenuItem } = remote;
 
 class Home extends Component {
   constructor(props) {
     super(props);
 
-		this.pasteListener = e => (e.ctrlKey && e.key === 'v') ? this.paste() : null;
-		this.copyListener = e => (e.ctrlKey && e.key === 'c') ? this.copy(this.props.state.textContent) : null;
-		this.undoListener = e => (e.ctrlKey && e.key === 'z') ? this.undo() : null;
-		// this.listeners = [
-		// 	this.pasteListener,
-		// 	this.copyListener,
-		// 	this.undoListener,
-		// ];
 		this.keydown = this.keydown.bind(this);
   }
   copy(toCopy) {
@@ -60,7 +52,7 @@ class Home extends Component {
   	if (e.ctrlKey) {
   		switch (e.key) {
 				case 'v': this.paste(); break;
-				case 'c': this.copy(); break;
+				case 'c': this.copy(this.props.state.textContent); break;
 				case 'z': this.undo(); break;
 			}
 		}
@@ -92,7 +84,7 @@ class Home extends Component {
     const textContent = this.props.state.textContent;
     const opts = this.props.options;
     return (
-      <div ref={elem => this.elemRef = elem} onKeyDown={this.keydown} tabIndex="-1" style={{ minHeight: '91vh' }}>
+      <div id="home" ref={elem => this.elemRef = elem} onKeyDown={this.keydown} tabIndex="-1">
         <Alert {...this.props.alert} />
 	      <div className="container-fluid">
 		      <div className="row">

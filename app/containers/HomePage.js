@@ -6,11 +6,10 @@ export default class HomePage extends Component {
     return (
 	    <div className="container-fluid">
 		    <div className="row">
-			    <div className="col"/>
-			    <div className="col-11 col-sm-12 center-block">
+			    <div className="col-xl-10 col-md-11 col-12 mx-auto">
 				    <Home />
 			    </div>
-			    <div className="col"/>
+					<div className="clearfix" />
 		    </div>
 	    </div>
     );

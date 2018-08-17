@@ -16,20 +16,25 @@ const Display = (props) => {
 		noDefs,
 		dispatch,
 	} = props;
+
 	switch (display) {
-		case 'acroList':
-			return <AcroList acros={acros} submit={submit} dispatch={dispatch} />;
-		case 'promptDefs':
-			return <AddDefs noDefs={noDefs} submit={submit} dispatch={dispatch} />;
-		case 'chooseAcros':
-			return <DupsList acros={acros}
-											 acroMap={acroMap}
-											 dups={dups || []}
-											 dupsMap={dupsMap}
-											 dispatch={dispatch} />;
+		case 'acroList': return (
+			<AcroList acros={acros} submit={submit} dispatch={dispatch} />
+		);
+		case 'promptDefs': return (
+			<AddDefs noDefs={noDefs} submit={submit} dispatch={dispatch} />
+		);
+		case 'chooseAcros': return (
+			<DupsList acros={acros}
+								acroMap={acroMap}
+								dups={dups || []}
+								dupsMap={dupsMap}
+								dispatch={dispatch} />
+		);
 	}
 };
-const mapStateToProps = ({autoAcro}) => ({
+
+const mapStateToProps = ({ autoAcro }) => ({
 	acroMap: autoAcro.acroMap,
 	dups: autoAcro.dups,
 	dupsMap: autoAcro.dupsMap,

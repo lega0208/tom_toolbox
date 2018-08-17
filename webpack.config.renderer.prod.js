@@ -15,13 +15,23 @@ import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
 CheckNodeEnv('production');
 
 export default merge.smart(baseConfig, {
+	mode: 'production',
   devtool: 'source-map',
 	optimization: {
 		minimizer: [
 			new UglifyJsPlugin({
+				uglifyOptions: {
+					parse: {
+						ecma: 8,
+					},
+					output: {
+						beautify: false,
+						ecma: 5,
+					},
+				},
 				cache: true,
-				parallel: true,
-				sourceMap: true // set to true if you want JS source maps
+				sourceMap: true, // set to true if you want JS source maps
+				parallel: 2,
 			}),
 			new OptimizeCSSAssetsPlugin({})
 		]
@@ -157,7 +167,6 @@ export default merge.smart(baseConfig, {
       }
     ]
   },
-  mode: 'production',
   plugins: [
   	new MiniCssExtractPlugin({
 		  filename: 'style.css',

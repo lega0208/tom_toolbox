@@ -13,9 +13,7 @@ import './app.global.css';
 import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 
-
 const store = configureStore();
-
 
 render(
   <AppContainer>

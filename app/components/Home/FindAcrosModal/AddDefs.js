@@ -38,7 +38,7 @@ export default class AddDefs extends React.Component {
 			if (Array.isArray(this.props.noDefs) && this.props.noDefs.length > 0) {
 				const noDefsMap = {};
 				this.props.noDefs.forEach(noDef => noDefsMap[noDef] = '');
-				this.setState({noDefsMap})
+				this.setState({ noDefsMap })
 			}
 		}
 	}
@@ -48,21 +48,30 @@ export default class AddDefs extends React.Component {
 
 		if (noDefs.length > 0) {
 			const renderedAcros = noDefs.map((acro, i) => (
-				<div className="form-group form-inline mb-1" key={'wrapper-' + i}>
-					<div className="form-check form-check-inline" key={'formcheck-' + i}>
-						<label className="form-check-label">
+				<div className="form-row" key={`outerdiv-${i}`}>
+					<div className="form-group col-2 form-inline mb-1" key={'checkgroup-' + i}>
+						<div className="form-check" key={'formcheck-' + i}>
 							<input key={'checkbox-' + i}
-										 className="form-check-input position-static"
+										 className="form-check-input"
 										 name={acro}
 										 type="checkbox"
-										 value={i}
+										 value=""
 										 onChange={this.checkChange}
-										 checked />
-							{acro}
-						</label>
+										 checked
+										 id={'checkbox-' + i} />
+							<label className="form-check-label" htmlFor={i}>{acro}</label>
+						</div>
 					</div>
-					<input key={'text-' + i} type="text" className="form-control w-75" value={noDefsMap[acro]} name={acro} onChange={this.textChange} />
-				</div>)
+					<div className="form-group col-8 mb-1 ml-5" key={'textgroup-' + i}>
+						<input key={'text-' + i}
+									 type="text" className="form-control"
+									 value={noDefsMap[acro]}
+									 name={acro}
+									 onChange={this.textChange} />
+					</div>
+					<div className="clearfix" />
+				</div>
+				)
 			);
 			return (
 				<form onSubmit={(e) => this.props.submit(e, wrapWithAbbr(noDefsMap))} id="promptDefs">
@@ -70,7 +79,11 @@ export default class AddDefs extends React.Component {
 				</form>
 			);
 		} else {
-			return (<form className="text-center" onSubmit={this.props.submit} id="promptDefs">No acronyms, press "Submit" to continue.</form>);
+			return (
+				<form className="text-center" onSubmit={this.props.submit} id="promptDefs">
+					No acronyms, press "Submit" to continue.
+				</form>
+			);
 		}
 	}
 }

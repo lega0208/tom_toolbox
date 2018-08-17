@@ -6,7 +6,8 @@ const initialState = {
 	dupsMap: {},
 	noDefs: [],
 	display: 'acroList',
-	show: false
+	show: false,
+	shouldCancel: true,
 };
 
 export default function autoAcro(state = initialState, action) {
@@ -23,6 +24,7 @@ export default function autoAcro(state = initialState, action) {
 		case 'SET_DISPLAY': return mergeState('display');
 		case 'SHOW_MODAL': return mergeState('show', true);
 		case 'HIDE_MODAL': return initialState;
+		case 'SUCESS_MODAL': return mergeState('shouldCancel', false);
 		case 'SET_NODEFS': return mergeState('noDefs');
 		case 'SUBMIT_ACROS': return {
 			...state,

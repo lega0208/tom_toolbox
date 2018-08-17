@@ -1,13 +1,13 @@
 {
   "presets": [
     ["env", {
-      "targets": { "node": "8.2" },
+      "targets": { "node": "8.9" },
       "useBuiltIns": true
     }],
     "stage-0",
     "react"
   ],
-  "plugins": ["add-module-exports", "dynamic-import-webpack", "transform-unicode-property-regex"],
+  "plugins": ["add-module-exports", "dynamic-import-webpack"],
   "env": {
     "production": {
       "presets": ["react-optimize"],

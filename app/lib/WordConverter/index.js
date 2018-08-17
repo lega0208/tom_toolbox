@@ -16,6 +16,8 @@ type optsType = {
 	supNbsp: boolean,
 }
 
+// const logHtml = ($) => console.log($('body').html());
+
 export default function WordConverter(html: string, opts?: optsType): any {
 	const _html = cleanPreLists(html);
 
@@ -32,28 +34,34 @@ export default function WordConverter(html: string, opts?: optsType): any {
 	];
 	funcs.forEach(func => func($, opts));
 
-	// const $ = cheerio.load(html, { decodeEntities: false });
 	return $;
 }
 
 function removeEmptyPs($) {
-	$('p').filter((i, p) => /^\s*$/.test($(p).html()))
+	$('p').filter(
+		(i, p) => /^\s*$/.test($(p).text()) && !$(p).children().has('img')
+	)
 		.each((i, el) => $(el).remove());
 }
 
 function handleComments($) {
 	// Get rid of comment anchors
-	$('a').filter((i, el) => ($(el).attr('style') || '').includes('mso-comment-reference'))
+	$('a').filter(
+		(i, el) => ($(el).attr('style') || '').includes('mso-comment-reference')
+	)
 		.each((i, el) => $(el).replaceWith($(el).contents()));
 
 	// Get rid of comment divs
-	$('div').filter((i, el) => ($(el).attr('style') || '').includes('mso-element:comment-list'))
+	$('div').filter(
+		(i, el) => ($(el).attr('style') || '').includes('mso-element:comment-list')
+	)
 		.each((i, el) => $(el).remove());
 }
 
 function boldFigureCaptions($) {
 	$('p.FigureCaption').each((i, caption) => {
 		const captionRef = $(caption);
+
 		if (captionRef.next().get(0).tagName === 'table') {
 			captionRef.prependTo(captionRef.next());
 			caption.tagName = 'caption';
@@ -71,6 +79,7 @@ function cleanTOC($) {
 			const siblings = tocLvl1.get(i+1)
 				? elRef.nextUntil('p.MsoToc1')
 				: elRef.nextAll('p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5');
+
 			const divWrapper = $('<div class="TOC"><ul></ul></div>');
 			divWrapper.insertBefore(el);
 			elRef.add(siblings)
@@ -82,8 +91,10 @@ function cleanTOC($) {
 		});
 	} else {
 		const toc = $('p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5');
+
 		if (toc.length) {
 			const divWrapper = $('<div class="TOC"><ul></ul></div>');
+
 			divWrapper.insertBefore(toc.get(0));
 			toc.map((i, tocItem) => {
 				if (tocItem.tagName === 'p') tocItem.tagName = 'li';
@@ -101,9 +112,8 @@ function cleanTOC($) {
 			const href = `#_sec${i+1}`;
 			addSecNumsToChildren(elRef, href, $);
 		});
-		$(ul).find('.MsoToc1, .MsoToc2, .MsoToc3, .MsoToc4, .MsoToc5').each((i, li) => $(li).attr('class', null));
-
-
+		$(ul).find('.MsoToc1, .MsoToc2, .MsoToc3, .MsoToc4, .MsoToc5')
+			.each((i, li) => $(li).attr('class', null));
 	});
 }
 

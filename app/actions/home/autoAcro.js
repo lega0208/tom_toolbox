@@ -1,8 +1,9 @@
-import getCache from '../../database/cache';
+import cheerio from 'cheerio';
+import getCache from 'database/cache';
 import { fireAlert, setTextContent } from './';
 
-import findAcros from '../../lib/findAcros';
-import cleanup from '../../lib/cleanup';
+import findAcros from 'lib/findAcros';
+import cleanup from 'lib/cleanup';
 import { clipboard } from 'electron';
 
 export function setAcros(acros) {
@@ -58,8 +59,10 @@ export function mergeAcroMap(acroMap) {
  */
 export function startAutoAcro(textContent) { // use param w/ convertList, else use clipboard
 	return async dispatch => {
+		const $ = cheerio.load(textContent, { decodeEntities: false });
+
 		const text = textContent ? textContent : clipboard.readHTML('text/html') || clipboard.readText();
-		const acros = (await findAcros(text)) || [];
+		const acros = (findAcros(text)) || [];
 
 		if (acros.length > 0) {
 			await dispatch(setAcros(acros));
@@ -163,7 +166,7 @@ export function submitAcros(acros = []) {
 			}
 		}
 	} else { // empty array / not an array
-		return (dispatch) => dispatch(endAutoAcro(clipboard.readText())); // Is this right? Shouldn't it use clipboard?
+		return (dispatch) => dispatch(endAutoAcro(clipboard.readText()));
 	}
 }
 
@@ -221,7 +224,8 @@ function endAutoAcro(text) {
 		clipboard.writeText(text);
 		try {
 			await dispatch(setTextContent(text));
-			await dispatch(hideModal());
+			await dispatch({type: 'SUCCESS_MODAL'});
+			$('#acronyms').modal('hide');
 			await dispatch(fireAlert());
 		} catch (e) {
 			await dispatch(hideModal());
@@ -237,10 +241,18 @@ export function showModal() {
 	}
 }
 
+// todo: make sure this is done properly
 export function hideModal() {
-	return dispatch => {
-		$('#acronyms').modal('hide');
-		return dispatch({type: 'HIDE_MODAL'});
+	return (dispatch, getState) => {
+		const cboard = getState().home.state.clipboard;
+		const { shouldCancel } = getState().autoAcro;
+
+		if (shouldCancel) {
+			clipboard.writeText(cboard);
+		}
+
+		$('#home').focus();
+		dispatch({type: 'HIDE_MODAL'});
 	}
 }
 
@@ -260,7 +272,6 @@ function findAndReplace(text, acroMap) {
 		}
 		return replacedText;
 	};
-	
 
 	return Object.entries(acroMap).reduce(reduceFunc, text);
 }

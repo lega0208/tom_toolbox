@@ -34,19 +34,16 @@ class FindAcronyms extends Component {
 		e ? e.preventDefault() : null;
 	}
 	hideModal() {
-		this.props.dispatch(hideModal());
-		clipboard.writeText(this.props.clipboard); // todo: random bug when pasting results back into converter
+		this.props.dispatch(hideModal()); // todo: make sure this is done properly
 	}
 
+	componentDidMount() {
+		$(document).on('hidden.bs.modal', `#${this.props.modalId}`, this.hideModal);
+	}
 
-	// componentDidUpdate(newProps) {
-  	// console.log(`newProps.show:\n${newProps.show}`);
-  	// if (newProps.show) {
-  	// 	newProps.configListeners('remove');
-	// 	} else if (!newProps.show) {
-	// 		newProps.configListeners('add');
-	// 	}
-	// }
+	componentWillUnmount() {
+  	$(document).off('hidden.bs.modal', `#${this.props.modalId}`);
+	}
 
   render() {
 		let findAcrosTitle;
@@ -60,7 +57,6 @@ class FindAcronyms extends Component {
     return (
       <Modal modalId={this.props.modalId}
 						 modalTitle={findAcrosTitle}
-						 hideModal={this.hideModal}
 						 submitType={this.props.display !== 'chooseAcros' ? 'submit' : null}
 						 submitClick={this.props.display === 'chooseAcros' ? this.getSubmit() : null}
 						 display={this.props.display}>
@@ -94,7 +90,10 @@ const Modal = (props) => (
 			<div className="modal-content">
 				<div className="modal-header">
 					<h5 className="modal-title">{props.modalTitle || 'Modal title'}</h5>
-					<button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={props.hideModal}>
+					<button type="button"
+									className="close"
+									data-dismiss="modal"
+									aria-label="Close" >
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -105,11 +104,14 @@ const Modal = (props) => (
 					<button type={props.submitType}
 									onClick={props.submitClick}
 									form={props.display}
-									className="btn btn-primary">Submit</button>
+									className="btn btn-primary">
+						Submit
+					</button>
 					<button type="button"
 									data-dismiss="modal"
-									className="btn btn-danger"
-									onClick={props.hideModal}>Cancel</button>
+									className="btn btn-danger">
+						Cancel
+					</button>
 				</div>
 			</div>
 		</div>
