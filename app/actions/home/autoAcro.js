@@ -229,7 +229,7 @@ function endAutoAcro(text) {
 			await dispatch(fireAlert());
 		} catch (e) {
 			await dispatch(hideModal());
-			await dispatch(fireAlert(e));
+			await dispatch(fireAlert('danger', e.message));
 		}
 	}
 }

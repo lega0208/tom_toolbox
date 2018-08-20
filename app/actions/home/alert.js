@@ -12,12 +12,9 @@ export function hideAlert() {
 	}
 }
 
-export function fireAlert(e) {
-	const type = e ? 'danger' : 'success';
-	const error = e ? e.message : '';
-	const payload = {type, error};
-
-	if (e) console.error(e);
+export function fireAlert(type = 'success', message) {
+	const payload = { type };
+	if (message) payload.message = message;
 
   return (dispatch) => {
 		dispatch(showAlert(payload));

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { clipboard, remote } from 'electron';
+import { clipboard } from 'electron';
 
 import ModalPreview from './HTMLPreview';
 import CodeView from './CodeView';
@@ -18,7 +18,7 @@ import {
 	fireAlert,
 	undo,
 } from '../../actions/home';
-import { setWarning, hideWarning } from '../../actions/home/alert';
+import { setWarning, hideWarning } from '../../actions/home/alert'; // todo: set up persistent warning
 
 // const { Menu, MenuItem } = remote;
 
@@ -35,7 +35,7 @@ class Home extends Component {
 			this.props.dispatch(setTextContent(toCopy));
       this.props.dispatch(fireAlert());
     } catch(e) {
-			this.props.dispatch(fireAlert(e));
+			this.props.dispatch(fireAlert('danger', e.message));
     }
   }
 
@@ -50,7 +50,7 @@ class Home extends Component {
 
 	keydown(e) {
   	if (e.ctrlKey) {
-  		switch (e.key) {
+  		switch (e.key) { // todo: add "&& modal.show === false" type thing
 				case 'v': this.paste(); break;
 				case 'c': this.copy(this.props.state.textContent); break;
 				case 'z': this.undo(); break;
@@ -72,8 +72,8 @@ class Home extends Component {
 					? 'Error: Database connection could not be established.'
 					: e.message;
 				this.props.dispatch(setWarning({
-					message: 'There was a problem connecting to the database, please verify you have the correct path. '
-						+ 'Otherwise, try toggling the DB driver.',
+					message: 'There was a problem connecting to the database. Please verify that you have the correct path. '
+						+ 'Otherwise, try toggling the DB driver via File -> Toggle DB Driver.',
 					error,
 				}));
 				console.error(e.message);

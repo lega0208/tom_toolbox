@@ -34,7 +34,7 @@ export default function convertWord() {
 			}
 		} catch (e) {
 			console.error('Error in Word conversion:\n' + e);
-			dispatch(fireAlert(e));
+			dispatch(fireAlert('danger', e.message));
 		}
 	};
 }
