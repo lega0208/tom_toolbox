@@ -9,11 +9,9 @@
     "email": "chentsulin@gmail.com",
     "url": "https://github.com/chentsulin"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "license": "MIT",
   "dependencies": {
-    "hazardous": "^0.3.0",
     "node-adodb-electronfork": "^4.1.0",
     "sql.js": "^0.4.0",
     "trilogy": "^1.4.4"

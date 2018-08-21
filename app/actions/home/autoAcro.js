@@ -12,13 +12,7 @@ export function setAcros(acros) {
 		payload: acros,
 	}
 }
-export function mergeAcros(acros) {
-	return {
-		type: 'MERGE_ACROS',
-		payload: acros,
-	}
-}
-export function setDisplay(display) {
+export function setDisplay(display) { // set acro modal state
 	return {
 		type: 'SET_DISPLAY',
 		payload: display,
@@ -59,7 +53,6 @@ export function mergeAcroMap(acroMap) {
  */
 export function startAutoAcro(textContent) { // use param w/ convertList, else use clipboard
 	return async dispatch => {
-		const $ = cheerio.load(textContent, { decodeEntities: false });
 
 		const text = textContent ? textContent : clipboard.readHTML('text/html') || clipboard.readText();
 		const acros = (findAcros(text)) || [];

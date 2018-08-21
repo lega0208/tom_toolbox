@@ -26,7 +26,7 @@ export default function Alert(props) {
 				type === 'success' ? 'Success!' : '';
 	const message = type === 'success' ? 'Result has been copied to your clipboard.' : props.message;
 	const display = props.show ? 'show' : 'hide';
-	console.log(type);
+
 	return (
 		<div className="container mb-5">
 			{

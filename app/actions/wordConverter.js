@@ -1,4 +1,4 @@
-import WordConverter from 'lib/WordConverter';
+import WordConverter from 'lib/word-converter';
 import cleanup from 'lib/cleanup';
 import { clipboard } from 'electron';
 import { fireAlert, setTextContent } from './home';
@@ -48,7 +48,7 @@ export function postConvert() {
 
 		if (!!opts.autoAcro) {
 			clipboard.writeText(html);
-			dispatch(startAutoAcro(html));
+			dispatch(startAutoAcro(html)); //todo: decouple cleanup from autoAcro
 		} else {
 			const cleanHtml = cleanup(html, opts);
 			clipboard.writeText(cleanHtml);

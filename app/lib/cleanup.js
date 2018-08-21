@@ -1,4 +1,7 @@
-
+/**
+ * Cleanup scripts. Replaces special characters with their html entities,
+ * replaces quotes with straight quotes, adds nbsp; and sup tags where appropriate
+ */
 const specChars = [
 	['–', '&ndash;'],
 	['\\s&\\s', ' &amp; '],
