@@ -1,9 +1,11 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware, routerActions } from 'react-router-redux';
 import { createLogger } from 'redux-logger';
 import rootReducer from '../reducers';
+import rootSaga from '../sagas';
 
 const history = createHashHistory();
 
@@ -13,7 +15,11 @@ const configureStore = (initialState) => {
   const enhancers = [];
 
   // Thunk Middleware
-  middleware.push(thunk);
+  //middleware.push(thunk);
+
+  // Saga Middleware
+  const sagaMiddleware = createSagaMiddleware();
+  middleware.push(sagaMiddleware);
 
   // Logging Middleware
   const logger = createLogger({
@@ -30,6 +36,7 @@ const configureStore = (initialState) => {
   const actionCreators = {
     ...routerActions,
   };
+
   // If Redux DevTools Extension is installed use it, otherwise use Redux compose
   /* eslint-disable no-underscore-dangle */
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
@@ -46,6 +53,9 @@ const configureStore = (initialState) => {
 
   // Create Store
   const store = createStore(rootReducer, initialState, enhancer);
+
+  // Run sagas
+  sagaMiddleware.run(rootSaga);
 
   if (module.hot) {
     module.hot.accept('../reducers', () =>

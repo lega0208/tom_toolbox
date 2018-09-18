@@ -53,12 +53,15 @@ function replaceAll(string, arr) {
 	}
 	return string;
 }
-const cleanup = (string, opts) => {
-	const cleanupArr = [];
-	if (opts.specChars) cleanupArr.push(...specChars);
-	if (opts.supNbsp) cleanupArr.push(...superscript);
-	if (opts.supNbsp) cleanupArr.push(...nbsp);
 
-	return replaceAll(string, cleanupArr);
-};
-export default cleanup;
+export const replaceSpecChars = (string) => replaceAll(string, specChars);
+export const replaceSupNbsp = (string) => replaceAll(string, [...superscript, ...nbsp]);
+
+//const cleanup = (string, opts) => {
+//	const cleanupArr = [];
+//	if (opts.specChars) cleanupArr.push(...specChars);
+//	if (opts.supNbsp)   cleanupArr.push(...superscript, ...nbsp);
+//
+//	return replaceAll(string, cleanupArr);
+//};
+//export default cleanup;

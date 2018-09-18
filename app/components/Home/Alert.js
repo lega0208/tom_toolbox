@@ -4,11 +4,14 @@ const Warning = (props) => (
 	<div className="row mt-2">
 		<div className="col-auto" />
 		<div className="col">
-			<div className={`alert alert-warning fade ${props.show ? 'show' : 'hide'}`} role="alert">
-				<h5>Warning:</h5>
+			<div className={`alert alert-danger fade ${props.show ? 'show' : 'hide'}`} role="alert">
 				{
 					props.error
-						? <p className="my-1 text-danger"><strong>{props.error.replace('Error: ', '')}</strong></p>
+						? (
+							<p className="my-1">
+								<span className="h5 text-danger">Error:</span> {props.error.replace('Error: ', '')}
+							</p>
+						)
 						: null
 				}
 				<p className="mb-1">{props.message}</p>
@@ -24,7 +27,7 @@ export default function Alert(props) {
 		type === 'danger' ? 'Error' :
 			type === 'warning' ? 'Warning' :
 				type === 'success' ? 'Success!' : '';
-	const message = type === 'success' ? 'Result has been copied to your clipboard.' : props.message;
+	const message = props.message;
 	const display = props.show ? 'show' : 'hide';
 
 	return (

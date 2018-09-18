@@ -4,7 +4,6 @@
 
 import webpack from 'webpack';
 import merge from 'webpack-merge';
-// import BabiliPlugin from 'babili-webpack-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 // import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import baseConfig from './webpack.config.base';

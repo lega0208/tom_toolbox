@@ -2,42 +2,44 @@ import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faCheckSquare from '@fortawesome/fontawesome-free-solid/faCheckSquare';
 import faSquare from '@fortawesome/fontawesome-free-regular/faSquare';
-import {
-	toggleWET,
-	toggleAutoAcro,
-	toggleSpecChars,
-	toggleSupNbsp,
-} from '../../actions/home';
 
+// todo: remove dispatch, connect component & implement mapDispatchToProps +++ action creators
 export default function ScriptsBar(props) {
 	const { dispatch } = props;
-	const {
-		autoAcro,
-		specChars,
-		supNbsp,
-	} = props.state;
-	const btnClasses = (optionName) => `btn btn-sm btn-outline-primary${(props.state[optionName] ? ' active' : '')}`;
+	const { autoAcro, specChars, supNbsp, images } = props.opts;
+	const btnClasses = (optionName) =>
+		`btn btn-sm btn-outline-primary px-0 border-dark${(props.opts[optionName] ? ' active' : '')}`;
+
+	const Checkbox = (props) => <FontAwesomeIcon className="align-middle" icon={props.option ? faCheckSquare : faSquare} />;
+
+	const ScriptButton = ({ scriptName, text, optionProp }) => (
+		<button className={btnClasses(scriptName)}
+		        onClick={() => dispatch({ type: `TOGGLE_${scriptName.toUpperCase()}` })}
+		>
+			<div className="row mx-0">
+				<div className="col-2 align-self-start pr-0 pl-1">
+					<Checkbox option={optionProp} />
+				</div>
+				<div className="col-10 align-self-end text-left pl-1">
+					{` ${text}`}
+				</div>
+			</div>
+		</button>
+	);
 
 	return (
-		<div className="col-2 px-0">
-			<div className="card">
-				<h6 className="card-header p-2">Scripts</h6>
+		<div className="col-3 pl-1">
+			<div className="card border-secondary">
+				<h6 className="card-header text-center border-secondary">Scripts</h6>
 				<div className="card-body p-2">
-					<div className="btn-group btn-group-sm btn-group-vertical" style={{ minWidth: '100%' }}>
-						<button className={btnClasses('autoAcro')} onClick={() => dispatch(toggleAutoAcro())}>
-							<span className="nowrap">Acronyms <Checkbox option={autoAcro} /></span>
-						</button>
-						<button className={btnClasses('specChars')} onClick={() => dispatch(toggleSpecChars())}>
-							Special <span className="nowrap">characters <Checkbox option={specChars} /></span>
-						</button>
-						<button className={btnClasses('supNbsp')} onClick={() => dispatch(toggleSupNbsp())}>
-							Superscript and <span className="nowrap">nbsp <Checkbox option={supNbsp} /></span>
-						</button>
+					<div className="btn-group btn-group-sm btn-group-vertical d-flex">
+						<ScriptButton text="Acronyms" scriptName="autoAcro" optionProp={autoAcro} />
+						<ScriptButton text="Special characters" scriptName="specChars" optionProp={specChars} />
+						<ScriptButton text="Superscript and nbsp" scriptName="supNbsp" optionProp={supNbsp} />
+						<ScriptButton text="Images" scriptName="images" optionProp={images} />
 					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
-
-const Checkbox = (props) => <FontAwesomeIcon icon={props.option ? faCheckSquare : faSquare} />;

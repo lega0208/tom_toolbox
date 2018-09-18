@@ -1,8 +1,14 @@
+// @flow
 import * as alerts from './alert';
+
+export type actionType = {
+	type: string,
+	payload?: ?any,
+};
 
 export const { fireAlert } = alerts;
 
-export * from './options';
+export * from './options'; // todo: could refactor to "setOption"
 
 export function setTextContent(payload) {
 	return {
@@ -11,4 +17,5 @@ export function setTextContent(payload) {
 	}
 }
 
-export const undo = () => ({type: 'UNDO'});
+export const undo = () => ({ type: 'UNDO' });
+export const setClipboard = (payload) => ({ type: 'SET_CLIPBOARD', payload });

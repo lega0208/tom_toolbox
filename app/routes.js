@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect } from 'react-router';
-import App from './containers/App';
-import Loadable from './components/Loadable';
+import App from 'containers/App';
+import Loadable from 'components/Loadable';
 
 export default class extends Component {
   render() {

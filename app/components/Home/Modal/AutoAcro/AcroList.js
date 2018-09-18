@@ -1,7 +1,8 @@
 import React from 'react';
-import { setAcros } from '../../../actions/home/autoAcro';
+import { connect } from 'react-redux';
+import { setAcros } from 'actions/home/autoAcro';
 
-export default class AcroList extends React.Component {
+class AcroList extends React.Component {
 	constructor(props) {
 		super(props);
 		this.checkChange = this.checkChange.bind(this);
@@ -15,9 +16,9 @@ export default class AcroList extends React.Component {
 
 		if (checked) {
 			acrosProxy[index] = name;
-			this.props.dispatch(setAcros(acrosProxy));
+			this.props.setAcros(acrosProxy);
 		} else {
-			await this.props.dispatch(setAcros(acrosProxy.filter(item => item !== name)));
+			await this.props.setAcros(acrosProxy.filter(item => item !== name));
 		}
 	}
 	async textChange(e) {
@@ -26,7 +27,7 @@ export default class AcroList extends React.Component {
 		const acrosProxy = [...this.props.acros];
 
 		acrosProxy[index] = value;
-		await this.props.dispatch(setAcros(acrosProxy));
+		await this.props.setAcros(acrosProxy);
 	}
 	render() {
 		if (this.props.acros.length > 0) {
@@ -35,24 +36,29 @@ export default class AcroList extends React.Component {
 					<div className="form-check form-check-inline" key={'formcheck-' + i}>
 						<label className="form-check-label">
 							<input key={'checkbox-' + i}
-										 className="form-check-input position-static"
-										 name={acro}
-										 type="checkbox"
-										 value={i}
-										 onChange={this.checkChange}
-										 checked />
+							       className="form-check-input position-static"
+							       name={acro}
+							       type="checkbox"
+							       value={i}
+							       onChange={this.checkChange}
+							       checked />
 						</label>
 					</div>
 					<input key={'text-' + i} type="text" className="form-control w-25" value={acro} name={i} onChange={this.textChange} />
 				</div>)
 			);
 			return (
-				<form onSubmit={this.props.submit} id="acroList">
+				<form id="acroList">
 					{renderedAcros}
 				</form>
 			);
 		} else {
-			return (<form className="text-center" onSubmit={this.props.submit} id="acroList">No Acronyms found</form>);
+			return (<form className="text-center" id="acroList">No Acronyms found</form>);
 		}
 	}
 }
+
+const mapState = ({ home: { autoAcro: { acros } } }) => ({ acros });
+const mapDispatch = { setAcros };
+
+export default connect(mapState, mapDispatch)(AcroList);

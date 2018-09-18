@@ -6,7 +6,7 @@ export default class HomePage extends Component {
     return (
 	    <div className="container-fluid">
 		    <div className="row">
-			    <div className="col-xl-10 col-md-11 col-12 mx-auto">
+			    <div className="col-md-11 col-12 mx-auto">
 				    <Home />
 			    </div>
 					<div className="clearfix" />

@@ -8,10 +8,10 @@ type Props = {
 export default class App extends Component<Props> {
   render() {
     return (
-      <div>
+      <React.Fragment>
         <Navbar/>
         {this.props.children}
-      </div>
+      </React.Fragment>
     );
   }
 }

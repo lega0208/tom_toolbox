@@ -1,21 +1,16 @@
+import { clipboard } from 'electron';
 import WordConverter from 'lib/word-converter';
 import cleanup from 'lib/cleanup';
-import { clipboard } from 'electron';
+import { beautify } from 'lib/util';
 import { fireAlert, setTextContent } from './home';
 import { startAutoAcro } from './home/autoAcro';
 
-const hasImg = ($) => !!$('img').length;
-
-const setClipboard = (dispatch) => {
-	const wordHTML = clipboard.readHTML('text/html') || clipboard.readText();
-	dispatch({type: 'SET_CLIPBOARD', payload: wordHTML});
-	return wordHTML;
-};
 
 export const setWordConvert = ($) =>
 	(dispatch) => dispatch({ type: 'SET_WORDCONVERT', payload: beautify($) });
 
 export default function convertWord() {
+	const hasImg = ($) => !!$('img').length;
 	return (dispatch, getState) => {
 		const wordHTML = clipboard.readHTML('text/html') || clipboard.readText();
 		const opts = getState().home.options;
@@ -44,7 +39,7 @@ export function postConvert() {
 	return (dispatch, getState) => {
 		const { home } = getState();
 		const opts = home.options;
-		const html = home.wordConvert;
+		const html = home.wordConvert.text;
 
 		if (!!opts.autoAcro) {
 			clipboard.writeText(html);
@@ -56,22 +51,4 @@ export function postConvert() {
 			dispatch(fireAlert());
 		}
 	};
-}
-
-function beautify($) {
-	const bodyRef = $('body');
-	const text = bodyRef.html();
-	const beautify = require('js-beautify').html;
-	const config = {
-		indent_size: 2,
-		indent_char: '  ',
-		indent_with_tabs: true,
-		eol: '\r\n',
-		unescape_strings: true,
-		wrap_line_length: 0,
-		extra_liners: 'h2',
-		preserve_newlines: false,
-	};
-
-	return beautify(text, config);
 }

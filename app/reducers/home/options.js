@@ -1,24 +1,41 @@
+import { combineReducers } from 'redux';
 
+//const homeOptions = sessionStorage.getItem('home.options'); // fix sessionStorage
+const defaultState = {
+	initScriptsState: {
+		autoAcro: true,
+		specChars: true,
+		supNbsp: true,
+		images: true,
+	},
+	initConverterState: {
+		lang: 'en',
+		wetVersion: 2,
+	},
+};
+const { initScriptsState, initConverterState } = defaultState;
 
-const initialState = localStorage.getItem('home.options')
-											? JSON.parse(localStorage.getItem('home.options'))
-											: {
-													listType: 'ol',
-													lang: 'en',
-													wetVersion: 2,
-													autoAcro: true,
-													specChars: true,
-													supNbsp: true,
-												};
-
-export default function options(state = initialState, action) {
+function scripts(state = initScriptsState, action) {
 	switch (action.type) {
-		case 'CHANGE_LISTTYPE': return mergeState('listType');
-		case 'CHANGE_LANG': return mergeState('lang');
-		case 'CHANGE_WETVERSION': return mergeState('wetVersion');
-		case 'CHANGE_AUTOACRO': return mergeState('autoAcro');
-		case 'CHANGE_SPECCHARS': return mergeState('specChars');
-		case 'CHANGE_SUPNBSP': return mergeState('supNbsp');
+		case 'TOGGLE_AUTOACRO': return toggleState('autoAcro');
+		case 'TOGGLE_SPECCHARS': return toggleState('specChars');
+		case 'TOGGLE_SUPNBSP': return toggleState('supNbsp');
+		case 'TOGGLE_IMAGES': return toggleState('images');
+		default: return state;
+	}
+
+	function toggleState(propName) {
+		return {
+			...state,
+			[propName]: !state[propName],
+		}
+	}
+}
+
+function converter(state = initConverterState, action) {
+	switch (action.type) {
+		case 'SET_LANG': return mergeState('lang');
+		case 'SET_WETVERSION': return mergeState('wetVersion');
 		default: return state;
 	}
 
@@ -30,3 +47,7 @@ export default function options(state = initialState, action) {
 	}
 }
 
+export default combineReducers({
+	scripts,
+	converter,
+});

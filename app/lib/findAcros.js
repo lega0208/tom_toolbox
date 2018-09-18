@@ -50,9 +50,7 @@ function findNonStandard(string: string): Array<string> {
     'Tel\\.',
   ];
 
-  return nonStandardAcros
-		// replace all backslashes
-		.map(acro => {
+  return nonStandardAcros.map(acro => { // replace all backslashes
 			const regex: RegExp = new RegExp(`${acro}(?!\\s*?</abbr>)`);
 
 			if (regex.test(string)) {

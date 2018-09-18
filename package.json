@@ -7,7 +7,7 @@
     "build": "concurrently \"npm run build-main\" \"npm run build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development node --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.renderer.dev.dll.js --colors",
     "build-main": "cross-env NODE_ENV=production node --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.main.prod.js --colors",
-    "build-renderer": "cross-env NODE_ENV=production node --harmony_regexp_lookbehind --harmony_regexp_property --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.renderer.prod.js --colors",
+    "build-renderer": "cross-env NODE_ENV=production node --trace-warnings -r babel-register ./node_modules/webpack/bin/webpack --config webpack.config.renderer.prod.js --colors",
     "dev": "cross-env START_HOT=1 npm run start-renderer-dev",
     "flow": "flow",
     "flow-typed": "rimraf flow-typed/npm && flow-typed install --overwrite || true",
@@ -90,6 +90,7 @@
     "babel-plugin-dev-expression": "^0.2.1",
     "babel-plugin-dynamic-import-webpack": "^1.0.1",
     "babel-plugin-flow-runtime": "^0.17.0",
+    "babel-plugin-redux-saga": "^1.0.0-beta.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-classes": "^6.24.1",
     "babel-plugin-transform-unicode-property-regex": "^2.0.5",
@@ -190,7 +191,7 @@
     "react-router-redux": "^5.0.0-alpha.6",
     "react-syntax-highlighter": "^8.0.1",
     "redux": "^4.0.0",
-    "redux-saga": "^0.16.0",
+    "redux-saga": "^1.0.0-beta.2",
     "redux-thunk": "^2.3.0"
   },
   "devEngines": {

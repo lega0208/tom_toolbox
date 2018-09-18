@@ -8,15 +8,9 @@ import wetTransforms from './wetTransforms';
 import nestTOCList from './nestTOCLists';
 
 type optsType = {
-	listType: string,
 	lang: string,
 	wetVersion: number,
-	autoAcro: boolean,
-	specChars: boolean,
-	supNbsp: boolean,
 }
-
-// const logHtml = ($) => console.log($('body').html());
 
 export default function WordConverter(html: string, opts?: optsType): any {
 	const _html = cleanPreLists(html);
@@ -34,7 +28,7 @@ export default function WordConverter(html: string, opts?: optsType): any {
 	];
 	funcs.forEach(func => func($, opts));
 
-	return $;
+	return $('body').html();
 }
 
 function removeEmptyPs($) {

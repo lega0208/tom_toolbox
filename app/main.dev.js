@@ -29,20 +29,20 @@ if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true')
   require('module').globalPaths.push(p);
 }
 
-// const installExtensions = async () => {
-//   const installer = require('electron-devtools-installer');
-//   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-//   const extensions = [
-//     'REACT_DEVELOPER_TOOLS',
-//     'REDUX_DEVTOOLS'
-//   ];
-//
-//   return Promise
-//     .all(extensions.map(name => installer.default(installer[name], forceDownload)))
-//     .catch(console.log);
-// };
+ const installExtensions = async () => {
+   const installer = require('electron-devtools-installer');
+   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+   const extensions = [
+     'REACT_DEVELOPER_TOOLS',
+     'REDUX_DEVTOOLS'
+   ];
 
-// add harmony flags
+   return Promise
+     .all(extensions.map(name => installer.default(installer[name], forceDownload)))
+     .catch(console.log);
+ };
+
+// add harmony flags todo: remove when electron is updated to version >=3.0.0
 app.commandLine.appendSwitch('js-flags', '--harmony_regexp_lookbehind --harmony_regexp_property');
 
 /**
@@ -54,19 +54,19 @@ app.on('window-all-closed', () => {
   // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
+    process.exit();
   }
 });
 
-
 app.on('ready', async () => {
-  // if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
-  //   await installExtensions();
-  // }
+   if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
+     await installExtensions();
+   }
 	console.log('Electron ready');
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1229,
+    height: 874,
 		webPreferences: {
 			nodeIntegrationInWorker: true
 		}

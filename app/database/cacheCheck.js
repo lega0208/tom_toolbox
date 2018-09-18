@@ -28,6 +28,7 @@ function shouldCheck() {
 	// todo: switch to file or something
 	const lastCheck = localStorage.getItem('lastCheck') ? localStorage.getItem('lastCheck') : null;
 	console.log(`lastCheck: ${lastCheck}`);
+
 	if (lastCheck) {
 		const _lastCheck = moment(lastCheck);
 		const today = moment().startOf('day');
@@ -58,6 +59,7 @@ async function writeLastCache() {
 		throw e;
 	}
 }
+
 async function readLastCache() {
 	try {
 		await ensureFile(LAST_CACHE);
@@ -91,7 +93,7 @@ async function shouldUpdateCache(lastCache = '1970-01-01') {
 	}
 	const query = 'SELECT MAX ([Date Modified]) FROM Acronyms';
 	const resultArr = (await db.query(query)) || [];
-	const result = ( resultArr.length && resultArr[0].hasOwnProperty('Expr1000')) ? resultArr[0].Expr1000 : null;
+	const result = (resultArr.length && resultArr[0].hasOwnProperty('Expr1000')) ? resultArr[0].Expr1000 : null;
 
 	if (result) {
 		const lastUpdate = moment(result);

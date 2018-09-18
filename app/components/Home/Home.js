@@ -1,24 +1,17 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { clipboard } from 'electron';
+import { connect }          from 'react-redux';
 
-import ModalPreview from './HTMLPreview';
-import CodeView from './CodeView';
-import Alert from './Alert';
-import TopButtonRow from './TopButtonRow'
-import ScriptsBar from './ScriptsBar';
+import CodeView        from './CodeView';
+import Alert           from './Alert';
+import TopButtonRow    from './TopButtonRow'
+import ScriptsBar      from './ScriptsBar';
 import BottomButtonRow from './BottomButtonRow';
-import FindAcronyms from './FindAcrosModal';
-import ImageModal from './ImageModal';
+import HomeModal       from './Modal';
 
-import cacheCheck from '../../database/cacheCheck';
-import convertWord from '../../actions/wordConverter';
-import {
-	setTextContent,
-	fireAlert,
-	undo,
-} from '../../actions/home';
-import { setWarning, hideWarning } from '../../actions/home/alert'; // todo: set up persistent warning
+import convertWord                         from 'actions/wordConverter';
+import { setTextContent, fireAlert, undo } from 'actions/home';
+import { setWarning, hideWarning }         from 'actions/home/alert';
+import cacheCheck                          from 'database/cacheCheck';
 
 // const { Menu, MenuItem } = remote;
 
@@ -28,10 +21,8 @@ class Home extends Component {
 
 		this.keydown = this.keydown.bind(this);
   }
-  copy(toCopy) {
+  copy(toCopy) { // todo: move to sagas
     try {
-      clipboard.writeText(toCopy);
-
 			this.props.dispatch(setTextContent(toCopy));
       this.props.dispatch(fireAlert());
     } catch(e) {
@@ -40,34 +31,33 @@ class Home extends Component {
   }
 
   paste() {
-		this.props.dispatch(convertWord());
+		//this.props.dispatch(convertWord());
+	  this.props.dispatch({ type: 'WORDCONVERT_INIT' }); // todo: make action creator
 	}
 
 	undo() {
-  	clipboard.writeText(this.props.state.priorText);
   	this.props.dispatch(undo());
 	}
 
 	keydown(e) {
   	if (e.ctrlKey) {
-  		switch (e.key) { // todo: add "&& modal.show === false" type thing
+  		switch (e.key) { // todo: change behavior based on state ("modal.show === false", or other stuff)
 				case 'v': this.paste(); break;
-				case 'c': this.copy(this.props.state.textContent); break;
+				case 'c': this.copy(this.props.textBox.content); break;
 				case 'z': this.undo(); break;
 			}
 		}
 	}
 
   componentDidMount() {
-		// this.configListeners('add', this.listeners);
-		this.elemRef.focus();
+		this.elemRef.focus(); // Do I still need this?
 
-		// todo: write .dbpath if none is found
-		cacheCheck().then(() => {
-			console.log('Done checking cache');
-			this.props.dispatch(hideWarning());
-		})
-			.catch(e => {
+		setTimeout(async () => { // todo: move to sagas probably
+			try {
+				await cacheCheck();
+				console.log('Done checking cache');
+				this.props.dispatch(hideWarning());
+			} catch (e) {
 				const error = e.message.includes('cscript.exe error')
 					? 'Error: Database connection could not be established.'
 					: e.message;
@@ -77,34 +67,32 @@ class Home extends Component {
 					error,
 				}));
 				console.error(e.message);
-			});
+			}
+		}, 250);
   }
 
   render() {
-    const textContent = this.props.state.textContent;
-    const opts = this.props.options;
+    const textContent = this.props.textBox.content;
+	  const converterOpts = this.props.options.converter;
+	  const scriptsOpts = this.props.options.scripts;
+
     return (
-      <div id="home" ref={elem => this.elemRef = elem} onKeyDown={this.keydown} tabIndex="-1">
-        <Alert {...this.props.alert} />
+      <div id="home" ref={elem => this.elemRef = elem /* Do I need this ref? */} onKeyDown={this.keydown} tabIndex="-1">
+        <Alert {...this.props.alert} warning={this.props.warning} />
 	      <div className="container-fluid">
 		      <div className="row">
-			      <div className="col-10 pr-1">
-				      <TopButtonRow listType={opts.listType}
-				                    lang={opts.lang}
-				                    wetVersion={opts.wetVersion}
+			      <div className="col-9 pr-1">
+				      <TopButtonRow listType={converterOpts.listType}
+				                    lang={converterOpts.lang}
+				                    wetVersion={converterOpts.wetVersion}
 				                    dispatch={this.props.dispatch}/>
 				      <CodeView content={textContent}/>
 				      <BottomButtonRow convert={() => convertWord()} />
 			      </div>
-			      <ScriptsBar dispatch={this.props.dispatch} state={opts} />
+			      <ScriptsBar dispatch={this.props.dispatch} opts={scriptsOpts} />
 		      </div>
 	      </div>
-        <ModalPreview modalTitle="Preview" modalId="preview" modalText={textContent} />
-        <FindAcronyms modalTitle="Select acronyms to replace:"
-											modalId="acronyms"
-											clipboard={this.props.state.clipboard}
-											/>
-				<ImageModal />
+	      <HomeModal />
       </div>
     );
   }
@@ -118,13 +106,11 @@ class Home extends Component {
   }
   setStorage() {
 		const persistedSubstates = [
-			'options',
-			'state'
+			'options'
 		];
 
-		persistedSubstates.forEach((prop) => {
-  		localStorage.setItem(`home.${prop}`, JSON.stringify(this.props[prop]));
-		});
+		persistedSubstates.forEach((prop) =>
+			sessionStorage.setItem(`home.${prop}`, JSON.stringify(this.props[prop])));
 	}
 	// configListeners(operation) {
 	// 	if (operation === 'add') {
@@ -136,7 +122,7 @@ class Home extends Component {
 	// 		const contextMenu = new Menu();
 	// 		contextMenu.append(new MenuItem({
 	// 				label: 'Copy',
-	// 				click: () => this.copy.bind(this)(this.props.state.textContent)
+	// 				click: () => this.copy.bind(this)(this.props.textBox.content)
 	// 			})
 	// 		);
 	// 		contextMenu.append(new MenuItem({

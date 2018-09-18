@@ -1,36 +1,20 @@
 // @flow
-export function showAlert(payload) {
-	return {
-		type: 'SHOW_ALERT',
-		payload
-	}
-}
+export const showAlert = (payload) => ({ type: 'SHOW_ALERT', payload });
+export const hideAlert = () => ({ type: 'HIDE_ALERT' });
 
-export function hideAlert() {
-	return {
-		type: 'HIDE_ALERT',
-	}
-}
+export const triggerAlert = (type = 'success', message = 'Success!') => ({
+	type: 'TRIGGER_ALERT',
+	payload: { type, message },
+});
 
-export function fireAlert(type = 'success', message) {
-	const payload = { type };
-	if (message) payload.message = message;
+export const errorAlert = (message) => ({
+	type: 'TRIGGER_ALERT',
+	payload: { type: 'danger', message },
+});
 
-  return (dispatch) => {
-		dispatch(showAlert(payload));
-		setTimeout(() => dispatch(hideAlert()), 3000);
-  };
-}
+export const setWarning = (payload: { message: string, error: ?string }) => ({
+	type: 'SHOW_WARNING',
+	payload
+});
 
-export function setWarning(payload: { message: string, error: ?string }): { type: string, payload: Object } {
-	return {
-		type: 'SHOW_WARNING',
-		payload
-	}
-}
-
-export function hideWarning() {
-	return {
-		type: 'HIDE_WARNING'
-	}
-}
+export const hideWarning = () => ({ type: 'HIDE_WARNING' });

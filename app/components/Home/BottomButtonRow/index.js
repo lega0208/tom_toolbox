@@ -3,8 +3,8 @@ import React from 'react';
 export default function BottomButtonRow(props) {
 	const { convertlist } = props;
 	return (
-		<div className="container-fluid">
-			<div className="row">
+		<div className="container-fluid px-0">
+			<div className="row mx-0">
 				<button className="btn btn-primary col-7 col-md-8"
 								onClick={convertlist}>
 					<span className="h6">Convert list</span>
