@@ -4,9 +4,10 @@ import { all, call, fork, join, take, put, select } from 'redux-saga/effects';
 import WordConverter from 'lib/word-converter';
 import { beautify } from 'lib/util';
 import { setTextContent } from 'actions/home';
+import { triggerAlert, errorAlert } from 'actions/home/alert';
 import { setClipboard } from './util';
 
-// WC = wordConvert
+// WC = wordConvert todo: use/move actions in actions folder
 const createWCAction = (type, payload) => ({
 	type: `WORDCONVERT_${type.toUpperCase()}`,
 	payload
@@ -47,7 +48,6 @@ function* initWordConvert() {
 }
 
 function* preWordConvert() {
-	//yield put(preAction);
 	const clipboard = eClipboard.readHTML('text/html') || eClipboard.readText();
 	yield setClipboard(clipboard);
 }
@@ -56,14 +56,12 @@ function* startWordConvert() {
 	const { clipboard, options } = yield select(({ home: { clipboard, options } }) => ({ clipboard, options }));
 	const opts = options.converter;
 
-	//yield put(startAction);
 	const result = yield call(WordConverter, clipboard, opts);
 
 	yield* postWordConvert(result);
 }
 
 function* postWordConvert(html) {
-	//yield put(postAction);
 	yield put({ type: 'SCRIPTS_START', payload: html });
 
 	const scriptResult = (yield take('SCRIPTS_END')).payload;
@@ -79,13 +77,13 @@ function* finalizeWordConvert(result) {
 
 	yield put(setTextContent(beautifiedHtml));
 	eClipboard.writeText(beautifiedHtml);
-	yield put({ type: 'TRIGGER_ALERT', payload: { type: 'success' } });
+	yield put(triggerAlert());
 }
 
-function* watchError() {
+function* watchError() { // todo: use withAbort
 	while (true) {
 		const { error } = (yield take('WORDCONVERT_ERROR')).payload;
-		yield put({ type: 'TRIGGER_ALERT', payload: { type: 'danger', message: error } });
+		yield put(errorAlert(error));
 
 		const clipboard = yield select(({ home: { clipboard } }) => clipboard);
 		// cancel logic goes here

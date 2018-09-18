@@ -1,15 +1,17 @@
 
 export const setLang =
-	(payload) => ({ type: 'CHANGE_LANG', payload });
+	(payload) => ({ type: 'SET_LANG', payload });
 
 export const setWET =
-	(payload) => ({ type: 'CHANGE_WETVERSION', payload });
+	(payload) => ({ type: 'SET_WETVERSION', payload });
 
 export const setAutoAcro =
-	(payload) => ({ type: 'CHANGE_AUTOACRO', payload });
+	(payload) => ({ type: 'TOGGLE_AUTOACRO', payload });
 
 export const setSpecChars =
-	(payload) => ({ type: 'CHANGE_SPECCHARS', payload });
+	(payload) => ({ type: 'TOGGLE_SPECCHARS', payload });
 
 export const setSupNbsp =
-	(payload) => ({ type: 'CHANGE_SUPNBSP', payload });
+	(payload) => ({ type: 'TOGGLE_SUPNBSP', payload });
+export const setImages =
+	(payload) => ({ type: 'TOGGLE_IMAGES', payload });

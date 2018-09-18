@@ -1,7 +1,12 @@
 import { call, put, select, take } from 'redux-saga/effects';
 import { replaceSpecChars, replaceSupNbsp } from 'lib/cleanup';
+import { triggerAlert, errorAlert } from 'actions/home/alert';
+import { startScripts } from 'actions/home/scripts';
 import runAutoAcro from './auto-acro';
 import images from './images';
+import { beautify } from 'lib/util';
+import { setTextContent } from 'actions/home';
+import { clipboard as eClipboard } from "electron";
 
 export default function* watchScripts() {
 	const setText = (text) => ({ type: 'SCRIPTS_SET_TEXT', payload: text });
@@ -27,13 +32,27 @@ export default function* watchScripts() {
 				}
 			}
 
-			const text = yield select(({ home: { scripts: { text } } }) => text);
+			const { text, status } = yield select(({
+				home: {
+					scripts: { text },
+					wordConvert: { status },
+				}
+			}) => ({ text, status }));
 
-			yield put({ type: 'SCRIPTS_END', payload: text });
+			if (status !== 'started') {
+				yield put({ type: 'SCRIPTS_END', payload: text });
+			} else {
+				const beautifiedHtml = yield call(beautify, text);
+
+				yield put(setTextContent(beautifiedHtml));
+				eClipboard.writeText(beautifiedHtml);
+				yield put(triggerAlert());
+			}
+
 		} catch ({ stack, message }) {
 			console.error('Error in scripts saga:');
 			console.error(stack);
-			yield put({ type: 'TRIGGER_ALERT', payload: { type: 'danger', message } });
+			yield put(errorAlert(message));
 			yield put({ type: 'SCRIPTS_END', payload });
 		}
 	}

@@ -8,8 +8,8 @@ import ScriptsBar      from './ScriptsBar';
 import BottomButtonRow from './BottomButtonRow';
 import HomeModal       from './Modal';
 
-import convertWord                         from 'actions/wordConverter';
-import { setTextContent, fireAlert, undo } from 'actions/home';
+import convertWord                         from 'actions/home/wordConverter';
+import { setTextContent, undo } from 'actions/home';
 import { setWarning, hideWarning }         from 'actions/home/alert';
 import cacheCheck                          from 'database/cacheCheck';
 
@@ -21,13 +21,8 @@ class Home extends Component {
 
 		this.keydown = this.keydown.bind(this);
   }
-  copy(toCopy) { // todo: move to sagas
-    try {
-			this.props.dispatch(setTextContent(toCopy));
-      this.props.dispatch(fireAlert());
-    } catch(e) {
-			this.props.dispatch(fireAlert('danger', e.message));
-    }
+  copy(toCopy) {
+    // todo
   }
 
   paste() {
@@ -110,37 +105,8 @@ class Home extends Component {
 		];
 
 		persistedSubstates.forEach((prop) =>
-			sessionStorage.setItem(`home.${prop}`, JSON.stringify(this.props[prop])));
+			sessionStorage.setItem(`home.${prop}`, JSON.stringify(this.props[prop]))); // does this even work?
 	}
-	// configListeners(operation) {
-	// 	if (operation === 'add') {
-	// 		this.listeners.forEach(listener => document.body.addEventListener('keydown', listener));
-	// 	} else if (operation === 'remove') {
-	// 		this.listeners.forEach(listener => document.body.removeEventListener('keydown', listener));
-	// 	}
-	// 	if (process.env.NODE_ENV !== 'development') {
-	// 		const contextMenu = new Menu();
-	// 		contextMenu.append(new MenuItem({
-	// 				label: 'Copy',
-	// 				click: () => this.copy.bind(this)(this.props.textBox.content)
-	// 			})
-	// 		);
-	// 		contextMenu.append(new MenuItem({
-	// 				label: 'Paste',
-	// 				click: this.paste.bind(this)
-	// 			})
-	// 		);
-	// 		contextMenu.append(new MenuItem({
-	// 				label: 'Undo',
-	// 				click: this.undo.bind(this)
-	// 			})
-	// 		);
-	// 		window.addEventListener('contextmenu', (e) => {
-	// 			e.preventDefault();
-	// 			contextMenu.popup({ window: remote.getCurrentWindow() });
-	// 		}, false);
-	// 	}
-	// }
 }
 
 const mapStateToProps = ({ home }) => home;
