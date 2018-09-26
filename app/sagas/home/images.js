@@ -1,13 +1,12 @@
 import { call, cancel, fork, put, take } from 'redux-saga/effects';
 import cheerio from 'cheerio';
 import { copy } from 'fs-extra';
-import { IMAGES, setSrcMap, clearImages } from 'actions/home/images';
-import { errorAlert, triggerAlert } from 'actions/home/alert';
+import { IMAGES, setSrcMap, clearImages, endImages, errorAlert, triggerAlert } from 'actions/home';
 import { withAbort } from '../util';
 
 function* watchSaveImage() {
 	while (true) {
-		const { payload } = yield take('IMAGES.SAVE');
+		const { payload } = yield take(IMAGES.SAVE);
 		for (const [srcPath, destPath] of Object.entries(payload)) {
 			if (destPath) {
 				try {
@@ -23,11 +22,10 @@ function* watchSaveImage() {
 }
 
 function* startImages(text) {
-	const saveImageTask = yield fork(watchSaveImage);
+	const watchSaveTask = yield fork(watchSaveImage);
 	yield put(clearImages());
 	const $ = cheerio.load(text, { decodeEntities: false });
 	const imgRef = $('img');
-	console.log('imgRef.length: ' + imgRef.length);
 
 	if (imgRef.length > 0) {
 		const imgs = {};
@@ -42,7 +40,7 @@ function* startImages(text) {
 		yield put({ type: 'MODAL_TRIGGER_SHOW', payload: { display: 'images', screen: 'images' } });
 
 		const { payload } = yield take(IMAGES.SUBMIT);
-		yield cancel(saveImageTask);
+		yield cancel(watchSaveTask);
 		Object.keys(imgs)
 			.forEach((img, i) => $(imgRef.get(i)).attr('src', payload[img]));
 
@@ -50,6 +48,7 @@ function* startImages(text) {
 
 		return $('body').html();
 	} else {
+		yield cancel(watchSaveTask);
 		return text;
 	}
 }
@@ -68,7 +67,7 @@ export default function* images(text) {
 			return $('body').html();
 		},
 		cleanup: function*() {
-			yield put({ type: IMAGES.END });
+			yield put(endImages());
 			yield put({ type: 'MODAL_TRIGGER_HIDE' });
 		}
 	});

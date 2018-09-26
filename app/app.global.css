@@ -37,11 +37,11 @@ body {
   list-style-type: lower-roman;
 }
 
-ul li {
+:root > ul {
   list-style-type: disc;
 }
 
-:root > li > ul {
+:root li > ul {
   list-style-type: circle;
 }
 

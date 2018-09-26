@@ -11,7 +11,7 @@ import {
 	submitAcroList,
 	submitAddDefs,
 	submitChooseDups,
-} from 'actions/home/autoAcro';
+} from 'actions/home';
 
 const SubmitButton = (props) => (
 	<Button text="Submit" bsClass="success" click={() => props.submit(props.submitAction)} />

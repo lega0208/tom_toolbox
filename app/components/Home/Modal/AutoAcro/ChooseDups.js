@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { setDupsSelections } from 'actions/home/autoAcro';
+import { setDupsSelections } from 'actions/home';
 
 class ChooseDups extends Component {
 	constructor(props) {

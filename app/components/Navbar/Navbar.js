@@ -7,8 +7,9 @@ export default Navbar;
 
 function MyNavbar() {
 	const links = [
-		{link: '/', text: 'Word to HTML', exact: true},
-		{link: '/references', text: 'References'},
+		{ link: '/', text: 'Word to HTML', exact: true },
+		{ link: '/references', text: 'References' },
+		{ link: '/tomviewer', text: 'TOM Viewer' },
 	];
 
 	return (

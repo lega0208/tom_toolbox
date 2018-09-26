@@ -25,6 +25,7 @@ export default function WordConverter(html: string, opts?: optsType): any {
 		cleanTOC,
 		wetTransforms,
 		removeEmptyPs,
+		removeImagePs,
 	];
 	funcs.forEach(func => func($, opts));
 
@@ -33,9 +34,16 @@ export default function WordConverter(html: string, opts?: optsType): any {
 
 function removeEmptyPs($) {
 	$('p').filter(
-		(i, p) => /^\s*$/.test($(p).text()) && !$(p).children().has('img')
+		(i, p) => /^$|^&nbsp;$/.test($(p).text().trim()) && !$(p).has('img').length
 	)
 		.each((i, el) => $(el).remove());
+}
+
+function removeImagePs($) {
+	$('p').has('img')
+		.each(
+			(i, p) => $(p).replaceWith($(p).children().get(0))
+		);
 }
 
 function handleComments($) {

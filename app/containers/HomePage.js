@@ -1,17 +1,16 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Home from '../components/Home/Home';
+import { Grid, Col, Row, Clear } from 'components/bsComponents';
 
-export default class HomePage extends Component {
-  render() {
-    return (
-	    <div className="container-fluid">
-		    <div className="row">
-			    <div className="col-md-11 col-12 mx-auto">
-				    <Home />
-			    </div>
-					<div className="clearfix" />
-		    </div>
-	    </div>
-    );
-  }
+export default function HomePage() {
+	return (
+		<Grid fluid>
+			<Row>
+				<Col md={11} col={12} xClass="mx-auto">
+					<Home />
+				</Col>
+			</Row>
+			<Clear />
+		</Grid>
+	);
 }

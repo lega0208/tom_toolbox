@@ -15,11 +15,11 @@ export function beautify(html) {
 		eol: '\r\n',
 		unescape_strings: true,
 		wrap_line_length: 0,
-		extra_liners: 'h2',
+		extra_liners: 'h1,h2,h3,h4',
 		preserve_newlines: false,
 	};
 
-	return beautify(html, config);
+	return beautify(html, config).replace(/\s*(<img.+?>)/g, '\r\n$1');
 }
 
 export function findAndReplace(text, acroMap) {

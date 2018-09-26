@@ -5,7 +5,7 @@ import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faFolder from '@fortawesome/fontawesome-free-regular/faFolder';
 import { Button }       from 'components/bsComponents';
 import { ModalContent } from 'components/ModalComponent';
-import { setSrcMap, submitImages, cancelImages, removeImage, saveImages } from 'actions/home/images';
+import { setSrcMap, submitImages, cancelImages, saveImages } from 'actions/home';
 
 const { dialog } = remote;
 
@@ -104,7 +104,7 @@ const mapState =
 const mapDispatch = (dispatch) => ({
 	submitImages: (srcMap) => dispatch(submitImages(srcMap)),
 	cancelImages: () => dispatch(cancelImages()),
-	removeImage: (i) => dispatch(removeImage(i)),
+	//removeImage: (i) => dispatch(removeImage(i)),
 	setSrcMap: (srcMapFragment) => dispatch(setSrcMap(srcMapFragment)),
 	saveImages: (pathsMap) => dispatch(saveImages(pathsMap)),
 });

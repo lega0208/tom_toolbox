@@ -23,7 +23,7 @@ const ModalHeader = ({ modalTitle }) => (
 const ModalBody = (props) => <div className="modal-body" style={{overflowY: 'scroll'}}>{props.children}</div>;
 const ModalFooter = ({ submitButton, cancelButton }) => (
 	<div className="modal-footer">
-		{submitButton}
+		{submitButton || null}
 		{cancelButton}
 	</div>
 );

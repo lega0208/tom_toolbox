@@ -4,7 +4,7 @@ import { eventChannel } from 'redux-saga';
 // This modal channel will pipe jQuery modal events to redux-saga to keep the state in sync
 function createModalChannel() {
 	return eventChannel((emit) => {
-		$(document).on('hide.bs.modal', '#modal', () => emit({ event: 'hideModal' }));
+		$(document).on('hidden.bs.modal', '#modal', () => emit({ event: 'hideModal' }));
 		$(document).on('show.bs.modal', '#modal', () => emit({ event: 'showModal' }));
 
 		// returns unsubscribe function
@@ -49,10 +49,7 @@ function* watchTriggerModal() {
 			yield call(triggerModal, 'show');
 		} else if (type === 'MODAL_TRIGGER_HIDE') {
 			yield call(triggerModal, 'hide');
-		} else {
-			console.warn('watchTriggerModal is doing weird stuff');
 		}
-
 	}
 }
 

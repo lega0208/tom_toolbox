@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { ModalRoot, ModalContent } from 'components/ModalComponent';
 import AutoAcro from './AutoAcro';
 import Images from './Images'
+import Preview from './Preview';
 
 function HomeModal({ display }) {
 	// All modals are added to the displays object
@@ -18,11 +19,14 @@ function HomeModal({ display }) {
 	const displays = {
 		autoAcro: <AutoAcro />,
 		images: <Images />,
+		preview: <Preview />,
 	};
 
 	return (
 		<ModalRoot>
-			{displays[display] ? displays[display] : defaultDisplay}
+			{
+				displays[display] ? displays[display] : defaultDisplay
+			}
 		</ModalRoot>
 	);
 }

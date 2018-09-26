@@ -1,4 +1,4 @@
-import { AUTOACRO } from 'actions/home/autoAcro';
+import { AUTOACRO } from 'actions/home';
 
 const initialState = {
 	acros: [],

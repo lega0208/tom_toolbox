@@ -2,7 +2,7 @@
 export const showAlert = (payload) => ({ type: 'SHOW_ALERT', payload });
 export const hideAlert = () => ({ type: 'HIDE_ALERT' });
 
-export const triggerAlert = (type = 'success', message = 'Success!') => ({
+export const triggerAlert = (type = 'success', message) => ({
 	type: 'TRIGGER_ALERT',
 	payload: { type, message },
 });

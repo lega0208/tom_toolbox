@@ -3,6 +3,7 @@ import options from './options';
 import { alert, warning } from './alert';
 import autoAcro from './autoAcro';
 import images from './images';
+import modal from './modal';
 
 function clipboard(state = '', action) {
 	switch (action.type) {
@@ -30,36 +31,7 @@ function wordConvert(state = { text: '', status: 'waiting' }, action) {
 		case 'WORDCONVERT_INIT': return { ...state, status: 'started', };
 		case 'WORDCONVERT_END': return { text: '', status: 'waiting', };
 		case 'WORDCONVERT_ERROR': return { text: '', status: 'waiting', }; // Alternative to END
-		case 'SET_WORDCONVERT': return { ...state, text: action.payload, }; // Do I need this one?
 		default: return state;
-	}
-}
-
-const initModalState = { display: null, screen: null, show: false };
-function modal(state = initModalState, action) {
-	try {
-		switch (action.type) {
-			case 'MODAL_TRIGGER_SHOW': // This action triggers a side-effect which shows the modal w/ jQuery
-				return { ...state, ...action.payload, };
-			case 'MODAL_TRIGGER_HIDE':
-				return initModalState; // This action triggers a side-effect which hides the modal w/ jQuery
-			case 'MODAL_SET':
-				return { ...state, ...action.payload };
-			case 'MODAL_SET_DISPLAY':
-				return { ...state, display: action.payload };
-			case 'MODAL_SET_SCREEN':
-				return { ...state, screen: action.payload };
-			case 'MODAL_SHOW':
-				return { ...state, show: true };
-			case 'MODAL_HIDE':
-				return { ...state, show: false };
-			case 'MODAL_CLEAR':
-				return initModalState;
-			default:
-				return state;
-		}
-	} catch (e) {
-		console.error(e);
 	}
 }
 

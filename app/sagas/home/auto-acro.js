@@ -4,14 +4,14 @@ import { withAbort } from '../util';
 import getCache from 'database/cache';
 import findAcros from 'lib/findAcros';
 import {
+	AUTOACRO,
 	startAutoAcro as startAutoAcroAction,
 	setAcros,
 	setDupsMap,
 	setNoDefs,
 	autoAcroError,
-} from 'actions/home/autoAcro';
-import { errorAlert } from 'actions/home/alert';
-import { AUTOACRO } from 'actions/home/autoAcro';
+	errorAlert,
+} from 'actions/home';
 
 function* startAutoAcro(text) {
 	try {
@@ -101,7 +101,7 @@ export default function* autoAcro(text) {
 		cleanup: function*() {
 				yield put({ type: AUTOACRO.END });
 				yield put({ type: 'MODAL_TRIGGER_HIDE' });
-		}
+		},
 	});
 
 	return yield call(startAutoAcroWithAbort);

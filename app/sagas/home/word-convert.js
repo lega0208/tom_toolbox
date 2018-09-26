@@ -1,10 +1,9 @@
 // @flow
 import { clipboard as eClipboard } from 'electron';
-import { all, call, fork, join, take, put, select } from 'redux-saga/effects';
+import { all, call, fork, take, put, select } from 'redux-saga/effects';
 import WordConverter from 'lib/word-converter';
 import { beautify } from 'lib/util';
-import { setTextContent } from 'actions/home';
-import { triggerAlert, errorAlert } from 'actions/home/alert';
+import { setTextContent, triggerAlert, errorAlert } from 'actions/home';
 import { setClipboard } from './util';
 
 // WC = wordConvert todo: use/move actions in actions folder

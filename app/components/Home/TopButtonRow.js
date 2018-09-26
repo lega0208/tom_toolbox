@@ -1,8 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { clipboard, eClipboard } from 'electron';
-import { setWET, setLang } from 'actions/home';
-import { startScripts } from 'actions/home/scripts';
+import { setWET, setLang, startScripts } from 'actions/home';
 
 function TopButtonRow({ opts, setWET, setLang, startScripts }) {
 

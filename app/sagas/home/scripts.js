@@ -1,11 +1,9 @@
 import { call, put, select, take } from 'redux-saga/effects';
 import { replaceSpecChars, replaceSupNbsp } from 'lib/cleanup';
-import { triggerAlert, errorAlert } from 'actions/home/alert';
-import { startScripts } from 'actions/home/scripts';
+import { setTextContent, triggerAlert, errorAlert, startScripts } from 'actions/home';
 import runAutoAcro from './auto-acro';
 import images from './images';
 import { beautify } from 'lib/util';
-import { setTextContent } from 'actions/home';
 import { clipboard as eClipboard } from "electron";
 
 export default function* watchScripts() {
@@ -39,7 +37,7 @@ export default function* watchScripts() {
 				}
 			}) => ({ text, status }));
 
-			if (status !== 'started') {
+			if (status === 'started') {
 				yield put({ type: 'SCRIPTS_END', payload: text });
 			} else {
 				const beautifiedHtml = yield call(beautify, text);

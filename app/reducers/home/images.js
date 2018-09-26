@@ -1,4 +1,4 @@
-import { IMAGES } from 'actions/home/images';
+import { IMAGES } from 'actions/home';
 
 const initialState = {
 	images: [],

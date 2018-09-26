@@ -1,21 +1,13 @@
 // @flow
-import * as alerts from './alert';
+export * from './alert';
+export * from './autoAcro';
+export * from './cache';
+export * from './images';
+export * from './modal';
+export * from './options';
+export * from './scripts';
+export * from './wordConverter';
 
-export type actionType = {
-	type: string,
-	payload?: ?any,
-};
-
-export const { fireAlert } = alerts;
-
-export * from './options'; // todo: could refactor to "setOption"
-
-export function setTextContent(payload) {
-	return {
-		type: 'SET_TEXTCONTENT',
-		payload
-	}
-}
-
-export const undo = () => ({ type: 'UNDO' });
+export const setTextContent = (payload) => ({ type: 'SET_TEXTCONTENT', payload });
 export const setClipboard = (payload) => ({ type: 'SET_CLIPBOARD', payload });
+export const undo = () => ({ type: 'UNDO' });

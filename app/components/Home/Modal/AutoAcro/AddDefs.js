@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { setNoDefs, setNoDefsMap } from 'actions/home/autoAcro';
+import { setNoDefs, setNoDefsMap } from 'actions/home';
 
 class AddDefs extends React.Component {
 	constructor(props) {
