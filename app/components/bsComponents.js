@@ -56,7 +56,11 @@ export const Col = (props: colPropsType) => {
  * Components
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 export const Button = (props) => (
-	<button type="button" className={`btn btn-${props.bsClass || 'default'}`} onClick={props.click}>
+	<button
+		type="button"
+		className={`btn btn-${props.bsClass || 'default'}${props.xClass ? ` ${props.xClass}` : ''}`}
+		onClick={props.click}
+	>
 		{props.text}
 	</button>
 );
@@ -70,7 +74,7 @@ export const ListGroupItem = (props) => (
 
 export const Card = ({ header, children, xClass }) => (
 	<div className={`card${xClass ? ` ${xClass}` : ''}`}>
-		{header ? <h5 className="card-header">{header}</h5> : null}
+		{header ? <h3 className="card-header">{header}</h3> : null}
 		<div className="card-body">
 			{children}
 		</div>
@@ -105,6 +109,37 @@ export class Collapse extends React.Component {
 		);
 	}
 }
+
+
+export const Dropdown = ({ items, click, label, xClass }) => {
+	const onClickFunc = (e) => {
+		e.preventDefault();
+		click(e.target.innerText);
+	};
+
+	return (
+		<div className={'dropdown' + (xClass ? ` ${xClass}` : '')}>
+			<button id="dropdown-toggle"
+			        type="button"
+			        className="btn btn-default dropdown-toggle w-100"
+			        data-toggle="dropdown"
+			        data-offset="0"
+			>
+				{label}
+			</button>
+
+			<div className="dropdown-menu dropdown-menu-right" style={{maxHeight: '70vh', overflowY: 'scroll'}}>
+				{
+					items && items.length > 0
+						? items.map((item, i) => (
+							<a href="#" className="dropdown-item" onClick={onClickFunc} key={`dropdown-item-${i}`}>{item}</a>
+						))
+						: null
+				}
+			</div>
+		</div>
+	);
+};
 
 /*
  * Misc utilities

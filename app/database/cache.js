@@ -11,15 +11,14 @@ class Cache {
 		  .then(() => console.log('Acronyms table exists'))
 		  .catch(e => console.error(`Error ensuring Acronyms table exists:\n${e}`));
   }
-  knex() {
-		return this.db.knex;
-	}
+
 	async ensureTable() {
 		const acrosModel = await getAcrosModel(this.db);
 		if (!this.db.hasModel('Acronyms')) {
 			return acrosModel.create();
 		}
 	}
+
   async getAcroCount(acro, lang) {
     const countQuery = this.db.knex('Acronyms').where({ Acronym: acro })
 			.andWhere(function() {
@@ -28,6 +27,7 @@ class Cache {
 			.count('Acronym');
     return (await this.db.raw(countQuery, true))[0]['count("Acronym")'];
   }
+
   async getDef(acro, lang) {
     const defQuery = this.db.knex('Acronyms').where({ Acronym: acro })
 			.andWhere(function() {
@@ -41,6 +41,7 @@ class Cache {
       console.error(`No definition found for ${acro}(lang=${lang})`);
       return false;
   }
+
   async getDefs(acros, lang) {
 		if (Array.isArray(acros)) {
 			const defsQuery = this.db.knex('Acronyms')
@@ -59,6 +60,7 @@ class Cache {
 			 												            // AND WHERE 'Language' IN (lang, null);
 			return this.db.raw(defsQuery, true);
   }
+
   async insertOne(data: {ID: number, Acronym: string, Definition: string, Language: ?string}) {
   	const acroModel = await getAcrosModel(this.db);
   	try {
@@ -67,6 +69,7 @@ class Cache {
   		console.error(`Error in acroModel.create():\n${e}`);
 		}
 	}
+
 	async insertAll(arr) {
   	while (arr.length > 0) {
 			const queue = arr.splice(0, 499);
@@ -80,11 +83,13 @@ class Cache {
 			}
 		}
 	}
+
   close() {
     this.db.close()
 			.then(() => console.log('db connection closed'))
 	    .catch(e => console.error(`Error closing the database?\n${e}`));
   }
 }
-export default () => new Cache();
+
+export default async () => new Cache();
 

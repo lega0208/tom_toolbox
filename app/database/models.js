@@ -22,3 +22,27 @@ export async function getAcrosModel(db) {
 		primary: ['ID'],
 	});
 }
+
+export async function getTOMDataModel(db) {
+	const tomDataSchema = {
+		'id': {
+			type: 'increments',
+			primary: true,
+		},
+		path: {
+			type: String,
+			unique: true,
+		},
+		$: String, // stringified function
+		tomName: String,
+		updated_at: Date,
+	};
+
+	return db.model('tomData', tomDataSchema, {
+		index: {
+			path: 'path',
+			tomName: 'tomName',
+			updated_at: 'updated_at',
+		},
+	});
+}

@@ -1,12 +1,14 @@
 import { combineReducers } from 'redux';
 import { routerReducer as router } from 'react-router-redux';
 import home from './home';
-import tomViewer from './tom-viewer';
+//import tomViewer from './tom-viewer';
+import validator from './validator';
 
 
 const rootReducer = combineReducers({
 	home,
-	tomViewer,
+	//tomViewer,
+	validator,
   router,
 });
 

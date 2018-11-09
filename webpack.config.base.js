@@ -52,6 +52,7 @@ export default {
 		  lib: path.resolve(__dirname, 'app/lib'),
 		  reducers: path.resolve(__dirname, 'app/reducers'),
 		  utils: path.resolve(__dirname, 'app/utils'),
+		  '@constants': path.resolve(__dirname, 'app/constants.js'),
 	  },
   },
   mode: JSON.stringify(process.env.NODE_ENV || 'production'),

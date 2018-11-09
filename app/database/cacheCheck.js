@@ -5,14 +5,14 @@ import cache from './cache';
 import { LAST_CACHE } from '../constants';
 
 export default async function checkCache(forceCache: ?boolean): void {
-	const dbCache = cache();
+	const dbCache = await cache();
 	try {
 		const lastCache = await readLastCache() || '';
-		if (shouldCheck() && (!lastCache || forceCache)) {
+		if ((await shouldCheck()) && (!lastCache || forceCache)) {
 			console.log('No lastCache, caching data');
 			await cacheData(dbCache);
 			localStorage.setItem('lastCheck', moment().toISOString());
-		} else if (shouldCheck() && (await shouldUpdateCache(lastCache))) {
+		} else if ((await shouldCheck()) && (await shouldUpdateCache(lastCache))) {
 			await cacheData(dbCache, lastCache);
 			localStorage.setItem('lastCheck', moment().toISOString());
 		} else {
@@ -24,18 +24,17 @@ export default async function checkCache(forceCache: ?boolean): void {
 	await dbCache.close();
 }
 
-function shouldCheck() {
+async function shouldCheck() {
 	// todo: switch to file or something
-	const lastCheck = localStorage.getItem('lastCheck') ? localStorage.getItem('lastCheck') : null;
+	const lastCheck = localStorage.getItem('lastCheck') || null;
 	console.log(`lastCheck: ${lastCheck}`);
 
 	if (lastCheck) {
 		const _lastCheck = moment(lastCheck);
 		const today = moment().startOf('day');
 		return _lastCheck.isBefore(today);
-	} else {
-		return true;
 	}
+	return true;
 }
 
 async function cacheData(dbCache, lastCache) {

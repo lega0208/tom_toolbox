@@ -4,8 +4,8 @@ import { TOMVIEWER } from 'actions/tom-viewer';
 const initialData = {
 	title: '',
 	filename: '',
-	lang: '',
-	wetVersion: 2,
+	lang: '',       // not really necessary?
+	wetVersion: 2,  // ?
 	metadata: {
 		isHomepage: '',
 		manualdId: '',

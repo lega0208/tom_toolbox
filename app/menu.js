@@ -7,7 +7,7 @@ import {
 	CACHE_FILE,
 	DB_DRIVER_PATH,
 	DB_DRIVER,
-	DB_DRIVER_ALT,
+	DB_DRIVER_ALT, TOM_DATA_CACHE,
 } from './constants';
 
 export default class MenuBuilder {
@@ -136,5 +136,6 @@ function toggleDbDriver() {
 function clearCache() {
 	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
 	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
+	fs.rmdirSync(TOM_DATA_CACHE);
 	session.defaultSession.clearStorageData({ storages: ['localStorage'] });
 }

@@ -48,3 +48,14 @@ export function wrapWithAbbr(noDefsMap){
 		return wrappedMap;
 	}, {});
 }
+
+export function timeFunction(func) {
+	return function() {
+		const start = process.hrtime();
+		const returnVal = func();
+		const end = process.hrtime(start);
+
+		console.log(`Execution time: ${end[0]}s ${end[1] / 1000000}ms`);
+		return returnVal;
+	}
+}
