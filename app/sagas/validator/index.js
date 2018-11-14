@@ -4,26 +4,49 @@ import {
 	validateTOMError,
 	validateTOMSuccess,
 	setResults,
+	setTOMData,
+	setSubchapterChoices,
 } from 'actions/validator';
 import validate from './validate';
 import getTOMData from 'lib/validator/get-tom-data';
 import watchGetTOMs from './get-toms';
 import { withAbort } from '../util';
 
+
+export function* getTOMDataSaga(selectedTOM) {
+	const tomData = yield call(getTOMData, selectedTOM);
+	yield put(setTOMData(tomData));
+
+	return yield tomData;
+}
+
 function* watchStartValidate() {
 	while (true) {
 		yield take(VALIDATOR.VALIDATE_TOM.START);
 		const selectedTOM = yield select(({ validator: { selectedTOM } }) => (selectedTOM));
+		const tomData = yield call(getTOMDataSaga, selectedTOM);
 
 		try {
-			const tomData = yield call(getTOMData, selectedTOM);
 			const results = yield call(validate, tomData);
 			yield put(setResults(results));
 			yield put(validateTOMSuccess());
 		} catch (e) {
-			console.error('Error validating ' + selectedTOM);
+			console.error('Error validating ' + tomData.tomName);
 			throw e;
 		}
+	}
+}
+
+function* watchSelectTOM() {
+	while (true) {
+		// verify & update cache and store in state
+		const selectedTOM = yield take(VALIDATOR.SELECT.TOM);
+		const tomData = yield call(getTOMDataSaga, selectedTOM);
+
+		// get & set subchapters
+		const homepagePath = tomData.homePage + '-e.html';
+		const homepageChildren = Object.values(tomData.files[homepagePath].children);
+		yield put(setSubchapterChoices(homepageChildren));
 	}
 }
 
@@ -37,6 +60,7 @@ function* watchValidator() {
 	yield all([
 		fork(watchValidateWithAbort),
 		fork(watchGetTOMs),
+		fork(watchSelectTOM),
 	]);
 }
 

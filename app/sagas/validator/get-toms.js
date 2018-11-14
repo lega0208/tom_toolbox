@@ -1,8 +1,9 @@
-import { pathExists, readdir, readJSON, readFile, outputJSON } from 'fs-extra';
-import { join } from 'path';
+import { copy, pathExists, readdir, readJSON, readFile, outputJSON } from 'fs-extra';
+import { basename, join, resolve } from 'path';
 import { call, take, put } from 'redux-saga/effects';
 import { VALIDATOR, getTOMsSuccess, getTOMsError } from 'actions/validator';
 import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
+import { homepages } from 'lib/validator/paths';
 
 export default function* watchGetTOMs() {
 	while (true) {
@@ -24,37 +25,33 @@ export default function* watchGetTOMs() {
 // check cache folder -> if empty, copy from db folder
 // return list of fileNames with .json removed
 async function getToms() {
-	if (!(await pathExists(TOM_DATA_CACHE))) {
-		await copyDataCache(TOM_DATA_CACHE);
+	if (!(await pathExists(TOM_DATA_CACHE)) || (await readdir(TOM_DATA_CACHE)).length === 0) {
+		await copyDataCache();
 	}
 
-	const toms = await readdir(TOM_DATA_CACHE);
-
-	return toms.map((tom) => tom.replace('.json', ''));
+	return Object.keys(homepages);
 }
 
-async function copyDataCache(outputDir) {
-	const tomDataDir = (await readFile(DB_PATH, 'utf8')) | DEFAULT_DB_PATH;
-	const tomDataPath = join(tomDataDir, 'TOM_DATA.json');
+async function copyDataCache() {
+	const tomDataDir =
+		(await pathExists(DB_PATH))
+			? (await readFile(DB_PATH, 'utf8'))
+			: DEFAULT_DB_PATH;
+	const tomDataPath = join(tomDataDir, 'TOM_Data');
 
 	if (!(await pathExists(tomDataPath))) { // todo: remove for production
-		await doFullParse();
+		console.error('TOM data cache doesn\'t exist?');
 	}
+
 	try {
-		const tomData = await readJSON(tomDataPath); // Object where each key is going to be a new JSON file
+		const cacheFiles = await readdir(tomDataPath);
 
-		const outputTasks =
-			Object.entries(tomData)
-				.map(([ tomName, data ]) => outputJSON(join(outputDir, `${tomName}.json`), data));
+		const copyTasks =
+			cacheFiles.map((file) => copy(resolve(tomDataPath, file), resolve(TOM_DATA_CACHE, file)));
 
-		return await Promise.all(outputTasks); // output "concurrently"
+		return await Promise.all(copyTasks);
 	} catch (e) {
-		console.error('Error copying data cache.');
+		console.error(e);
 		throw e;
 	}
-}
-
-async function doFullParse() {
-	// populate the initial cache, extract to a script later maybe
-	// make sure to console.log so that progress is visible
 }

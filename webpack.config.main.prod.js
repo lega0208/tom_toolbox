@@ -25,10 +25,6 @@ export default merge.smart(baseConfig, {
   },
   mode: 'production',
   plugins: [
-    /**
-     * Babli is an ES6+ aware minifier based on the Babel toolchain (beta)
-     */
-    // new BabiliPlugin(),
 		new UglifyJsPlugin({
 			parallel: true,
 			sourceMap: true,

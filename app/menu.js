@@ -1,6 +1,7 @@
 // @flow
 import { app, Menu, shell, BrowserWindow, dialog, session } from 'electron';
 import fs from 'fs';
+import { join } from 'path';
 import {
 	DB_PATH,
 	LAST_CACHE,
@@ -9,6 +10,7 @@ import {
 	DB_DRIVER,
 	DB_DRIVER_ALT, TOM_DATA_CACHE,
 } from './constants';
+import { parseAllTOMs } from './lib/validator/parse-all-toms';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -75,6 +77,13 @@ export default class MenuBuilder {
 					toggleDbDriver();
 					this.mainWindow.webContents.reload();
 				}
+			}, {
+				label: 'Parse all TOMs',
+				click: () =>
+					parseAllTOMs(join(process.env.USERPROFILE, 'Desktop/TOMData.json'))
+						.then(() => console.log('TOMs successfully parsed and cached!'))
+						.then(() => console.log(`Output dir: ${join(process.env.USERPROFILE, 'Desktop/TOMData.json')}`))
+						.catch(e => console.error(e))
 			}]
 		}, {
       label: '&View',

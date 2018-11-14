@@ -40,7 +40,7 @@ const AcroList = ({ acros, setAcros }) => {
 			</div>)
 		);
 		return (
-			<form id="acroList">
+			<form id="acroList" onSubmit={e => e.preventDefault()}>
 				{renderedAcros}
 			</form>
 		);

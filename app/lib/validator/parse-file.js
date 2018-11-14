@@ -5,7 +5,7 @@ import { readFile } from 'fs-extra';
 import { wrapContent } from './util';
 import { FileData, TOMData } from './get-tom-data';
 
-const getTitles = async ($) => {
+export const getTitles = async ($) => {
 	const titleTag =
 		$('title').text().replace(/\s+/g, ' ').trim();
 
@@ -26,50 +26,52 @@ const getTitles = async ($) => {
 	}
 };
 
-const getDates = async ($) => {
-	const top = $('meta')
+export const getDates = async ($) => {
+	const top = ($('meta')
 		.filter((i, meta) => meta.attribs.name === 'dcterms.modified')
 		.first()
-		.attr('content')
+		.attr('content') || '')
 		.trim();
 	const bottom = $('time').first().text();
 
 	return { top, bottom };
 };
 
-const getlangLink = async ($) => {
+export const getlangLink = async ($) => {
 	const langLinkRef = $('#cn-cmb1 > a');
 
 	return langLinkRef.length > 0 ? langLinkRef.first().attr('href') : '';
 };
 
-const getBreadcrumbs = async ($, path, parentData) => {
+export const getBreadcrumbs = async ($, path, parentData) => {
 	const pageDir = dirname(path);
 
 	const actual =
 		$('#cn-bcrumb > ol > li > a').filter((i) => i !== 0).toArray()
-			.map((bcrumb) => bcrumb.attribs.href.replace(/\//g, '\\'));
+			.map((bcrumb) => (bcrumb.attribs.href || '').replace(/\//g, '\\'));
 
 	const expected =
-		[ ...parentData.breadcrumbs, parentData.path ]
+		[ ...parentData.breadcrumbs.expected, parentData.path ]
 			.map((bcrumb) => relative(pageDir, bcrumb));
 
 	return { actual, expected }
 };
 
-const getSecMenu = async ($) =>
+export const getSecMenu = async ($) =>
 	$('div.module-menu-section')
 		.first()
 		.find('ul > li > a')
 		.toArray()
 		.map((a) => a.attribs.href.replace(/\//g, '\\'));
 
-const getNavs = async ($) => {
-	const navRef = $('.embedded-nav');
+export const getNavs = async ($, path, errors) => {
+	const navsRef = $('.embedded-nav');
 
-	if (navRef.length === 0) {
+	if (navsRef.length === 0) {
 		return {};
 	}
+
+	const navRef = navsRef.filter((i) => i === 0 || i === navsRef.length - 1); // in case there are extra 'embedded-nav's
 
 	const navObjects = [];
 
@@ -97,7 +99,7 @@ const getNavs = async ($) => {
 					navObjects[i]['nextPage'] = itemLink;
 					break;
 				default:
-					console.error('An error occurred while parsing nav.');
+					errors.push({ filename: path, error: `Error parsing nav.\nitemText: ${itemText}\nitemLink: ${itemLink}` });
 					return [];
 			}
 		});
@@ -116,7 +118,7 @@ const getNavs = async ($) => {
 	return navs;
 };
 
-const getToC = async ($) => {
+export const getToC = async ($) => {
 	const tocRef = $('.module-table-contents');
 
 	if (tocRef.length === 0) return [];
@@ -133,13 +135,20 @@ const getToC = async ($) => {
 
 		if (!itemsByLevel[listLevel]) itemsByLevel[listLevel] = [];
 
-		itemsByLevel[listLevel].push(ulRef.children()); // check for <a> tag in case some landing pages have lists?
+		const tocItems = ulRef.children()
+			.toArray()
+			.map((li) => ({
+				href: $(li).children('a').first().attr('href'),
+				text: $(li).text(),
+			}));
+
+		itemsByLevel[listLevel].push(tocItems); // check for <a> tag in case some landing pages have lists?
 	});
 
 	return itemsByLevel;
 };
 
-const getHeaders = async ($) => {
+export const getHeaders = async ($) => {
 	$('h2,h3,h4,h5').toArray().map((header) => {
 		const headerRef = $(header);
 
@@ -151,15 +160,19 @@ const getHeaders = async ($) => {
 	});
 };
 
-const getChildren = async ($, path, tomName) => {
+export const getChildren = async ($, path, tomName) => {
 	const contentRef = $('div#__main-content');
 
 	const fileName = basename(path);
 	const getNormalChildren = () => contentRef
 		.find('li > a')
 		.toArray()
-		.map(a => join(`${path}/..`, a.attribs.href));
+		.map(a => ({
+			href: join(`${path}/..`, a.attribs.href.trim()),
+			text: $(a).text(),
+		}));
 
+	// TOM56 & 4095 have abnormal "children" structure
 	if (!/TOM(?:56|4095)/.test(tomName)) {
 		return getNormalChildren();
 	} else { // They have landing pages that don't conform
@@ -170,7 +183,10 @@ const getChildren = async ($, path, tomName) => {
 					.find('li > a')
 					.filter((i, el) => $(el).find('strong').length > 0) // only links with strong are direct children
 					.toArray()
-					.map(a => join(`${path}/..`, a.attribs.href));
+					.map(a => ({
+						href: join(`${path}/..`, a.attribs.href.trim()),
+						text: $(a).text(),
+					}));
 			} else {
 				return getNormalChildren();
 			}
@@ -182,83 +198,17 @@ const getChildren = async ($, path, tomName) => {
 					.children()
 					.first()    // ul
 					.children() // lis
-					.map((i, li) => $(li).children('a').get(0))
 					.toArray()
-					.map(a => join(`${path}/..`, a.attribs.href));
+					.map(li => {
+						const a = $(li).children('a').get(0);
+						const href = join(`${path}/..`, a.attribs.href.trim());
+						const text = $(a).text();
+
+						return { href, text };
+					});
 			} else {
 				return getNormalChildren();
 			}
 		}
 	}
 };
-
-const parseNewData = async (path, parentData, tomName) => {
-	const fileName = basename(path);
-	const fileContents = await readFile(filePath, 'utf8');
-	const pageContents = (await wrapContent(fileContents, fileName) || fileContents);
-	const $ = cheerio.load(pageContents, { decodeEntities: false });
-
-	return {
-		lastUpdated: Date.now(),
-		title: await getTitles($),
-		date: await getDates($),
-		langLink: await getlangLink($),
-		breadcrumbs: await getBreadcrumbs($, path, parentData),
-		secMenu: await getSecMenu($),
-		nav: await getNavs($),
-		toc: await getToC($),
-		headers: await getHeaders($),
-		children: await getChildren($, path, tomName),
-	}
-};
-
-const createNewFileData = async (path, parentData, tomName) => ({
-	...(await parseNewData(path, parentData, tomName)),
-	path,
-	depth: parentData.depth + 1,
-	isLanding: false,
-	parent: parentData.path,
-});
-
-export async function updateCachedData(path: string, tomData: TOMData): Promise<FileData> {
-	const { files } = tomData;
-
-	const oldFileData: FileData = files[path];
-	const parentData: ?FileData = oldFileData.parent ? files[oldFileData.parent] : null;
-
-	const newFileData = await parseNewData(path, parentData, tomData.tomName);
-
-	const combinedData: FileData = { ...oldFileData, ...newFileData };
-
-	if (oldFileData.isLanding) {
-		// check that each href was in the old children
-		//  if not, check if the file existed in the tomData, and if not, parse and add the file to tomData.files
-		const oldChildren = oldFileData.children;
-		const newChildren = newFileData.children;
-
-		const addedChildren = newChildren.filter((child) => !oldChildren.includes(child));
-		const removedChildren = oldChildren.filter((child) => !newChildren.includes(child));
-
-		for (const child of addedChildren) {
-			if (!files[child]) {
-				files[child] = await createNewFileData(child, combinedData, tomData.tomName);
-			}
-		}
-
-		for (const child of removedChildren) {
-			if (files[child]) {
-				delete files[child];
-			}
-		}
-
-		if (oldFileData.isHomepage) {
-			// if children changed, update tomData secMenu
-			const childrenChanged = oldChildren.reduce((acc, child, i) => newChildren[i] !== child ? true : acc, false);
-			if (childrenChanged) {
-				// do the things here
-			}
-		}
-	}
-
-	return combinedData;
-}

@@ -16,6 +16,16 @@ export const VALIDATOR = {
 	SET: {
 		RESULTS: 'VALIDATOR.SET.RESULTS',
 		FILECOUNT: 'VALIDATOR.SET.FILECOUNT',
+		TOM_DATA: 'VALIDATOR.SET.TOM_DATA',
+	},
+	SUBCHAPTERS: {
+		SELECTION: {
+			CLEAR: 'VALIDATOR.SUBCHAPTERS.SELECTION.CLEAR',
+			SET: 'VALIDATOR.SUBCHAPTERS.SELECTION.SET',
+		},
+		CHOICES: {
+			SET: 'VALIDATOR.SUBCHAPTERS.CHOICES.SET',
+		},
 	},
 	PROGRESS: {
 		UPDATE: 'VALIDATOR.PROGRESS.UPDATE',
@@ -36,10 +46,17 @@ export const getTOMsError = (e) => ({ type: VALIDATOR.GET_TOMS.ERROR, payload: e
 export const getTOMsSuccess =
 	(toms) => ({ type: VALIDATOR.GET_TOMS.SUCCESS, payload: toms }); // map of tom names to homepage paths
 
+export const setTOMData = (tomData) => ({ type: VALIDATOR.SET.TOM_DATA, payload: tomData });
+
+export const selectSubchapter = (path) => ({ type: VALIDATOR.SUBCHAPTERS.SELECTION.SET, payload: path });
+export const clearSubchapters = () => ({ type: VALIDATOR.SUBCHAPTERS.SELECTION.CLEAR });
+export const setSubchapterChoices =
+	(subchapters) => ({ type: VALIDATOR.SUBCHAPTERS.CHOICES.SET, payload: subchapters });
+
 export const setResults = (results) => ({ type: VALIDATOR.SET.RESULTS, payload: results });
+
 export const setFilecount = (fileCount) => ({ type: VALIDATOR.SET.FILECOUNT, payload: fileCount });
 export const setProgress = (progress) => ({ type: VALIDATOR.PROGRESS.SET, payload: progress });
 export const setProgressStatus = (status) => ({ type: VALIDATOR.PROGRESS.SET_STATUS, payload: status });
 export const resetProgress = () => ({ type: VALIDATOR.PROGRESS.RESET });
-
 export const updateProgress = (numFiles) => ({ type: VALIDATOR.PROGRESS.UPDATE, payload: numFiles });

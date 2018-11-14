@@ -1,12 +1,17 @@
 // @flow
 import { outputJSON, readJSON, stat } from 'fs-extra';
-import { updateCachedData } from './parse-file';
-import { TOM_DATA_CACHE } from '@constants';
+import { batchAwait } from '../util';
+import { updateCachedData } from './update-cache';
+import { TOM_DATA_CACHE } from '../../constants';
+import { landingPages } from './paths';
 
 export type TOMData = {
 	tomName: string,
 	homePage: string, // without -[ef].html
-	secMenu: Array<string>,
+	secMenu: {
+		e: Array<Child>,
+		f: Array<Child>,
+	},
 	files: { [FilePath]: FileData },
 }
 type FilePath = string;
@@ -17,7 +22,7 @@ type Nav = {
 	nextPage?: string,
 };
 
-type ToCItem = { link: string, text: string };
+type ToCItem = { href: string, text: string };
 type ToCLevel = Array<ToCItem>;
 
 type Header = {
@@ -25,6 +30,11 @@ type Header = {
 	text: string,
 	id?: string,
 };
+
+type Child = {
+	text: string,
+	href: string,
+}
 
 export type FileData = {
 	path: string,
@@ -44,48 +54,88 @@ export type FileData = {
 	langLink: string,
 	breadcrumbs: {
 		expected: Array<string>,
-		actual: Array<string>,
+		actual?: Array<string>,
 	},
-	secMenu: Array<string>,
+	secMenu?: Array<Child>,
 	nav?: {
 		top: ?Nav,
 		bottom: ?Nav,
 	},
 	toc?: Array<ToCLevel>,
 	headers?: Array<Header>,
-	parent?: string,
-	children?: ?Array<string>,
+	parent?: ?string,
+	children?: ?Array<Child>,
 }
 
-export default async function getTOMData(tomName) {
-	const dataFilePath = join(TOM_DATA_CACHE, `${tomName}.json`);
-	const tomData: TOMData = await readJSON(dataFilePath);
+export default async function getTOMData(tomName): Promise<TOMData> { // should rename this or extract parts because it mostly updates
+	const cacheFilePath = join(TOM_DATA_CACHE, `${tomName}.json`);
+
+	try {
+		const tomData = await verifyCache(cacheFilePath);
+		// format data to use from state
+		return formatTOMData(tomData);
+	} catch (e) {
+		console.error('Error getting TOM data:');
+		console.error(e);
+	}
+}
+
+async function verifyCache(cacheFilePath: string): Promise<TOMData> {
+	const tomData: TOMData = await readJSON(cacheFilePath);
 	const { files } = tomData;
-	const outdatedFiles = [];
+	const outdatedFiles: Array<FileData> = [];
 
-	// do check on homePage if children changed
+	for (const file of Object.values(files)) {
+		const lastModified = (await stat(file.path)).mtime;
 
-	// do checks on all landing pages for new children (diff file paths)
-	//  check if they exist, and if not, add them
-
-	for (const { path, lastUpdated } of Object.values(files)) {
-		const lastModified = (await stat(path)).mtime;
-
-		if (lastModified > lastUpdated) {
-			outdatedFiles.push(path);
+		if (lastModified > file.lastUpdated) {
+			outdatedFiles.push(file);
 		}
 	}
 
 	if (outdatedFiles.length > 0) {
-		const sortedFiles = outdatedFiles.sort((path, nextPath) => files[path].depth - files[nextPath].depth); // sort according to depth
-		const landingPages = await readJSON('./landing-pages.json');
+		await updateTOMData(outdatedFiles, tomData); // mutates tomData.files directly
 
-		for (const path of sortedFiles) {
-			files[path] = await updateCachedData(path, tomData, landingPages); // make sure this actually mutates tomData
-		}
-
-		await outputJSON(dataFilePath, tomData);
+		console.log(`Updated ${outdatedFiles.length} outdated files in ${tomData.tomName}`);
+		console.log('Saving to cache file.');
+		await outputJSON(cacheFilePath, tomData); // maybe also update the remote cache?
 	}
 
 	return tomData;
+}
+
+async function updateTOMData(outdatedFiles: Array<FileData>, tomData: TOMData): Promise<void> {
+	const { files } = tomData;
+	const filesByDepth: Array<Array<FileData>> =
+		outdatedFiles.reduce((acc, file) => {
+			const { depth, path } = file;
+			if (!acc[depth]) acc[depth] = [];
+			acc[depth].push(path);
+
+			return acc;
+		}, []);
+
+	for (const depth: Array of filesByDepth) {
+		const updateTasks: Array<Promise<FileData>> = depth.map((path) => updateCachedData(path, tomData, landingPages));
+		// test out different queue sizes, it might be fine doing huge amounts at once
+		const updatedFiles: Array<FileData> = await batchAwait(updateTasks, 100);
+
+		for (const file of updatedFiles) {
+			files[file.path] = file; // make sure this actually mutates tomData
+		}
+	}
+}
+
+// changes fileData.children from an array of path strings to and object where key=filePath, val=ObjectRef
+async function formatTOMData(tomData) {
+	const { files } = tomData;
+	for (const filePath of Object.keys(files)) {
+		let fileChildren = files[filePath].children;
+
+		const childrenObj = {};
+		for (const childPath of fileChildren) {
+			childrenObj[childPath] = files[childPath];
+		}
+		fileChildren = childrenObj;
+	}
 }

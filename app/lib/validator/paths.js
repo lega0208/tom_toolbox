@@ -203,10 +203,6 @@ export const homepages = {
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9020\\home_9020-e.html",
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9020\\home_9020-f.html"
 		],
-		"TOM9540": [
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9540\\homepage_9540-e.html",
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9540\\homepage_9540-f.html"
-		],
 		"TOM9810": [
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9810\\ERAguide_9810-e.html",
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9810\\ERAguide_9810-f.html"
@@ -283,21 +279,9 @@ export const homepages = {
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9922\\homepage_9922-e.html",
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9922\\homepage_9922-f.html"
 		],
-		"TOM9924": [
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9924\\homepage_9924-e.html",
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9924\\homepage_9924-f.html"
-		],
 		"TOM9927": [
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9927\\9927_0landing-e.html",
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9927\\9927_0landing-f.html"
-		],
-		"TOM9930": [
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9930\\homepage_9930-e.html",
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9930\\homepage_9930-f.html"
-		],
-		"TOM9940": [
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9940\\homepage_9940-e.html",
-			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9940\\homepage_9940-f.html"
 		],
 		"TOM9950": [
 			"\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM9950\\statement_acc-e.html",
@@ -437,6 +421,10 @@ export const landingPages = {
 	"TOM401010": [
 		"homepage_40(10)(10)-e.html",
 		"homepage_40(10)(10)-f.html"
+	],
+	"TOM401011": [
+		"homepage_40(10)(11)-e.html",
+		"homepage_40(10)(11)-f.html"
 	],
 	"TOM401056": [
 		"40(10)5_TCA_landing-e.html",

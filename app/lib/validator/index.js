@@ -1,6 +1,6 @@
 // @flow
 import { readFile, readJSON, pathExists } from 'fs-extra';
-import { getNav, wrapContent } from 'lib/validator/util';
+import { getNav, wrapContent } from './util';
 import {
 	checkTitle,
 	checkDate,
@@ -10,9 +10,7 @@ import {
 	checkChildren,
 	checkHeaders,
 	checkNavs,
-} from 'lib/validator/validation-checks';
-
-export countDirFiles from './count-dir-files';
+} from './validation-checks';
 
 type ValidationError = { message: string, expected?: string, actual?: string };
 type ValidationErrors = Array<ValidationError>;
@@ -65,123 +63,126 @@ export const performValidations = async (pageData, validator) => {
 	validator.incrementProgress();
 };
 
-
-// should probably be part of Validator
-async function recurseChildren(path, validator, breadcrumbs) {
-	// get page data from cache or parsing
-	const pageData = await validator.getOrParse(path);
-
-	// get other data needed for validation & add to data object -- add this to cache later?
-	// isLanding, nav, breadcrumbs, something else? (children? would be useful to cache for
-	//  further optimization, but is it necessary?)
-	const isLanding = validator.landingPages.includes(pageData.path);
-
-	const nav = await getNav(pageData.$);
-
-	const validationData = {
-		...pageData,
-		isLanding,
-		nav,
-		breadcrumbs,
-		secMenu: validator.tomDeps.secMenu,
-		// homepage?
-	};
-
-	validator.addData(pageData.path, validationData);
-	validator.incrementProgress();
-
-	if (isLanding) {
-		const children = await validator.getChildren(pageData.$, pageData.path);
-		const childErrors = [];
-
-		for (const child of children) {
-			if (await pathExists(child)) {
-				try {
-					await recurseChildren(child, validator, breadcrumbs);
-				} catch (e) {
-					const errMsg =
-						`"${child.replace(`${validator.dirPath}\\`, '')}" is a valid path but another error occurred:`;
-					console.error(errMsg);
-					console.error(e);
-					childErrors.push(errMsg);
-				}
-			} else {
-				childErrors.push(`Link "${child.replace(`${validator.dirPath}\\`, '')}" is invalid.`)
-			}
-			await recurseChildren(child, validator, [ ...breadcrumbs, pageData.path ]); // maybe convert to Promise.all()
-		}
-		validator.addChildErrors(pageData.path, childErrors)
-	}
-}
-
 export default async function validateTOM(validator) {
-	console.log('about to get cached data:');
-	await validator.getCachedData();
-	console.log('Got cached data');
 
-	// populate data object for both languages
-	for (const homepage of validator.homepages) {
-		try {
-			console.log(`getOrParse:`);
-			const homeData = await validator.getOrParse(homepage);
-			const breadcrumbs = [ homepage ];
-
-			const childLinks = await validator.getChildren(homeData.$, homeData.path);
-
-			validator.setTOMDeps({
-				homepage,
-				secMenu: childLinks,
-			});
-
-			// add homepage data to object
-			const homeValidationData = {
-				...homeData,
-				isHomepage: true,
-			};
-			validator.addData(homepage, homeValidationData);
-			validator.incrementProgress();
-
-			const childErrors = [];
-
-			for (const child of childLinks) {
-				if (await pathExists(child)) {
-					try {
-						console.log(`recursing children`);
-						await recurseChildren(child, validator, breadcrumbs);
-					} catch (e) {
-						const errMsg =
-							`"${child.replace(`${validator.dirPath}\\`, '')}" is a valid path but another error occurred:`;
-						console.error(errMsg);
-						console.error(e);
-						childErrors.push(errMsg);
-					}
-				} else {
-					childErrors.push(`Link "${child.replace(`${validator.dirPath}\\`, '')}" is invalid.`)
-				}
-			}
-			validator.addChildErrors(homepage, childErrors);
-		} catch (e) {
-			console.error('errrrror?');
-			throw e;
-		}
-	}
-
-	// all pages have been parsed, so commit updates to cache
-	validator.commitCacheUpdates()
-		.then((linesAffected) => console.log(`Committed cache updates, ${linesAffected} lines affected.`))
-		.catch(e => console.error(e));
-
-
-	// iterate through data array & perform validations
-	for (const fileData of Object.values(validator.getData())) {
-		await performValidations(fileData, validator)
-	}
-
-	return {
-		tomResults: validator.getValidationResults(),
-		tomErrors: validator.getErrors(),
-	};
 }
+
+//// should probably be part of Validator
+//async function recurseChildren(path, validator, breadcrumbs) {
+//	// get page data from cache or parsing
+//	const pageData = await validator.getOrParse(path);
+//
+//	// get other data needed for validation & add to data object -- add this to cache later?
+//	// isLanding, nav, breadcrumbs, something else? (children? would be useful to cache for
+//	//  further optimization, but is it necessary?)
+//	const isLanding = validator.landingPages.includes(pageData.path);
+//
+//	const nav = await getNav(pageData.$);
+//
+//	const validationData = {
+//		...pageData,
+//		isLanding,
+//		nav,
+//		breadcrumbs,
+//		secMenu: validator.tomDeps.secMenu,
+//		// homepage?
+//	};
+//
+//	validator.addData(pageData.path, validationData);
+//	validator.incrementProgress();
+//
+//	if (isLanding) {
+//		const children = await validator.getChildren(pageData.$, pageData.path);
+//		const childErrors = [];
+//
+//		for (const child of children) {
+//			if (await pathExists(child)) {
+//				try {
+//					await recurseChildren(child, validator, breadcrumbs);
+//				} catch (e) {
+//					const errMsg =
+//						`"${child.replace(`${validator.dirPath}\\`, '')}" is a valid path but another error occurred:`;
+//					console.error(errMsg);
+//					console.error(e);
+//					childErrors.push(errMsg);
+//				}
+//			} else {
+//				childErrors.push(`Link "${child.replace(`${validator.dirPath}\\`, '')}" is invalid.`)
+//			}
+//			await recurseChildren(child, validator, [ ...breadcrumbs, pageData.path ]); // maybe convert to Promise.all()
+//		}
+//		validator.addChildErrors(pageData.path, childErrors)
+//	}
+//}
+
+//export default async function validateTOM(validator) {
+//	console.log('about to get cached data:');
+//	await validator.getCachedData();
+//	console.log('Got cached data');
+//
+//	// populate data object for both languages
+//	for (const homepage of validator.homepages) {
+//		try {
+//			console.log(`getOrParse:`);
+//			const homeData = await validator.getOrParse(homepage);
+//			const breadcrumbs = [ homepage ];
+//
+//			const childLinks = await validator.getChildren(homeData.$, homeData.path);
+//
+//			validator.setTOMDeps({
+//				homepage,
+//				secMenu: childLinks,
+//			});
+//
+//			// add homepage data to object
+//			const homeValidationData = {
+//				...homeData,
+//				isHomepage: true,
+//			};
+//			validator.addData(homepage, homeValidationData);
+//			validator.incrementProgress();
+//
+//			const childErrors = [];
+//
+//			for (const child of childLinks) {
+//				if (await pathExists(child)) {
+//					try {
+//						console.log(`recursing children`);
+//						await recurseChildren(child, validator, breadcrumbs);
+//					} catch (e) {
+//						const errMsg =
+//							`"${child.replace(`${validator.dirPath}\\`, '')}" is a valid path but another error occurred:`;
+//						console.error(errMsg);
+//						console.error(e);
+//						childErrors.push(errMsg);
+//					}
+//				} else {
+//					childErrors.push(`Link "${child.replace(`${validator.dirPath}\\`, '')}" is invalid.`)
+//				}
+//			}
+//			validator.addChildErrors(homepage, childErrors);
+//		} catch (e) {
+//			console.error('errrrror?');
+//			throw e;
+//		}
+//	}
+//
+//	// all pages have been parsed, so commit updates to cache
+//	validator.commitCacheUpdates()
+//		.then((linesAffected) => console.log(`Committed cache updates, ${linesAffected} lines affected.`))
+//		.catch(e => console.error(e));
+//
+//
+//	// iterate through data array & perform validations
+//	for (const fileData of Object.values(validator.getData())) {
+//		await performValidations(fileData, validator)
+//	}
+//
+//	return {
+//		tomResults: validator.getValidationResults(),
+//		tomErrors: validator.getErrors(),
+//	};
+//}
 
 //async function getPageDeps(filePath, landingPages, isHomepage = false) {
 //	try {

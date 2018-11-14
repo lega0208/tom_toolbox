@@ -1,6 +1,22 @@
 /**
  * Random utility functions
  */
+/* Take an array of unresolved Promises and await them in batches */
+export const batchAwait = async (arr, queueSize = 10) => {
+	try {
+		const returnVals = [];
+		while (arr.length > 0) {
+			const queue = arr.splice(0, queueSize);
+			const awaitedQueue = await Promise.all(queue);
+			returnVals.push(...awaitedQueue);
+		}
+
+		return returnVals;
+	} catch (e) {
+		throw e;
+	}
+};
+
 export const waitForEach = (processFunc, [head, ...tail]) =>
 	!head
 		? Promise.resolve()
