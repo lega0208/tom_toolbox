@@ -4,74 +4,13 @@ import { batchAwait } from '../util';
 import { updateCachedData } from './update-cache';
 import { TOM_DATA_CACHE } from '../../constants';
 import { landingPages } from './paths';
-
-export type TOMData = {
-	tomName: string,
-	homePage: string, // without -[ef].html
-	secMenu: {
-		e: Array<Child>,
-		f: Array<Child>,
-	},
-	files: { [FilePath]: FileData },
-}
-type FilePath = string;
-
-type Nav = {
-	prevPage?: string,
-	homePage: string,
-	nextPage?: string,
-};
-
-type ToCItem = { href: string, text: string };
-type ToCLevel = Array<ToCItem>;
-
-type Header = {
-	tag: string,
-	text: string,
-	id?: string,
-};
-
-type Child = {
-	text: string,
-	href: string,
-}
-
-export type FileData = {
-	path: string,
-	depth: number, // basically how many parents they have, will be used to prioritize updates because they can cascade
-	lastUpdated: number,
-	isLanding: boolean,
-	isHomepage?: boolean,
-	title: {
-		titleTag: string,
-		metadata: string,
-		h1: string,
-	},
-	date: {
-		top: ?string,
-		bottom: ?string,
-	},
-	langLink: string,
-	breadcrumbs: {
-		expected: Array<string>,
-		actual?: Array<string>,
-	},
-	secMenu?: Array<Child>,
-	nav?: {
-		top: ?Nav,
-		bottom: ?Nav,
-	},
-	toc?: Array<ToCLevel>,
-	headers?: Array<Header>,
-	parent?: ?string,
-	children?: ?Array<Child>,
-}
+import { TOMData, FileData } from 'lib/validator/types';
 
 export default async function getTOMData(tomName): Promise<TOMData> { // should rename this or extract parts because it mostly updates
 	const cacheFilePath = join(TOM_DATA_CACHE, `${tomName}.json`);
 
 	try {
-		const tomData = await verifyCache(cacheFilePath);
+		const tomData: TOMData = await verifyCache(cacheFilePath);
 		// format data to use from state
 		return formatTOMData(tomData);
 	} catch (e) {
@@ -127,14 +66,14 @@ async function updateTOMData(outdatedFiles: Array<FileData>, tomData: TOMData): 
 }
 
 // changes fileData.children from an array of path strings to and object where key=filePath, val=ObjectRef
-async function formatTOMData(tomData) {
+async function formatTOMData(tomData): void {
 	const { files } = tomData;
 	for (const filePath of Object.keys(files)) {
 		let fileChildren = files[filePath].children;
 
 		const childrenObj = {};
-		for (const childPath of fileChildren) {
-			childrenObj[childPath] = files[childPath];
+		for (const child of fileChildren) {
+			childrenObj[child] = files[child.href];
 		}
 		fileChildren = childrenObj;
 	}

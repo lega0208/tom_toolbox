@@ -12,16 +12,6 @@ import {
 	checkNavs,
 } from './validation-checks';
 
-type ValidationError = { message: string, expected?: string, actual?: string };
-type ValidationErrors = Array<ValidationError>;
-type ValidationCheckResult = { type: string, errors: ValidationErrors }
-type ValidationResults = { [string]: ValidationErrors }
-type PageResult = Array<ValidationCheckResult>;
-type PageResults = Array<PageResult>;
-type TOMResults = { [string]: PageResults };
-type PageData = { filepath: string, prevPage: string, nextPage: string, homePage: string };
-type TOMData = Array<PageData>;
-
 // should probably be part of Validator
 export const performValidations = async (pageData, validator) => {
 	const { $, path, secMenu, isLanding, breadcrumbs } = pageData;
