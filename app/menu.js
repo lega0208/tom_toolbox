@@ -1,7 +1,8 @@
 // @flow
-import { app, Menu, shell, BrowserWindow, dialog, session } from 'electron';
+import {
+ Menu, shell, BrowserWindow, dialog, session
+} from 'electron';
 import fs from 'fs';
-import { join } from 'path';
 import {
 	DB_PATH,
 	LAST_CACHE,
@@ -10,7 +11,6 @@ import {
 	DB_DRIVER,
 	DB_DRIVER_ALT, TOM_DATA_CACHE,
 } from './constants';
-import { parseAllTOMs } from './lib/validator/parse-all-toms';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -44,7 +44,7 @@ export default class MenuBuilder {
   }
 
   buildDefaultTemplate() {
-  	const mainWindow = this.mainWindow;
+  	const { mainWindow } = this;
     return [{
 			label: 'File',
 			submenu: [{
@@ -55,14 +55,15 @@ export default class MenuBuilder {
 						if (typeof path !== 'undefined') {
 							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DIRECTORATE_SERVICES/,
 								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES');
-							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => e ? console.error(e)
-																															 : console.log(`"${fixedPath}" saved as new db path`));
+							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => (
+								e ? console.error(e)
+									: console.log(`"${fixedPath}" saved as new db path`)
+							));
 							clearCache();
 							this.mainWindow.webContents.reload();
-
 						} else console.error('path chosen is undefined');
 					} catch (e) {
-						console.log('Error selecting db path: ' + e);
+						console.log(`Error selecting db path: ${e}`);
 					}
 				}
 			}, {
@@ -77,13 +78,6 @@ export default class MenuBuilder {
 					toggleDbDriver();
 					this.mainWindow.webContents.reload();
 				}
-			}, {
-				label: 'Parse all TOMs',
-				click: () =>
-					parseAllTOMs(join(process.env.USERPROFILE, 'Desktop/TOMData.json'))
-						.then(() => console.log('TOMs successfully parsed and cached!'))
-						.then(() => console.log(`Output dir: ${join(process.env.USERPROFILE, 'Desktop/TOMData.json')}`))
-						.catch(e => console.error(e))
 			}]
 		}, {
       label: '&View',
@@ -116,14 +110,6 @@ export default class MenuBuilder {
         accelerator: 'F11',
         click: () => {
           this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
-        }
-      }]
-    }, {
-      label: 'Help',
-      submenu: [{
-        label: 'Documentation',
-        click() {
-          shell.openExternal('https://github.com/atom/electron/tree/master/docs#readme');
         }
       }]
     }];

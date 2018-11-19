@@ -5,6 +5,9 @@ export const VALIDATOR = {
 		ERROR: 'VALIDATOR.VALIDATE_TOM.ERROR',
 		SUCCESS: 'VALIDATOR.VALIDATE_TOM.SUCCESS',
 	},
+	FILTERS: {
+		SET: 'VALIDATOR.FILTERS.SET', // for validation filters (i.e. title)
+	},
 	GET_TOMS: {
 		START: 'VALIDATOR.GET_TOMS.START',
 		ERROR: 'VALIDATOR.GET_TOMS.ERROR',
@@ -19,6 +22,7 @@ export const VALIDATOR = {
 		TOM_DATA: 'VALIDATOR.SET.TOM_DATA',
 	},
 	SUBCHAPTERS: {
+		GET: 'VALIDATOR.SUBCHAPTERS.GET',
 		SELECTION: {
 			CLEAR: 'VALIDATOR.SUBCHAPTERS.SELECTION.CLEAR',
 			SET: 'VALIDATOR.SUBCHAPTERS.SELECTION.SET',
@@ -37,6 +41,8 @@ export const VALIDATOR = {
 
 export const selectTOM = (tomName) => ({ type: VALIDATOR.SELECT.TOM, payload: tomName });
 
+export const setFilters = () => ({ type: VALIDATOR.FILTERS.SET });
+
 export const validateTOMStart = () => ({ type: VALIDATOR.VALIDATE_TOM.START });
 export const validateTOMError = (e) => ({ type: VALIDATOR.VALIDATE_TOM.ERROR, payload: e });
 export const validateTOMSuccess = () => ({ type: VALIDATOR.VALIDATE_TOM.SUCCESS });
@@ -48,6 +54,7 @@ export const getTOMsSuccess =
 
 export const setTOMData = (tomData) => ({ type: VALIDATOR.SET.TOM_DATA, payload: tomData });
 
+export const getSubchapters = () => ({ type: VALIDATOR.SUBCHAPTERS.GET });
 export const selectSubchapter = (path) => ({ type: VALIDATOR.SUBCHAPTERS.SELECTION.SET, payload: path });
 export const clearSubchapters = () => ({ type: VALIDATOR.SUBCHAPTERS.SELECTION.CLEAR });
 export const setSubchapterChoices =

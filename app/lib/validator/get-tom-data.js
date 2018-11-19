@@ -45,14 +45,15 @@ async function verifyCache(cacheFilePath: string): Promise<TOMData> {
 
 async function updateTOMData(outdatedFiles: Array<FileData>, tomData: TOMData): Promise<void> {
 	const { files } = tomData;
-	const filesByDepth: Array<Array<FileData>> =
+	const filesByDepth: Array<Array<FileData>> = (
 		outdatedFiles.reduce((acc, file) => {
 			const { depth, path } = file;
 			if (!acc[depth]) acc[depth] = [];
 			acc[depth].push(path);
 
 			return acc;
-		}, []);
+		}, [])
+	);
 
 	for (const depth: Array of filesByDepth) {
 		const updateTasks: Array<Promise<FileData>> = depth.map((path) => updateCachedData(path, tomData, landingPages));

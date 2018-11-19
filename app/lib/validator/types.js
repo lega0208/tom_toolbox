@@ -1,5 +1,5 @@
 // @flow
-export type TOMData = {
+export type TOMDataType = {
 	tomName: string,
 	homePage: string, // without -[ef].html
 	secMenu: {
@@ -8,6 +8,19 @@ export type TOMData = {
 	},
 	files: { [FilePath]: FileData },
 }
+export class TOMData {
+	constructor(tomData: TOMDataType) {
+		this.tomName = tomData.tomName;
+		this.homePage = tomData.homePage;
+		this.secMenu = tomData.secMenu;
+		this.files = tomData.files;
+	}
+	getLandingPages() {
+		return Object.values(this.files)
+			.filter((file: FileData) => file.isLanding);
+	}
+}
+
 type FilePath = string;
 
 type Nav = {
@@ -55,15 +68,16 @@ export type FileData = {
 		top: ?Nav,
 		bottom: ?Nav,
 	},
-	toc?: Array<ToCLevel>,
+	toc: Array<ToCLevel>,
 	headers?: Array<Header>,
 	parent?: ?string,
 	children?: ?Array<Child> | ?{ [string]: FileData },
 }
 
-export type ValidationError = { message: string, [additionalMessage: string]: string };
-export type ValidationResult = { title: string, errors: ?Array<ValidationError> }
-export type PageResults = { [path: string]: Array<ValidationResult> };
+export type AdditionalErrorMessage = { header: string, message: string } | string;
+export type ValidationError = { message: string, additionalMessages: Array<AdditionalErrorMessage> };
+export type ValidationResult = { title: string, errors: Array<ValidationError> }
+export type PageResults = { path: string, results: Array<ValidationResult> };
 export type TOMResults = Array<PageResults>;
 
 export type ValidationFunction = (fileData: FileData) => Promise<?ValidationResult>;

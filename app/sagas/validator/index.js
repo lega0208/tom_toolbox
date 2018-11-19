@@ -45,7 +45,11 @@ function* watchSelectTOM() {
 
 		// get & set subchapters
 		const homepagePath = tomData.homePage + '-e.html';
-		const homepageChildren = Object.values(tomData.files[homepagePath].children);
+		const homepageChildren = Object.values(tomData.files[homepagePath].children)
+			.map(({ path, title: { h1 } }) => ({
+				path,
+				title: h1.replace(/.+TOM(:?<\/abbr>)?\s?(.+)(?:<\/.+)/, '$1')
+			}));
 		yield put(setSubchapterChoices(homepageChildren));
 	}
 }
