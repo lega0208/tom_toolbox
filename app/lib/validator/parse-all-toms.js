@@ -124,6 +124,7 @@ const parseFileData = async (path, tomName, parentData, errors) => {
 		nav: await getNavs($, path, errors),
 		toc: await getToC($),
 		headers: await getHeaders($),
+		parent: parentData.path,
 		children: isLanding ? (await getChildren($, path, tomName)) : null,
 	};
 };

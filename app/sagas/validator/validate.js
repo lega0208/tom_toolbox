@@ -1,39 +1,31 @@
 // @flow
-import { call, cancel, fork, put } from 'redux-saga/effects';
+import { call, cancel, fork, put, select } from 'redux-saga/effects';
 import { pathExists, readFile, readJSONSync, stat } from 'fs-extra';
 import validateTOM from 'lib/validator';
 import {
 	setProgressStatus,
 	setProgress,
-	setFilecount,
 } from 'actions/validator';
-import startTrackProgress from './progress';
-import Validator from 'lib/validator/Validator';
-import { TOMData } from 'lib/validator/get-tom-data';
+import startTrackProgress, { ProgressTracker } from './progress';
+import { TOMData } from 'lib/validator/types';
 
-export default function* validate(tomData: TOMData) {
+export default function* validate(tomData) {
 	yield put(setProgressStatus('Validation in progress'));
 
 	const subchapterSelections = (yield select(({ validator: { subchapterSelections } }) => (subchapterSelections)));
 	const rootFile = subchapterSelections[subchapterSelections.length - 1];
 
+	const progress = new ProgressTracker();
+	// This isn't working properly, change to do all files for now and worry about filters after ***************************
 	const filesToValidate = yield call(getFilesToValidate, rootFile, tomData);
-
-	const validationData = { ...tomData, selectedFiles: filesToValidate, };
-
-	const validator = new Validator(validationData); // class might not be necessary?
-
-	// set up fileCount for progress tracking
-	const fileCount = Object.keys(filesToValidate).length;
-	// multiply fileCount by amount of steps (if more than 1) and increment for each file for every step
-	yield put(setFilecount(fileCount));
+	progress.setTotal(filesToValidate.length);
 
 	// start progress tracking
-	const progressTask = yield fork(startTrackProgress, validator.getProgress.bind(validator));
+	const progressTask = yield fork(startTrackProgress, progress.getProgress.bind(progress));
 
 	// start validation
 	console.log('about to start validation:');
-	const { tomResults, tomErrors } = yield call(validateTOM, validator);
+	const tomResults = yield call(validateTOM, filesToValidate, tomData, progress);
 
 	// validation complete
 	yield put(setProgress(100));
@@ -42,14 +34,7 @@ export default function* validate(tomData: TOMData) {
 	// stop progress tracking
 	yield cancel(progressTask);
 
-	// fire error alert if errors.length > 0
-	if (tomErrors.length > 0) {
-		console.error('tomErrors:');
-		console.error(tomErrors);
-		//yield put({ type: 'VALIDATOR_ERROR_ALERT', payload: { stuff:  'stuff' } });
-	}
-
-	return yield tomResults;
+	return yield tomResults.sort();
 }
 
 async function getFilesToValidate(rootNode, tomData) {

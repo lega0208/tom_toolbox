@@ -66,4 +66,4 @@ export const setFilecount = (fileCount) => ({ type: VALIDATOR.SET.FILECOUNT, pay
 export const setProgress = (progress) => ({ type: VALIDATOR.PROGRESS.SET, payload: progress });
 export const setProgressStatus = (status) => ({ type: VALIDATOR.PROGRESS.SET_STATUS, payload: status });
 export const resetProgress = () => ({ type: VALIDATOR.PROGRESS.RESET });
-export const updateProgress = (numFiles) => ({ type: VALIDATOR.PROGRESS.UPDATE, payload: numFiles });
+export const updateProgress = (percentDone) => ({ type: VALIDATOR.PROGRESS.UPDATE, payload: percentDone });

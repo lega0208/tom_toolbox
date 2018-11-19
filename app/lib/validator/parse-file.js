@@ -1,15 +1,12 @@
 // @flow
-import cheerio from 'cheerio';
 import { basename, dirname, join, relative } from 'path';
 import { readFile } from 'fs-extra';
-import { wrapContent } from './util';
-import { FileData, TOMData } from './get-tom-data';
 
 export const getTitles = async ($) => {
 	const titleTag =
 		$('title').text().replace(/\s+/g, ' ').trim();
 
-	const metaData =
+	const metadata =
 		($('meta')
 				.filter((i, meta) => meta.attribs.name === 'dcterms.title')
 				.first()
@@ -21,7 +18,7 @@ export const getTitles = async ($) => {
 
 	return {
 		titleTag,
-		metaData,
+		metadata,
 		h1,
 	}
 };
@@ -62,7 +59,10 @@ export const getSecMenu = async ($) =>
 		.first()
 		.find('ul > li > a')
 		.toArray()
-		.map((a) => a.attribs.href.replace(/\//g, '\\'));
+		.map((a) => ({
+			text: $(a).text(),
+			href: a.attribs.href.replace(/\//g, '\\').trim(),
+		}));
 
 export const getNavs = async ($, path, errors) => {
 	const navsRef = $('.embedded-nav');

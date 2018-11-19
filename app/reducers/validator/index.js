@@ -9,7 +9,6 @@ const initialState = {
 	subchapterSelections: [],
 	results: {},
 	error: '',
-	fileCount: 0,
 	progress: 0,
 	progressStatus: '',
 };
@@ -24,15 +23,10 @@ function validator(state = initialState, action) {
 			return { ...state, selectedTOM: action.payload, fileCount: 0, progress: 0, results: {}, progressStatus: '' };
 
 		case VALIDATOR.SET.RESULTS: return { ...state, results: action.payload };
-		case VALIDATOR.SET.FILECOUNT: return { ...state, fileCount: action.payload };
 		case VALIDATOR.SET.TOM_DATA: return { ...state, tomData: action.payload };
 
 		case VALIDATOR.PROGRESS.SET: return { ...state, progress: action.payload };
-		case VALIDATOR.PROGRESS.UPDATE:
-			const percentDone = state.fileCount === 0
-				? 100
-				: Math.round((action.payload / state.fileCount) * 100);
-			return { ...state, progress: percentDone };
+		case VALIDATOR.PROGRESS.UPDATE: return { ...state, progress: action.payload };
 		case VALIDATOR.PROGRESS.RESET: return { ...state, progress: 0 };
 		case VALIDATOR.PROGRESS.SET_STATUS: return { ...state, progressStatus: action.payload };
 

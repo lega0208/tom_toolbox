@@ -1,5 +1,5 @@
 import { copy, pathExists, readdir, readJSON, readFile, outputJSON } from 'fs-extra';
-import { basename, join, resolve } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import { call, take, put } from 'redux-saga/effects';
 import { VALIDATOR, getTOMsSuccess, getTOMsError } from 'actions/validator';
 import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
@@ -11,7 +11,6 @@ export default function* watchGetTOMs() {
 		try {
 			const toms = yield call(getToms);
 			console.log(`Found ${toms.length} toms!`);
-			console.log(toms);
 
 			//yield put(getTOMsSuccess(homepages)); // used to be homepages
 			yield put(getTOMsSuccess(toms));
@@ -25,7 +24,9 @@ export default function* watchGetTOMs() {
 // check cache folder -> if empty, copy from db folder
 // return list of fileNames with .json removed
 async function getToms() {
-	if (!(await pathExists(TOM_DATA_CACHE)) || (await readdir(TOM_DATA_CACHE)).length === 0) {
+	if (!(await pathExists(TOM_DATA_CACHE))) {
+		await copyDataCache();
+	} else if ((await readdir(TOM_DATA_CACHE)).length === 0) {
 		await copyDataCache();
 	}
 
@@ -33,11 +34,16 @@ async function getToms() {
 }
 
 async function copyDataCache() {
-	const tomDataDir =
+	const tomDataDir = dirname(
 		(await pathExists(DB_PATH))
-			? (await readFile(DB_PATH, 'utf8'))
-			: DEFAULT_DB_PATH;
+		&& (await readFile(DB_PATH, 'utf8'))
+		|| DEFAULT_DB_PATH
+	);
+	console.log('tomDataDir:');
+	console.log(tomDataDir);
 	const tomDataPath = join(tomDataDir, 'TOM_Data');
+	console.log('tomDataPath:');
+	console.log(tomDataPath);
 
 	if (!(await pathExists(tomDataPath))) { // todo: remove for production
 		console.error('TOM data cache doesn\'t exist?');

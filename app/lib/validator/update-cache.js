@@ -1,8 +1,9 @@
+// @flow
 import { basename } from "path";
 import { readFile } from "fs-extra";
-import { wrapContent } from 'lib/validator/util';
+import { wrapContent } from './util';
 import cheerio from "cheerio";
-import { FileData, TOMData } from 'lib/validator/get-tom-data';
+import { FileData, TOMData } from './types';
 import {
 	getBreadcrumbs,
 	getChildren,
@@ -13,11 +14,11 @@ import {
 	getSecMenu,
 	getTitles,
 	getToC
-} from 'lib/validator/parse-file';
+} from './parse-file';
 
 const parseNewData = async (path, parentData, tomName) => {
 	const fileName = basename(path);
-	const fileContents = await readFile(filePath, 'utf8');
+	const fileContents = await readFile(path, 'utf8');
 	const pageContents = (await wrapContent(fileContents, fileName) || fileContents);
 	const $ = cheerio.load(pageContents, { decodeEntities: false });
 
@@ -56,15 +57,15 @@ export async function updateCachedData(path: string, tomData: TOMData): Promise<
 	if (oldFileData.isLanding) {
 		// check that each href was in the old children
 		//  if not, check if the file existed in the tomData, and if not, parse and add the file to tomData.files
-		const oldChildren = oldFileData.children;
-		const newChildren = newFileData.children;
+		const oldChildren = oldFileData.children || [];
+		const newChildren = newFileData.children || [];
 
 		if (oldFileData.isHomepage) {
-			const oldHomepageChildren = oldChildren.map(({ href, text }) => [ href, text ]);
-			const newHomepageChildren = newChildren.map(({ href, text }) => [ href, text ]);
+			//const oldHomepageChildren = oldChildren.map(({ href, text }) => [ href, text ]);
+			//const newHomepageChildren = newChildren.map(({ href, text }) => [ href, text ]);
 
-			for (const [ i, oldChild ] of Object.entries(oldHomepageChildren)) {
-				if (oldChild.text !== newHomepageChildren[i].text || oldChild.href !== newHomepageChildren[i].href) {
+			for (const [ i, oldChild ] of oldChildren.entries()) {
+				if (oldChild.text !== newChildren[i].text || oldChild.href !== newChildren[i].href) {
 					const langRegex = /-([ef])\.html/;
 					const lang = langRegex.exec(path)[1];
 					secMenu[lang] = newChildren;
@@ -89,14 +90,6 @@ export async function updateCachedData(path: string, tomData: TOMData): Promise<
 		for (const child of removedChildren) {
 			if (files[child]) {
 				delete files[child];
-			}
-		}
-
-		if (oldFileData.isHomepage) {
-			// if children changed, update tomData secMenu
-			const childrenChanged = oldChildren.reduce((acc, child, i) => newChildren[i] !== child ? true : acc, false);
-			if (childrenChanged) {
-				// do the things here
 			}
 		}
 	}

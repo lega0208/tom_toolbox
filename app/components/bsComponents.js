@@ -125,7 +125,9 @@ export const Dropdown = ({ items, click, label, xClass }) => {
 			        data-toggle="dropdown"
 			        data-offset="0"
 			>
-				{label}
+				<span className="mr-auto">
+					{label}
+				</span>
 			</button>
 
 			<div className="dropdown-menu dropdown-menu-right" style={{maxHeight: '70vh', overflowY: 'scroll'}}>

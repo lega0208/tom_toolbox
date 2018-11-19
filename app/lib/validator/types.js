@@ -1,27 +1,13 @@
 // @flow
-export type TOMDataType = {
+export type TOMData = {
 	tomName: string,
 	homePage: string, // without -[ef].html
 	secMenu: {
 		e: Array<Child>,
 		f: Array<Child>,
 	},
-	files: { [FilePath]: FileData },
+	files: { [path: string]: FileData },
 }
-export class TOMData {
-	constructor(tomData: TOMDataType) {
-		this.tomName = tomData.tomName;
-		this.homePage = tomData.homePage;
-		this.secMenu = tomData.secMenu;
-		this.files = tomData.files;
-	}
-	getLandingPages() {
-		return Object.values(this.files)
-			.filter((file: FileData) => file.isLanding);
-	}
-}
-
-type FilePath = string;
 
 type Nav = {
 	prevPage?: string,
@@ -68,7 +54,7 @@ export type FileData = {
 		top: ?Nav,
 		bottom: ?Nav,
 	},
-	toc: Array<ToCLevel>,
+	toc?: ?Array<ToCLevel>,
 	headers?: Array<Header>,
 	parent?: ?string,
 	children?: ?Array<Child> | ?{ [string]: FileData },

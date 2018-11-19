@@ -79,7 +79,7 @@ class Validator extends Component {
 	}
 
 	render() {
-		const tomsList = Object.keys(this.props.toms);
+		const tomsList = this.props.toms;
 		const resultKeys = Object.keys(this.props.results);
 		const resultsNotEmpty = resultKeys.length > 0;
 
@@ -118,7 +118,6 @@ class Validator extends Component {
 							resultsNotEmpty
 								? <p className="my-2"><strong className="text-danger">{`${numResults} errors found`}</strong></p>
 								: null
-
 						}
 						<p className="my-2">{this.props.fileCount || 0} total files</p>
 						<ProgressBar percent={this.props.progress}/>
@@ -145,13 +144,6 @@ const mapDispatch = {
 	getTOMsStart,
 	selectTOM,
 	validateTOMStart,
-	mockSetTOMs: () => ({
-		type: VALIDATOR.GET_TOMS.SUCCESS,
-		payload: {
-			'TOM40(10)5&6':
-				'\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\TOM401056\\homepage_401056-e.html'
-		},
-	}),
 };
 
 export default connect(mapState, mapDispatch)(Validator);
