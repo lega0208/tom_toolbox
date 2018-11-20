@@ -5,18 +5,15 @@ import { batchAwait } from '../util';
 import { updateCachedData } from './update-cache';
 import { TOM_DATA_CACHE } from '../../constants';
 import { landingPages } from './paths';
-import { TOMData, FileData } from './types';
+import { TOMDataType, FileData } from './types';
 
-export default async function getTOMData(tomName) { // should rename this or extract parts because it mostly updates
+export default async function getTOMData(tomName): TOMDataType { // should rename this or extract parts because it mostly updates
 	console.log('tomName:');
 	console.log(tomName);
 	const cacheFilePath = join(TOM_DATA_CACHE, `${tomName}.json`);
 
 	try {
-		const tomData = await verifyCache(cacheFilePath);
-		// format data to use from state
-		await formatTOMData(tomData);
-		return tomData;
+		return await verifyCache(cacheFilePath);
 	} catch (e) {
 		console.error('Error getting TOM data:');
 		console.error(e);
@@ -25,7 +22,8 @@ export default async function getTOMData(tomName) { // should rename this or ext
 
 async function verifyCache(cacheFilePath: string) {
 	console.log('Verifying cache');
-	const tomData = await readJSON(cacheFilePath);
+
+	const tomData: TOMDataType = await readJSON(cacheFilePath);
 	const { files } = tomData;
 	const outdatedFiles: Array<FileData> = [];
 
@@ -82,20 +80,5 @@ async function updateTOMData(outdatedFiles: Array<FileData>, tomData): Promise<v
 		for (const file of updatedFiles) {
 			files[file.path] = file; // make sure this actually mutates tomData
 		}
-	}
-}
-
-// changes fileData.children from an array of path strings to and object where key=filePath, val=ObjectRef
-async function formatTOMData(tomData): void {
-	console.log('Formatting TOM data');
-	const files = tomData.files;
-	for (const filePath of Object.keys(files)) {
-		let fileChildren = files[filePath].children || [];
-
-		const childrenObj = {};
-		for (const child of fileChildren) {
-			childrenObj[child] = files[child.href];
-		}
-		fileChildren = childrenObj;
 	}
 }

@@ -4,16 +4,12 @@ import {
 	AdditionalErrorMessage,
 	FileData,
 	PageResults,
-	ProgressTracking,
 	TOMData,
 	TOMResults,
 	ValidationError,
-	ValidationFunction,
 	ValidationResult,
-	ValidatorInterface
 } from 'lib/validator/types';
 import { ProgressTracker } from '../../sagas/validator/progress';
-
 
 const makeError = (message: string, additionalMessages?: Array<AdditionalErrorMessage> = []): ValidationError => ({
 	message,
@@ -311,6 +307,7 @@ const checkToC: CheckFunc = async ({ toc, headers }) => {
 	return validate.getResults();
 };
 
+// this could probably just be a function (could write a "withProgressIncrement" function)
 export default class PageValidator {
 	results: Array<ValidationResult> = [];
 	validations = [

@@ -21,8 +21,7 @@ export default function* watchGetTOMs() {
 	}
 }
 
-// check cache folder -> if empty, copy from db folder
-// return list of fileNames with .json removed
+// todo: add: if shared-drive cache is newer than local cache lastModified
 async function getToms() {
 	if (!(await pathExists(TOM_DATA_CACHE))) {
 		await copyDataCache();
@@ -36,14 +35,11 @@ async function getToms() {
 async function copyDataCache() {
 	const tomDataDir = dirname(
 		(await pathExists(DB_PATH))
-		&& (await readFile(DB_PATH, 'utf8'))
-		|| DEFAULT_DB_PATH
+			&& (await readFile(DB_PATH, 'utf8'))
+			|| DEFAULT_DB_PATH
 	);
-	console.log('tomDataDir:');
-	console.log(tomDataDir);
+
 	const tomDataPath = join(tomDataDir, 'TOM_Data');
-	console.log('tomDataPath:');
-	console.log(tomDataPath);
 
 	if (!(await pathExists(tomDataPath))) { // todo: remove for production
 		console.error('TOM data cache doesn\'t exist?');

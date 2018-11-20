@@ -1,5 +1,5 @@
 // @flow
-export type TOMData = {
+export type TOMDataType = {
 	tomName: string,
 	homePage: string, // without -[ef].html
 	secMenu: {

@@ -1,4 +1,5 @@
 import { all, call, fork, put, select, take } from 'redux-saga/effects';
+import { stat } from 'fs-extra';
 import {
 	VALIDATOR,
 	validateTOMError,
