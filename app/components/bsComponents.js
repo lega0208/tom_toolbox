@@ -2,6 +2,7 @@
 import React from 'react';
 import FontAwesomeIcon from '@fortawesome/react-fontawesome';
 import faChevronRight from '@fortawesome/fontawesome-free-solid/faChevronRight';
+import faSpinner from '@fortawesome/fontawesome-free-solid/faSpinner';
 
 /*
  * Grid utilities
@@ -58,8 +59,11 @@ export const Col = (props: colPropsType) => {
 export const Button = (props) => (
 	<button
 		type="button"
-		className={`btn btn-${props.bsClass || 'default'}${props.xClass ? ` ${props.xClass}` : ''}`}
-		onClick={props.click}
+		className={
+			`btn btn-${props.bsClass || 'default'}${props.xClass ? ` ${props.xClass}` : ''}`
+				+ (props.disabled ? ' disabled' : '')
+		}
+		onClick={props.disabled ? () => console.log('Button is disabled') : props.click}
 	>
 		{props.text}
 	</button>
@@ -110,7 +114,6 @@ export class Collapse extends React.Component {
 	}
 }
 
-
 export const Dropdown = ({ items, click, label, xClass }) => {
 	const onClickFunc = (e) => {
 		e.preventDefault();
@@ -142,6 +145,8 @@ export const Dropdown = ({ items, click, label, xClass }) => {
 		</div>
 	);
 };
+
+export const LoadingSpinner = ({ xClass }) => <FontAwesomeIcon icon={faSpinner} spin className={xClass || ''} transform="grow-2" />;
 
 /*
  * Misc utilities

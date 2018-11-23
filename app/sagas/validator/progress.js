@@ -18,9 +18,11 @@ export function* updateProgress(getProgress) {
 }
 
 export class ProgressTracker {
-	numCompleted: 0;
-	total = 0;
-	progress = 0;
+	constructor() {
+		this.numCompleted = 0;
+		this.total = 0;
+		this.progress = 0;
+	}
 
 	setTotal(num = 0) {
 		this.total = num;

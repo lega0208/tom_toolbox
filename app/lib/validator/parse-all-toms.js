@@ -57,6 +57,7 @@ const parseFromHomepage = async (paths, tomName, errors) => {
 			title: await getTitles($),
 			date: await getDates($),
 			langLink: await getlangLink($),
+			headers: await getHeaders($),
 			children: await getChildren($, homepagePath, tomName),
 			breadcrumbs: {
 				expected: [],
@@ -115,6 +116,7 @@ const parseFileData = async (path, tomName, parentData, errors) => {
 		path,
 		lastUpdated: Date.now(),
 		isLanding,
+		isHomepage: false,
 		depth: parentData.depth + 1,
 		title: await getTitles($),
 		date: await getDates($),

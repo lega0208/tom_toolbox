@@ -1,26 +1,40 @@
 // @flow
 import { basename } from 'path';
-import PageValidator from './Validator';
-import { FileData, TOMData, TOMResults } from 'lib/validator/types';
+import PageValidator, { validatePage } from './Validator';
+import { FileData, TOMDataType, TOMResults } from 'lib/validator/types';
 import { ProgressTracker } from '../../sagas/validator/progress';
 
-const validatePage =
-	async (fileData, tomData, progress) => await new PageValidator(fileData, tomData, progress).performValidations();
+//const validatePage =
+//	async (fileData, tomData, progress) => await (new PageValidator(fileData, tomData, progress).performValidations());
 
-export default async (files: Array<FileData>, tomData: TOMData, progress: ProgressTracker): TOMResults => {
-	const validateFileTasks = files.map((file) => validatePage(file, tomData, progress));
+export default async (files: Array<FileData>, tomData: TOMDataType, progress: ProgressTracker): TOMResults => {
+	console.log('validating');
+	const results = [];
 
-	return (await Promise.all(validateFileTasks)).sort((a, b) => { // sort results by filename
-		const aFilename = basename(a.path);
-		const bFilename = basename(b.path);
+	for (const file of files) {
+		const pageResults = await validatePage(file, tomData, progress);
 
-		if (aFilename > bFilename) {
-			return -1;
+		if (pageResults.results.length > 0) {
+			results.push(pageResults);
 		}
-		if (aFilename < bFilename) {
-			return 1;
-		}
+		break;
+	}
+	console.log('done validating, returning results');
+	//const validateFileTasks = files.map((file) => validatePage(file, tomData, progress));
 
-		return 0;
-	});
+	//return (await Promise.all(validateFileTasks))
+	return results
+		.sort((a, b) => { // sort results by filename
+			const aFilename = basename(a.path);
+			const bFilename = basename(b.path);
+
+			if (aFilename > bFilename) {
+				return -1;
+			}
+			if (aFilename < bFilename) {
+				return 1;
+			}
+
+			return 0;
+		});
 };

@@ -8,16 +8,22 @@ export default class TOMData {
 	getTOMData() {
 		return this.tomData;
 	}
-	get files(): Array<FileData> {
+	setTOMData(data, propName) {
+		this.tomData[propName] = data;
+	}
+	getFiles(): Array<FileData> {
 		return this.tomData.files;
 	}
 	getFile(path): FileData {
 		return this.tomData.files[path];
 	}
+	deleteFile(path) {
+		delete this.tomData.files[path];
+	}
 	getFileProp(path, propName) {
 		return this.tomData.files[path][propName];
 	}
-	setTOMData(data, propName) {
-		this.tomData[propName] = data;
+	getRef() {
+		return this;
 	}
 }

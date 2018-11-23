@@ -11,6 +11,7 @@ const initialState = {
 	error: '',
 	progress: 0,
 	progressStatus: '',
+	verifyingCache: false,
 };
 
 function validator(state = initialState, action) {
@@ -41,6 +42,10 @@ function validator(state = initialState, action) {
 				...state,
 				subchapterSelections: [ ...state.subchapterSelections, state.tomData.files[action.payload] ]
 			};
+
+		case VALIDATOR.VERIFY_CACHE.START: return { ...state, verifyingCache: true };
+		case VALIDATOR.VERIFY_CACHE.SUCCESS: return { ...state, verifyingCache: false };
+		case VALIDATOR.VERIFY_CACHE.ERROR: return { ...state, verifyingCache: false };
 
 		default: return state;
 	}

@@ -1,5 +1,5 @@
 // @flow
-import { outputJSON, readJSON, stat } from 'fs-extra';
+import { outputJSON, readFile, readJSON, stat } from 'fs-extra';
 import { basename, join } from 'path';
 import { batchAwait } from '../util';
 import { updateCachedData } from './update-cache';
@@ -23,7 +23,8 @@ export default async function getTOMData(tomName): TOMDataType { // should renam
 async function verifyCache(cacheFilePath: string) {
 	console.log('Verifying cache');
 
-	const tomData: TOMDataType = await readJSON(cacheFilePath);
+	const tomData = await readJSON(cacheFilePath);
+
 	const { files } = tomData;
 	const outdatedFiles: Array<FileData> = [];
 
@@ -38,12 +39,12 @@ async function verifyCache(cacheFilePath: string) {
 
 		if (lastModified > file.lastUpdated) {
 			console.log(`${basename(file.path)} is outdated`);
-			console.log(file);
 			outdatedFiles.push(file);
 		}
 	}
 
 	if (outdatedFiles.length > 0) {
+		console.log('about to update data');
 		await updateTOMData(outdatedFiles, tomData); // mutates tomData.files directly
 
 		console.log(`Updated ${outdatedFiles.length} outdated files in ${tomData.tomName}`);
@@ -71,14 +72,24 @@ async function updateTOMData(outdatedFiles: Array<FileData>, tomData): Promise<v
 	for (const depth: Array of filesByDepth) {
 		if (!depth) continue;
 
-		const updateTasks: Array<Promise<FileData>> = depth.map((file) => updateCachedData(file.path, tomData, landingPages));
-		// test out different queue sizes, it might be fine doing huge amounts at once
-		console.log('About to await batchAwait:');
-		const updatedFiles: Array<FileData> = await batchAwait(updateTasks, 100);
-		console.log('batchAwait awaited.');
-
-		for (const file of updatedFiles) {
-			files[file.path] = file; // make sure this actually mutates tomData
+		for (const file of depth) {
+			try {
+				await updateCachedData(file.path, tomData);
+			} catch (e) {
+				console.error(`Error in ${basename(file.path)}`);
+				throw e;
+			}
 		}
+
+		//const updateTasks: Array<Promise<FileData>> = depth.map((file) => updateCachedData(file.path, tomData, landingPages));
+		//// test out different queue sizes, it might be fine doing huge amounts at once
+		////console.log('About to await batchAwait:');
+		////const updatedFiles: Array<FileData> = await batchAwait(updateTasks, 100);
+		//const updatedFiles: Array<FileData> = await Promise.all(updateTasks); // test performance difference
+		////console.log('batchAwait awaited.');
+		//
+		//for (const file of updatedFiles) {
+		//	files[file.path] = file; // make sure this actually mutates tomData
+		//}
 	}
 }

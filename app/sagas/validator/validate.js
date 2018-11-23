@@ -12,12 +12,14 @@ import { TOMData } from 'lib/validator/types';
 export default function* validate(tomData) {
 	yield put(setProgressStatus('Validation in progress'));
 
-	const subchapterSelections = (yield select(({ validator: { subchapterSelections } }) => (subchapterSelections)));
-	const rootFile = subchapterSelections[subchapterSelections.length - 1];
+	//const subchapterSelections = (yield select(({ validator: { subchapterSelections } }) => (subchapterSelections)));
+	//const rootFile = subchapterSelections[subchapterSelections.length - 1];
 
 	const progress = new ProgressTracker();
-	// This isn't working properly, change to do all files for now and worry about filters after ***************************
-	const filesToValidate = yield call(getFilesToValidate, rootFile, tomData);
+
+	const filesToValidate = Object.values(tomData.files);
+
+	//const filesToValidate = yield call(getFilesToValidate, rootFile, tomData);
 	progress.setTotal(filesToValidate.length);
 
 	// start progress tracking
@@ -37,30 +39,30 @@ export default function* validate(tomData) {
 	return yield tomResults.sort();
 }
 
-async function getFilesToValidate(rootNode, tomData) {
-	if (rootNode.isHomepage) {
-		return tomData.files;
-	}
-
-	const files = { [rootNode.path]: rootNode };
-
-	const children = // make sure children isn't null
-		typeof rootNode.children === 'object'
-			? Object.values(rootNode.children)
-			: null;
-
-	if (children && children.length > 0) {
-		const childFiles = await Promise.all(Object.values(children).map((child) => getFilesToValidate(child)));
-		let childrenObj = {};
-
-		for (const child of childFiles) {
-			childrenObj = { ...childrenObj, ...child };
-		}
-		return { ...files, ...childrenObj };
-	}
-
-	console.log('filesToValidate:');
-	console.log(files);
-
-	return files;
-}
+//async function getFilesToValidate(rootNode, tomData) {
+//	if (rootNode.isHomepage) {
+//		return tomData.files;
+//	}
+//
+//	const files = { [rootNode.path]: rootNode };
+//
+//	const children = // make sure children isn't null
+//		typeof rootNode.children === 'object'
+//			? Object.values(rootNode.children)
+//			: null;
+//
+//	if (children && children.length > 0) {
+//		const childFiles = await Promise.all(Object.values(children).map((child) => getFilesToValidate(child)));
+//		let childrenObj = {};
+//
+//		for (const child of childFiles) {
+//			childrenObj = { ...childrenObj, ...child };
+//		}
+//		return { ...files, ...childrenObj };
+//	}
+//
+//	console.log('filesToValidate:');
+//	console.log(files);
+//
+//	return files;
+//}

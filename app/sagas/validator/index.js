@@ -7,6 +7,9 @@ import {
 	setResults,
 	setTOMData,
 	setSubchapterChoices,
+	startVerifyCache,
+	verifyCacheSuccess,
+	verifyCacheError,
 } from 'actions/validator';
 import validate from './validate';
 import getTOMData from 'lib/validator/get-tom-data';
@@ -15,8 +18,10 @@ import { withAbort } from '../util';
 
 
 export function* getTOMDataSaga(selectedTOM) {
+	yield put(startVerifyCache());
 	const tomData = yield call(getTOMData, selectedTOM);
 	yield put(setTOMData(tomData));
+	yield put(verifyCacheSuccess());
 
 	return yield tomData;
 }
@@ -42,16 +47,16 @@ function* watchSelectTOM() {
 	while (true) {
 		// verify & update cache and store in state
 		const selectedTOM = (yield take(VALIDATOR.SELECT.TOM)).payload;
-		const tomData = yield call(getTOMDataSaga, selectedTOM);
+		yield call(getTOMDataSaga, selectedTOM);
 
 		// get & set subchapters
-		const homepagePath = tomData.homePage + '-e.html';
-		const homepageChildren = tomData.files[homepagePath].children
-			.map(({ href, text }) => ({
-				path: href,
-				title: text
-			}));
-		yield put(setSubchapterChoices(homepageChildren));
+		//const homepagePath = tomData.homePage + '-e.html';
+		//const homepageChildren = tomData.files[homepagePath].children
+		//	.map(({ href, text }) => ({
+		//		path: href,
+		//		title: text
+		//	}));
+		//yield put(setSubchapterChoices(homepageChildren));
 	}
 }
 

@@ -2,37 +2,41 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { basename } from 'path';
 import { VALIDATOR, getTOMsStart, selectTOM, validateTOMStart } from 'actions/validator';
-import { Grid, Row, Col, Clear, Card, Button, Dropdown } from 'components/bsComponents';
+import { Grid, Row, Col, Clear, Card, Button, Dropdown, LoadingSpinner } from 'components/bsComponents';
 import ProgressBar from 'components/Validator/ProgressBar';
 
-const ResultEntry = ({ error: { message, expected, actual } }) => (
+const ResultEntry = ({ error: { message, additionalMessages = [] } }) => (
 	<React.Fragment>
 		<h5 className="alert-heading text-dark">{message}</h5>
 		{
-			(expected || actual)
-				? (
-					<Grid>
-						<Row>
-							<Col col={1} xClass="pl-0">
-								{expected ? <p className="text-dark nowrap mb-0"><strong>Expected:</strong></p> : null}
-								{actual ? <p className="text-dark nowrap my-0"><strong>Actual:</strong></p> : null}
-							</Col>
-							<Col col={11}>
-								{expected ? <p className="text-dark mb-0">{expected}</p> : null}
-								{actual ? <p className="text-dark my-0">{actual}</p> : null}
-							</Col>
-						</Row>
-					</Grid>
-				)
-				: null
+			(additionalMessages.length > 0) ? (
+				<Grid>
+					{
+						additionalMessages.map((msg, i) => (
+							<Row key={`addit-msg-row-${i}`}>
+								<Col key={`addit-msg-col1-${i}`} col={4} xClass="pl-0">
+									<p key={`addit-msg-p1-${i}`} className="text-dark text-right nowrap my-0"><strong>{msg.header || ''}</strong></p>
+								</Col>
+								<Col key={`addit-msg-col2-${i}`} col={8}>
+									<p key={`addit-msg-p2-${i}`} className="text-dark my-0">
+										{
+											typeof msg === 'object' ? msg.message : msg
+										}
+							    </p>
+								</Col>
+							</Row>
+						))
+					}
+				</Grid>
+			) : null
 		}
 	</React.Fragment>
 	// message, expected, actual
 );
 
-const ResultCategory = ({ type, errors }) => (
+const ResultCategory = ({ title, errors }) => (
 	<div className="alert alert-danger">
-		<h4 className="alert-heading text-dark">{type}</h4>
+		<h4 className="alert-heading text-dark">{title}</h4>
 		{
 			errors.map((error, i) => (
 				<React.Fragment key={`rescat-frag-${i}`}>
@@ -45,14 +49,12 @@ const ResultCategory = ({ type, errors }) => (
 );
 
 const PageResults = ({ filename, pageResults }) => {
-	const entries = Object.entries(pageResults);
-	if (entries.length > 0) {
-
+	if (pageResults.length > 0) {
 		return (
 			<Card header={basename(filename)} xClass="mt-2">
 				{
-					entries.map(([type, errors], i) => (
-						<ResultCategory key={`err-cat-${i}`} type={type} errors={errors} />
+					pageResults.map(({ title, errors }, i) => (
+						<ResultCategory key={`err-cat-${i}`} title={title} errors={errors} />
 					))
 				}
 			</Card>
@@ -64,10 +66,9 @@ const PageResults = ({ filename, pageResults }) => {
 const ResultsEntries = ({ results }) => (
 	<React.Fragment>
 		{
-			Object.entries(results)
-				.map(([ filename, pageResults ], i) => (
-					<PageResults filename={basename(filename)} pageResults={pageResults} key={`results-${i}`} />
-				))
+			results.map(({ path, results }, i) => (
+				<PageResults filename={basename(path)} pageResults={results} key={`results-${i}`} />
+			))
 		}
 	</React.Fragment>
 );
@@ -80,12 +81,11 @@ class Validator extends Component {
 
 	render() {
 		const tomsList = this.props.toms;
-		const resultKeys = Object.keys(this.props.results);
-		const resultsNotEmpty = resultKeys.length > 0;
+		const resultsNotEmpty = this.props.results.length > 0;
 
 		const numResults = !resultsNotEmpty
 			? 0
-			: Object.values(this.props.results)
+			: this.props.results
 				.reduce(
 					(acc, pageResult) =>
 						acc + Object.values(pageResult).reduce(
@@ -97,7 +97,7 @@ class Validator extends Component {
 
 		return (
 			<Grid fluid xClass="mt-3">
-				<Row>
+				<Row xClass="position-static">
 					<Col md={11} col={12} xClass="mx-auto mb-3 py-3 border border-secondary rounded">
 						<h2>Selected TOM: {this.props.selectedTOM || 'None'}</h2>
 						<div className="btn-toolbar mt-3 mb-2 mw-75">
@@ -106,7 +106,17 @@ class Validator extends Component {
 							          label={this.props.selectedTOM || 'Select manual to validate'}
 							          xClass="w-25"
 							/>
-							<Button bsClass="primary" xClass="ml-2" click={() => this.props.validateTOMStart()} text="Validate TOM" />
+							<Button bsClass="primary"
+							        xClass="ml-2"
+							        click={() => this.props.validateTOMStart()}
+							        text="Validate TOM"
+							        disabled={this.props.toms.length === 0 || this.props.verifyingCache}
+							/>
+							{
+								(this.props.toms.length === 0 || this.props.verifyingCache)
+									? <LoadingSpinner xClass="ml-2 mt-2" />
+									: null
+							}
 						</div>
 						<hr />
 						{

@@ -149,7 +149,7 @@ export const getToC = async ($) => {
 };
 
 export const getHeaders = async ($) => {
-	$('h2,h3,h4,h5').toArray().map((header) => {
+	return $('h2,h3,h4,h5', 'div#__main-content').toArray().map((header) => {
 		const headerRef = $(header);
 
 		const tag = header.tagName;
