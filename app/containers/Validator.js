@@ -1,81 +1,57 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { basename } from 'path';
-import { VALIDATOR, getTOMsStart, selectTOM, validateTOMStart } from 'actions/validator';
-import { Grid, Row, Col, Clear, Card, Button, Dropdown, LoadingSpinner } from 'components/bsComponents';
-import ProgressBar from 'components/Validator/ProgressBar';
+import { getTOMsStart, selectTOM, validateTOMStart } from 'actions/validator';
+import {
+	Grid,
+	Row,
+	Col,
+	Clear,
+	Card,
+	Button,
+	Dropdown,
+	LoadingSpinner,
+} from 'components/bsComponents';
+import {
+	ProgressBar,
+	PageResults,
+} from 'components/Validator';
 
-const ResultEntry = ({ error: { message, additionalMessages = [] } }) => (
-	<React.Fragment>
-		<h5 className="alert-heading text-dark">{message}</h5>
-		{
-			(additionalMessages.length > 0) ? (
-				<Grid>
-					{
-						additionalMessages.map((msg, i) => (
-							<Row key={`addit-msg-row-${i}`}>
-								<Col key={`addit-msg-col1-${i}`} col={4} xClass="pl-0">
-									<p key={`addit-msg-p1-${i}`} className="text-dark text-right nowrap my-0"><strong>{msg.header || ''}</strong></p>
-								</Col>
-								<Col key={`addit-msg-col2-${i}`} col={8}>
-									<p key={`addit-msg-p2-${i}`} className="text-dark my-0">
-										{
-											typeof msg === 'object' ? msg.message : msg
-										}
-							    </p>
-								</Col>
-							</Row>
-						))
-					}
-				</Grid>
-			) : null
-		}
-	</React.Fragment>
-	// message, expected, actual
-);
-
-const ResultCategory = ({ title, errors }) => (
-	<div className="alert alert-danger">
-		<h4 className="alert-heading text-dark">{title}</h4>
-		{
-			errors.map((error, i) => (
-				<React.Fragment key={`rescat-frag-${i}`}>
-					<hr key={`hr${i}`}/>
-					<ResultEntry error={error} key={`result-entry-${i}`} />
-				</React.Fragment>
-			))
-		}
-	</div>
-);
-
-const PageResults = ({ filename, pageResults }) => {
-	if (pageResults.length > 0) {
-		return (
-			<Card header={basename(filename)} xClass="mt-2">
-				{
-					pageResults.map(({ title, errors }, i) => (
-						<ResultCategory key={`err-cat-${i}`} title={title} errors={errors} />
-					))
-				}
-			</Card>
-		);
-	}
-	else return null;
-};
-
-const ResultsEntries = ({ results }) => (
+const ResultsEntries = ({ results, validationFilters }) => (
 	<React.Fragment>
 		{
 			results.map(({ path, results }, i) => (
-				<PageResults filename={basename(path)} pageResults={results} key={`results-${i}`} />
+				<PageResults
+					filename={basename(path)}
+					pageResults={results}
+					validationFilters={validationFilters}
+					key={`results-${i}`}
+				/>
 			))
 		}
 	</React.Fragment>
+);
+
+const Results = ({ results }) => (
+	<Row>
+		<Col
+			md={11}
+			col={12}
+			xClass={`mx-auto ${results.length > 0 ? ' border border-secondary rounded' : ''}`}
+		>
+			{
+				results.length > 0
+					? <ResultsEntries results={this.props.results} />
+					: null
+			}
+		</Col>
+	</Row>
 );
 
 class Validator extends Component {
 	async componentDidMount() {
-		//this.props.mockSetTOMs(); // sets toms and selects 40(10)5&6
+		//this.props.mockSetTOMs();
+		//this.props.setMockResults();
 		await this.props.getTOMsStart();
 	}
 
@@ -134,15 +110,7 @@ class Validator extends Component {
 					</Col>
 					<Clear />
 				</Row>
-				<Row>
-					<Col md={11} col={12} xClass={`mx-auto ${resultsNotEmpty && ' border border-secondary rounded'}`}>
-						{
-							resultsNotEmpty
-								? <ResultsEntries results={this.props.results}/>
-								: null
-						}
-					</Col>
-				</Row>
+				<Results />
 			</Grid>
 		);
 	}
