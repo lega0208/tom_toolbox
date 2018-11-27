@@ -2,7 +2,7 @@
 import {
  Menu, shell, BrowserWindow, dialog, session
 } from 'electron';
-import fs from 'fs';
+import fs from 'fs-extra';
 import {
 	DB_PATH,
 	LAST_CACHE,
@@ -131,6 +131,6 @@ function toggleDbDriver() {
 function clearCache() {
 	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
 	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
-	fs.rmdirSync(TOM_DATA_CACHE);
+	fs.emptyDirSync(TOM_DATA_CACHE);
 	session.defaultSession.clearStorageData({ storages: ['localStorage'] });
 }

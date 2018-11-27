@@ -7,45 +7,59 @@ import {
 	Row,
 	Col,
 	Clear,
-	Card,
 	Button,
 	Dropdown,
 	LoadingSpinner,
+	ListGroup,
+	ListGroupItem,
+	Checkbox,
 } from 'components/bsComponents';
 import {
 	ProgressBar,
 	PageResults,
+	ValidationFilters,
 } from 'components/Validator';
 
-const ResultsEntries = ({ results, validationFilters }) => (
+const ResultsEntries = ({ results, validationFilters }) => {
+	try {
+		const filteredResults =
+			results.map(
+				(pageResults) => ({
+					path: pageResults.path,
+					results: pageResults.results
+						.filter(({ title }) => !validationFilters.includes(title))
+				})
+			)
+				.filter((pageResults) => pageResults.results.length > 0);
+
+		return (
+			<React.Fragment>
+				{
+					filteredResults.map(({ path, results }, i) => (
+						<PageResults
+							filename={basename(path)}
+							pageResults={results}
+							key={`results-${i}`}
+						/>
+					))
+				}
+			</React.Fragment>
+		);
+	} catch (e) {
+		console.error('probably can\'t filter results?');
+		console.error(results);
+		console.error(e);
+	}
+};
+
+const Results = ({ results, validationFilters }) => (
 	<React.Fragment>
 		{
-			results.map(({ path, results }, i) => (
-				<PageResults
-					filename={basename(path)}
-					pageResults={results}
-					validationFilters={validationFilters}
-					key={`results-${i}`}
-				/>
-			))
+			results.length > 0
+				? <ResultsEntries results={results} validationFilters={validationFilters} />
+				: null
 		}
 	</React.Fragment>
-);
-
-const Results = ({ results }) => (
-	<Row>
-		<Col
-			md={11}
-			col={12}
-			xClass={`mx-auto ${results.length > 0 ? ' border border-secondary rounded' : ''}`}
-		>
-			{
-				results.length > 0
-					? <ResultsEntries results={this.props.results} />
-					: null
-			}
-		</Col>
-	</Row>
 );
 
 class Validator extends Component {
@@ -59,22 +73,13 @@ class Validator extends Component {
 		const tomsList = this.props.toms;
 		const resultsNotEmpty = this.props.results.length > 0;
 
-		const numResults = !resultsNotEmpty
-			? 0
-			: this.props.results
-				.reduce(
-					(acc, pageResult) =>
-						acc + Object.values(pageResult).reduce(
-							(acc, checkResult) => acc + checkResult.length,
-							0,
-						),
-					0,
-				);
-
 		return (
 			<Grid fluid xClass="mt-3">
-				<Row xClass="position-static">
-					<Col md={11} col={12} xClass="mx-auto mb-3 py-3 border border-secondary rounded">
+				<Row xClass="position-static border border-secondary rounded m-1 py-2">
+					<Col col={2}>
+						<ValidationFilters />
+					</Col>
+					<Col md={9} col={10} xClass="mb-3 py-3">
 						<h2>Selected TOM: {this.props.selectedTOM || 'None'}</h2>
 						<div className="btn-toolbar mt-3 mb-2 mw-75">
 							<Dropdown items={tomsList}
@@ -84,7 +89,7 @@ class Validator extends Component {
 							/>
 							<Button bsClass="primary"
 							        xClass="ml-2"
-							        click={() => this.props.validateTOMStart()}
+							        click={() => this.props.selectedTOM && this.props.validateTOMStart()}
 							        text="Validate TOM"
 							        disabled={this.props.toms.length === 0 || this.props.verifyingCache}
 							/>
@@ -95,6 +100,7 @@ class Validator extends Component {
 							}
 						</div>
 						<hr />
+						<p className="my-2">{this.props.fileCount || 0} total files</p>
 						{
 							this.props.progressStatus
 								? <p>{this.props.progressStatus}</p>
@@ -102,15 +108,14 @@ class Validator extends Component {
 						}
 						{
 							resultsNotEmpty
-								? <p className="my-2"><strong className="text-danger">{`${numResults} errors found`}</strong></p>
+								? <p className="my-2"><strong className="text-danger">{`${this.props.numErrors} errors found`}</strong></p>
 								: null
 						}
-						<p className="my-2">{this.props.fileCount || 0} total files</p>
 						<ProgressBar percent={this.props.progress}/>
+						<Results results={this.props.results} validationFilters={this.props.validationFilters} />
 					</Col>
 					<Clear />
 				</Row>
-				<Results />
 			</Grid>
 		);
 	}

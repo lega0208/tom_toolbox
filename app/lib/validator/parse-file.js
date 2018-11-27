@@ -1,5 +1,5 @@
 // @flow
-import { basename, dirname, join, relative } from 'path';
+import { basename, dirname, join, relative, resolve } from 'path';
 import { readFile } from 'fs-extra';
 
 export const getTitles = async ($) => {
@@ -42,13 +42,17 @@ export const getlangLink = async ($) => {
 
 export const getBreadcrumbs = async ($, path, parentData) => {
 	const pageDir = dirname(path);
+	const parentDir = dirname(parentData.path);
 
 	const actual =
 		$('#cn-bcrumb > ol > li > a').filter((i) => i !== 0).toArray()
 			.map((bcrumb) => (bcrumb.attribs.href || '').replace(/\//g, '\\'));
 
+	const absoluteParentExpected =
+		parentData.breadcrumbs.expected
+			.map((filePath) => resolve(parentDir, filePath));
 	const expected =
-		[ ...parentData.breadcrumbs.expected, parentData.path ]
+		[ ...absoluteParentExpected, parentData.path ]
 			.map((bcrumb) => relative(pageDir, bcrumb));
 
 	return { actual, expected }
@@ -139,10 +143,10 @@ export const getToC = async ($) => {
 			.toArray()
 			.map((li) => ({
 				href: $(li).children('a').first().attr('href'),
-				text: $(li).text(),
+				text: $(li).children('a').first().html(),
 			}));
 
-		itemsByLevel[listLevel].push(tocItems); // check for <a> tag in case some landing pages have lists?
+		itemsByLevel[listLevel].push(...tocItems); // check for <a> tag in case some landing pages have lists?
 	});
 
 	return itemsByLevel;

@@ -11,7 +11,6 @@ import {
 	getTitles,
 	getToC
 } from './parse-file';
-import { batchAwait } from '../util';
 import { wrapContent } from './util';
 import { homepages, landingPages } from './paths';
 
@@ -19,7 +18,7 @@ export const parseAllTOMs = async (outputPath = '.') => { // run from menu?
 	//const outputObj = {};
 	const errors = [];
 
-	for (const [tomName, tomHomepages] of Object.entries(homepages).filter(entry => entry[0] === 'TOM409231')) {
+	for (const [tomName, tomHomepages] of Object.entries(homepages)) {
 		const tomDataObj = await parseFromHomepage(tomHomepages, tomName, errors);
 		try {
 			await outputFile(join(outputPath, `${tomName}.json`), JSON.stringify(tomDataObj), 'utf8');

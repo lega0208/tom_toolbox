@@ -6,7 +6,8 @@ export const VALIDATOR = {
 		SUCCESS: 'VALIDATOR.VALIDATE_TOM.SUCCESS',
 	},
 	FILTERS: {
-		SET: 'VALIDATOR.FILTERS.SET', // for validation filters (i.e. title)
+		ADD: 'VALIDATOR.FILTERS.ADD', // for validation filters (i.e. title)
+		REMOVE: 'VALIDATOR.FILTERS.REMOVE',
 	},
 	GET_TOMS: {
 		START: 'VALIDATOR.GET_TOMS.START',
@@ -46,7 +47,8 @@ export const VALIDATOR = {
 
 export const selectTOM = (tomName) => ({ type: VALIDATOR.SELECT.TOM, payload: tomName });
 
-export const setFilters = () => ({ type: VALIDATOR.FILTERS.SET });
+export const addFilter = (title) => ({ type: VALIDATOR.FILTERS.ADD, payload: title });
+export const removeFilter = (title) => ({ type: VALIDATOR.FILTERS.REMOVE, payload: title });
 
 export const validateTOMStart = () => ({ type: VALIDATOR.VALIDATE_TOM.START });
 export const validateTOMError = (e) => ({ type: VALIDATOR.VALIDATE_TOM.ERROR, payload: e });

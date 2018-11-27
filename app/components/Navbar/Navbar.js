@@ -14,7 +14,7 @@ function MyNavbar() {
 	];
 
 	return (
-		<nav className="navbar navbar-dark bg-secondary navbar-expand navbar-fixed-top">
+		<nav className="navbar navbar-dark bg-secondary navbar-expand navbar-fixed-top sticky-top">
 			<Link className="navbar-brand" to="/">TOM Toolbox</Link>
 			<NavLinks links={links} />
 		</nav>

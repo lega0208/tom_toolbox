@@ -3,10 +3,10 @@ import { Col, Grid, Row } from 'components/bsComponents';
 
 const AdditionalMessage = ({ msg, i }) => (
 	<Row key={`addit-msg-row-${i}`}>
-		<Col key={`addit-msg-col1-${i}`} col={4} xClass="pl-0">
+		<Col key={`addit-msg-col1-${i}`} col={3} xClass="pl-0">
 			<p key={`addit-msg-p1-${i}`} className="text-dark text-right nowrap my-0"><strong>{msg.header || ''}</strong></p>
 		</Col>
-		<Col key={`addit-msg-col2-${i}`} col={8}>
+		<Col key={`addit-msg-col2-${i}`} col={9}>
 			<p key={`addit-msg-p2-${i}`} className="text-dark my-0">
 				{
 					/* msg can be an object (for header) or string */

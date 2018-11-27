@@ -5,9 +5,9 @@ import validateTOM from 'lib/validator';
 import {
 	setProgressStatus,
 	setProgress,
+	setFilecount,
 } from 'actions/validator';
 import startTrackProgress, { ProgressTracker } from './progress';
-import { TOMData } from 'lib/validator/types';
 
 export default function* validate(tomData) {
 	yield put(setProgressStatus('Validation in progress'));
@@ -20,6 +20,7 @@ export default function* validate(tomData) {
 	const filesToValidate = Object.values(tomData.files);
 
 	//const filesToValidate = yield call(getFilesToValidate, rootFile, tomData);
+	yield put(setFilecount(filesToValidate.length));
 	progress.setTotal(filesToValidate.length);
 
 	// start progress tracking
@@ -36,7 +37,7 @@ export default function* validate(tomData) {
 	// stop progress tracking
 	yield cancel(progressTask);
 
-	return yield tomResults.sort();
+	return yield tomResults;
 }
 
 //async function getFilesToValidate(rootNode, tomData) {

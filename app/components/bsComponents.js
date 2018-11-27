@@ -69,7 +69,9 @@ export const Button = (props) => (
 	</button>
 );
 
-export const ListGroup = (props) => <ul className="list-group">{props.children}</ul>;
+export const ListGroup = (props) => (
+	<ul className={`list-group${props.xClass ? ` ${props.xClass}` : ''}`}>{props.children}</ul>
+);
 export const ListGroupItem = (props) => (
 	<li className={`list-group-item${props.xClass ? ` ${ props.xClass }` : ''}`}>
 		{props.children}
@@ -145,6 +147,13 @@ export const Dropdown = ({ items, click, label, xClass }) => {
 		</div>
 	);
 };
+
+export const Checkbox = ({ xClass = '', inline = false, label = '', value = '', checked, change }) => (
+	<div className={`form-check${inline ? ' form-check-inline' : ''}${xClass && ` ${xClass}`}`}>
+		<input className="form-check-input" type="checkbox" value={value} checked={checked} onChange={change} />
+		<label className="form-check-label">{label}</label>
+	</div>
+);
 
 export const LoadingSpinner = ({ xClass }) => <FontAwesomeIcon icon={faSpinner} spin className={xClass || ''} transform="grow-2" />;
 

@@ -7,15 +7,32 @@ const initialState = {
 	tomData: {},
 	subchapterChoices: [],
 	subchapterSelections: [],
-	results: {},
+	filecount: 0,
+	results: [],
+	numErrors: 0,
 	error: '',
 	progress: 0,
 	progressStatus: '',
 	verifyingCache: false,
+	validationFilters: [],
 };
 
 function validator(state = initialState, action) {
 	switch (action.type) {
+		case VALIDATOR.FILTERS.ADD:
+			return {
+				...state,
+				validationFilters:
+					!state.validationFilters.includes(action.payload)
+						? [ ...state.validationFilters, action.payload ]
+						: state.validationFilters,
+			};
+		case VALIDATOR.FILTERS.REMOVE:
+			return {
+				...state,
+				validationFilters: state.validationFilters.filter((title) => title !== action.payload),
+			};
+
 		case VALIDATOR.GET_TOMS.START: return initialState;
 		case VALIDATOR.GET_TOMS.SUCCESS: return { ...state, toms: action.payload, tomsLoaded: true };
 		case VALIDATOR.GET_TOMS.ERROR: return { ...initialState, error: action.payload, };
@@ -23,7 +40,18 @@ function validator(state = initialState, action) {
 		case VALIDATOR.SELECT.TOM:
 			return { ...state, selectedTOM: action.payload, fileCount: 0, progress: 0, results: {}, progressStatus: '' };
 
-		case VALIDATOR.SET.RESULTS: return { ...state, results: action.payload };
+		case VALIDATOR.SET.FILECOUNT: return { ...state, fileCount: action.payload };
+		case VALIDATOR.SET.RESULTS:
+			return {
+				...state,
+				results: action.payload,
+				numErrors:
+					action.payload
+						.reduce((acc, pageResults) => (
+							acc + pageResults.results
+								.reduce((acc, results) => acc + results.errors.length, 0)
+						), 0),
+			};
 		case VALIDATOR.SET.TOM_DATA: return { ...state, tomData: action.payload };
 
 		case VALIDATOR.PROGRESS.SET: return { ...state, progress: action.payload };

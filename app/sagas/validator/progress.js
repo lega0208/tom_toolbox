@@ -35,7 +35,7 @@ export class ProgressTracker {
 		this.numCompleted += 1;
 	}
 	getProgress() { // get % done
-		return (this.numCompleted / this.total) * 100;
+		return Math.floor((this.numCompleted / this.total) * 100);
 	}
 	done() {
 		this.progress = 100;

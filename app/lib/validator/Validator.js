@@ -6,6 +6,7 @@ import {
 	PageResults,
 	TOMDataType,
 	ValidationError,
+	ValidationResult,
 } from 'lib/validator/types';
 import { pathExists } from 'fs-extra';
 
@@ -116,17 +117,26 @@ const checkSecMenu: CheckFunc = async (fileData, tomData: TOMDataType) => {
 		return validate.getResults();
 	}
 
+	if (!fileData.secMenu) {
+		validate.pushError('Section menu not found.');
+		return validate.getResults();
+	}
+
 	const lang = basename(fileData.path).replace(/.+-([ef])\.html/, '$1') === 'e' ? 'e' : 'f';
+	const dirPath = dirname(`${fileData.path}`);
+
 	const expectedSecMenu =
 		tomData.secMenu[lang]
-			.map(({ text, href }) => ({ text, href: resolve(dirname(`${tomData.homePage}-e.html`), href) })); // get abs paths
-	const actualSecMenu = fileData.secMenu.map(({ text, href }) => ({ text, href: resolve(dirname(fileData.path), href) }));
+			.map(({ text, href }) => ({ text: text.replace(/\s+/g, ' '), href: resolve(dirname(`${tomData.homePage}-e.html`), href) })); // get abs paths
+	const actualSecMenu =
+		fileData.secMenu
+			.map(({ text, href }) => ({ text: text.replace(/\s+/g, ' '), href: resolve(dirPath, href) }));
 
 	for (const [ i, expectedItem ] of expectedSecMenu.entries()) {
 		const itemIsMissing =
 			validate.pushErrorIf(!fileData.secMenu[i], 'Section menu item is missing (based on homepage):', [
 				{ header: 'Text:', message: expectedItem.text },
-				{ header: 'Href:', message: expectedItem.href },
+				{ header: 'Href:', message: relative(dirPath, expectedItem.href) },
 			]);
 		if (itemIsMissing) continue;
 
@@ -137,7 +147,7 @@ const checkSecMenu: CheckFunc = async (fileData, tomData: TOMDataType) => {
 			]);
 		validate.pushErrorIf(expectedItem.href !== actualSecMenu[i].href,
 			'Href of section menu item differs from what is on the home page:', [
-				{ header: 'Expected:', message: relative(dirname(fileData.path), expectedItem.href) },
+				{ header: 'Expected:', message: relative(dirPath, expectedItem.href) },
 				{ header: 'Actual:', message: fileData.secMenu[i].href },
 			]);
 
@@ -160,12 +170,18 @@ const checkSecMenu: CheckFunc = async (fileData, tomData: TOMDataType) => {
 const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) => {
 	const validate = new ValidationCheck('Navigation buttons');
 
-	if (fileData.isHomepage || (!fileData.nav.top && !fileData.nav.bottom)) {
+	if (fileData.isHomepage) {
+		return validate.getResults();
+	}
+
+	if (!fileData.nav) {
+		validate.pushError('No navigation buttons found.');
 		return validate.getResults();
 	}
 
 	if (!fileData.nav.top) {
 		validate.pushError('Top navigation buttons are missing.');
+		return validate.getResults();
 	}
 
 	if (!fileData.nav.bottom) {
@@ -175,7 +191,7 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 	const { top, bottom } = fileData.nav;
 
 	const absPath = (filePath, relPath) => resolve(dirname(filePath), relPath);
-	const relPath = (from, to) => resolve(dirname(from), to);
+	const relPath = (from, to) => relative(dirname(from), to);
 
 	if (top && top.prevPage) {
 		validate.pushErrorIf(top.prevPage !== bottom.prevPage, 'Top and bottom "Previous page" buttons have different hrefs:', [
@@ -184,10 +200,12 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 		]);
 
 		const prevPageData = tomData.files[absPath(fileData.path, top.prevPage)];
-		validate.pushErrorIf(!prevPageData, 'Unable to find file linked in "Previous page" button:', [top.prevPage]);
+		validate.pushErrorIf(!prevPageData, 'Unable to find file linked in "Previous page" button:', [ top.prevPage ]);
 
-		if (prevPageData && !prevPageData.isHomepage && prevPageData.nav.top) {
-			if (prevPageData.nav.top.nextPage) {
+		if (prevPageData && !prevPageData.isHomepage && prevPageData.nav) {
+			if (!prevPageData.nav.top) {
+				console.error(`prevPageData nav found, but no nav.top: ${basename(prevPageData.path)}`);
+			} else if (prevPageData.nav.top.nextPage) {
 				const nextPageOfPrevPage = absPath(prevPageData.path, prevPageData.nav.top.nextPage);
 
 				validate.pushErrorIf(nextPageOfPrevPage !== fileData.path,
@@ -197,10 +215,10 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 						{ header: 'Expected:', message: relPath(prevPageData.path, fileData.path) },
 					]
 				);
-			} else {
-				validate.pushError('"Next page" button in the linked "Previous page" was not found.', [{
+			} else if (prevPageData && !prevPageData.isHomepage && !prevPageData.nav) {
+				validate.pushError('Navigation buttons not found in the linked "Previous page".', [{
 					header: 'Previous page:',
-					message: prevPageData.path,
+					message: basename(prevPageData.path),
 				}]);
 			}
 		}
@@ -213,10 +231,16 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 		]);
 
 		const nextPageData = tomData.files[absPath(fileData.path, top.nextPage)];
-		validate.pushErrorIf(!nextPageData, 'Unable to find file linked in "Next page" button:', [top.nextPage]);
+		validate.pushErrorIf(!nextPageData, 'Unable to find file linked in "Next page" button:', [ top.nextPage ]);
 
-		if (nextPageData && nextPageData.nav.top) {
-			if (nextPageData.nav.top.prevPage) {
+		if (nextPageData && nextPageData.nav) {
+			if (!nextPageData.nav.top) {
+				console.error(`nextPageData nav found, but no nav.top: ${basename(nextPageData.path)}`);
+				validate.pushError('Top navigation buttons not found in the linked "Next page".', [{
+					header: 'Next page:',
+					message: basename(nextPageData.path),
+				}]);
+			} else if (nextPageData.nav.top.prevPage) {
 				const prevPageOfNextPage = absPath(nextPageData.path, nextPageData.nav.top.prevPage);
 
 				validate.pushErrorIf(prevPageOfNextPage !== fileData.path,
@@ -229,7 +253,7 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 			} else {
 				validate.pushError('"Previous page" button in the linked "Next page" was not found.', [{
 					header: 'Next page:',
-					message: nextPageData.path,
+					message: basename(nextPageData.path),
 				}]);
 			}
 		}
@@ -240,7 +264,7 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 const checkToC: CheckFunc = async (fileData) => {
 	const validate = new ValidationCheck('Table of contents');
 
-	if (fileData.isHomepage) {
+	if (fileData.isHomepage || !(fileData.toc.length > 0)) {
 		return validate.getResults();
 	}
 
@@ -251,18 +275,19 @@ const checkToC: CheckFunc = async (fileData) => {
 		3: 'h5',
 	};
 
-	const { headersById, noIdHeaders } = fileData.headers.reduce((acc, header) => {
-		if (!header.id) {
-			acc.noIdHeaders.push(header);
-		} else {
-			acc.headersById[header.id] = { text: header.text, tag: header.tag };
+	const headersById = fileData.headers.reduce((acc, header) => {
+		if (header.id) {
+			acc[header.id] = { text: header.text.replace(/\s+/g, ' ').trim(), tag: header.tag };
 		}
-
 		return acc;
-	}, { headersById: {}, noIdHeaders: [] });
+	}, {});
 
 	for (const [ level, entries ] of fileData.toc.entries()) {
-		for (const tocItem of entries) {
+		const tocItems = entries.map((item) => ({
+			href: item.href,
+			text: item.text.replace(/\s+/g, ' ').trim()
+		}));
+		for (const tocItem of tocItems) {
 			// check if href is missing
 			const hrefIsMissing =
 				validate.pushErrorIf(!tocItem.href,
@@ -292,8 +317,9 @@ const checkToC: CheckFunc = async (fileData) => {
 			// check if header tag doesn't correspond to toc level
 			validate.pushErrorIf(correspondingHeader.tag !== levelMap[level],
 				'Header tag differs from what is expected based on the ToC:', [
+					{ header: 'Header:', message: correspondingHeader.text },
 					{ header: 'Expected:', message: levelMap[level] },
-					{ header: 'Actual:', message: tocItem.tag },
+					{ header: 'Actual:', message: correspondingHeader.tag },
 				]);
 
 			// remove headers with an associated toc entry to see if any are left over
@@ -312,14 +338,22 @@ const checkToC: CheckFunc = async (fileData) => {
 		}
 	}
 
-	if (noIdHeaders.length > 0) {
-		// header has no id
-		for (const header of noIdHeaders) {
-			validate.pushError('The following header has no id:', [header.text]);
-		}
-	}
-
-	// todo: add checking for duplicates
+	// check for duplicated
+	fileData.headers
+		.sort((a, b) => (a.id || '').localeCompare((b.id || ''))) // sort alphabetically by id
+		.reduce((acc, header, i) => {                             // reduce to array of (array of) headers with duplicate ids
+				if (header === fileData.headers[i + 1]) {
+					acc.push([ header, fileData.header[i + 1] ]);
+				}
+			return acc;
+			}, [])
+		.forEach((headers) => {                                    // push error for each header
+				validate.pushError('The following headers have duplicated ids. Ids should be unique:', [
+					{ header: 'Id:', message: headers[0].id },
+					headers[0].text,
+					headers[1].text,
+				]);
+			});
 
 	return validate.getResults();
 };
@@ -355,7 +389,8 @@ export const validatePage = async (fileData, tomData, progress) => {
 	];
 
 	const validationTasks = validations.map((validation) => validation(fileData, tomData));
-	const results: Array<PageResults> = (await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
+	const results: Array<ValidationResult> =
+		(await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
 
 	progress.incrementProgress();
 
@@ -364,41 +399,3 @@ export const validatePage = async (fileData, tomData, progress) => {
 		results,
 	};
 };
-
-// this could probably just be a function (could write a "withProgressIncrement" function)
-export default class PageValidator {
-	constructor(fileData, tomData, progress) {
-		this.fileData = fileData;
-		this.tomData = tomData;
-		this.progress = progress;
-		this.results = [];
-		this.validations = [
-			checkTitles,
-			checkDates,
-			checkLangLink,
-			checkBreadcrumbs,
-			checkSecMenu,
-			checkNavs,
-			checkToC,
-		];
-
-	}
-
-	async performValidations() {
-		const validationTasks = this.validations.map((validate) => validate(this.fileData, this.tomData));
-		const validationsResults = await Promise.all(validationTasks);
-
-		for (const validationResults of validationsResults) {
-			if (validationResults.errors.length > 0) {
-				this.results.push(validationResults);
-			}
-		}
-
-		this.progress.incrementProgress();
-
-		return {
-			path: this.fileData.path,
-			results: this.results,
-		};
-	}
-}
