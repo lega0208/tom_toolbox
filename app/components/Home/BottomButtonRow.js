@@ -13,7 +13,7 @@ export default function BottomButtonRow({ initConverter, showPreview }) {
 	const ConvertButton = () => (
 		<button className="btn btn-primary col-7 col-md-8"
 		        onClick={initConverter}>
-			<span className="h6">Convert list</span>
+			<span className="h6">Convert</span>
 		</button>
 	);
 

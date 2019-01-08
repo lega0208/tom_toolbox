@@ -33,7 +33,7 @@ export default function autoAcro(state = initialState, action) { // todo: clean 
 		case AUTOACRO.SET.ACROMAP: return mergeState('acroMap');
 		case AUTOACRO.SET.DUPS: return mergeState('dups');
 		case AUTOACRO.SET.DUPSMAP: return mergeState('dupsMap');
-		case AUTOACRO.SET.DUPS_SELECTIONS: return mergeState('dupsSelections');
+		case AUTOACRO.SET.DUPS_SELECTIONS: return mergeState('dupsSelections', { ...state.dupsSelections, ...action.payload });
 		case AUTOACRO.SET.NODEFS: return {
 			...state,
 			noDefs: action.payload,

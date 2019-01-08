@@ -29,7 +29,13 @@ async function verifyCache(cacheFilePath: string) {
 	const outdatedFiles: Array<FileData> = [];
 
 	const fileObjects = Object.values(files);
-	const getStatTasks = fileObjects.map((file) => stat(file.path));
+	const getStatTasks = fileObjects.map((file) => {
+		try {
+			return stat(file.path)
+		} catch (e) {
+			console.error(e);
+		}
+	});
 
 	const fileStats = await Promise.all(getStatTasks);
 

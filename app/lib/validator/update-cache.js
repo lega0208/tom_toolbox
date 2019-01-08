@@ -16,7 +16,7 @@ import {
 	getToC
 } from './parse-file';
 
-const parseNewData = async (path, isHomepage, parentData, tomName) => {
+const parseNewData = async (path, isHomepage, isLanding, parentData, tomName) => {
 	const fileName = basename(path);
 	const fileContents = await readFile(path, 'utf8');
 	const pageContents = (await wrapContent(fileContents, fileName) || fileContents);
@@ -46,11 +46,8 @@ const parseNewData = async (path, isHomepage, parentData, tomName) => {
 		nav: await getNavs($),
 		toc: await getToC($),
 		headers: await getHeaders($),
-		children: await getChildren($, path, tomName),
+		children: isLanding ? (await getChildren($, path, tomName)) : [],
 	};
-
-	console.log('Returning newly parsed data:');
-	console.log(data);
 
 	return data;
 };
@@ -60,7 +57,7 @@ const createNewFileData = async (path, parentData, tomName) => ({
 	depth: parentData.depth + 1,
 	isLanding: false,
 	parent: parentData.path,
-	...(await parseNewData(path, parentData, tomName)),
+	...(await parseNewData(path, false, false, parentData, tomName)),
 });
 
 export async function updateCachedData(path: string, tomData: TOMDataType): Promise<FileData> {
@@ -69,7 +66,7 @@ export async function updateCachedData(path: string, tomData: TOMDataType): Prom
 	const oldFileData: FileData = files[path];
 	const parentData: ?FileData = oldFileData.parent ? files[oldFileData.parent] : null;
 
-	const newFileData = await parseNewData(path, oldFileData.isHomepage, parentData, tomName);
+	const newFileData = await parseNewData(path, oldFileData.isHomepage, oldFileData.isLanding, parentData, tomName);
 
 	const combinedData: FileData = { ...oldFileData, ...newFileData };
 
@@ -82,15 +79,27 @@ export async function updateCachedData(path: string, tomData: TOMDataType): Prom
 		const newChildren = newFileData.children || [];
 
 		if (oldFileData.isHomepage) {
-			//const oldHomepageChildren = oldChildren.map(({ href, text }) => [ href, text ]);
-			//const newHomepageChildren = newChildren.map(({ href, text }) => [ href, text ]);
+			console.log('old children:');
+			console.log(oldChildren);
+			console.log('new children:');
+			console.log(newChildren);
 
-			for (const [ i, oldChild ] of oldChildren.entries()) {
-				if (oldChild.text !== newChildren[i].text || oldChild.href !== newChildren[i].href) {
-					const langRegex = /-([ef])\.html/;
-					const lang = langRegex.exec(path)[1];
-					secMenu[lang] = newChildren;
-					break; //  exit the loop if any change is found
+			const langRegex = /-([ef])\.html/;
+			const lang = langRegex.exec(path)[1];
+
+			if (newChildren.length > oldChildren.length) {
+				secMenu[lang] = newChildren;
+			} else {
+				for (const [ i, oldChild ] of oldChildren.entries()) {
+					if (!newChildren[i] || oldChild.text !== newChildren[i].text || oldChild.href !== newChildren[i].href) {
+						//console.log('secMenu updating:');
+						//console.log('old secMenu:');
+						//console.log(secMenu[lang]);
+						secMenu[lang] = newChildren;
+						//console.log('new secMenu:');
+						//console.log(secMenu[lang]);
+						break; //  exit the loop if any change is found
+					}
 				}
 			}
 		}
@@ -119,9 +128,6 @@ export async function updateCachedData(path: string, tomData: TOMDataType): Prom
 		}
 	}
 
-	console.log('updated data:');
-	console.log(combinedData);
-
 	return new Promise((resolve, reject) => {
 		try {
 			resolve();
@@ -140,7 +146,7 @@ async function cascadeAddition(path, parentData, tomName, filesRef) {
 		if (fileData.isLanding && fileData.children) {
 			const additionTasks = fileData.children.map((child) => cascadeAddition(child, fileData, tomName, filesRef));
 
-			await Promise.all(additionTasks);
+			return await Promise.all(additionTasks);
 		}
 	}
 }
@@ -155,7 +161,7 @@ async function cascadeRemoval(path, filesRef) {
 		if (children) {
 			const removalTasks = children.map((child) => cascadeRemoval(child, filesRef));
 
-			await Promise.all(removalTasks);
+			return await Promise.all(removalTasks);
 		}
 	}
 }

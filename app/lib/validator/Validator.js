@@ -27,7 +27,7 @@ class ValidationCheck {
 		this.errors.push(makeError(message, additionalMessages));
 	}
 
-	pushErrorIf(comparisonBool: boolean, message, additionalMessages): boolean {
+	pushErrorIf(comparisonBool: ?boolean, message, additionalMessages): ?boolean {
 		if (comparisonBool) {
 			this.pushError(message, additionalMessages);
 		}
@@ -194,9 +194,9 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 	const relPath = (from, to) => relative(dirname(from), to);
 
 	if (top && top.prevPage) {
-		validate.pushErrorIf(top.prevPage !== bottom.prevPage, 'Top and bottom "Previous page" buttons have different hrefs:', [
+		validate.pushErrorIf(bottom && top.prevPage !== bottom.prevPage, 'Top and bottom "Previous page" buttons have different hrefs:', [
 			{ header: 'Top:', message: top.prevPage },
-			{ header: 'Bottom:', message: bottom.prevPage }
+			{ header: 'Bottom:', message: bottom && bottom.prevPage }
 		]);
 
 		const prevPageData = tomData.files[absPath(fileData.path, top.prevPage)];
@@ -225,9 +225,9 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 	}
 
 	if (top && top.nextPage) {
-		validate.pushErrorIf(top.nextPage !== bottom.nextPage, 'Top and bottom "Next page" buttons have different hrefs:', [
-			{ header: 'Top:', message: top.prevPage },
-			{ header: 'Bottom:', message: bottom.prevPage }
+		validate.pushErrorIf(bottom && top.nextPage !== bottom.nextPage, 'Top and bottom "Next page" buttons have different hrefs:', [
+			{ header: 'Top:', message: top.nextPage },
+			{ header: 'Bottom:', message: bottom && bottom.nextPage }
 		]);
 
 		const nextPageData = tomData.files[absPath(fileData.path, top.nextPage)];
@@ -264,7 +264,7 @@ const checkNavs: CheckFunc = async (fileData: FileData, tomData: TOMDataType) =>
 const checkToC: CheckFunc = async (fileData) => {
 	const validate = new ValidationCheck('Table of contents');
 
-	if (fileData.isHomepage || !(fileData.toc.length > 0)) {
+	if (fileData.isHomepage || !fileData.toc || !(fileData.toc.length > 0)) {
 		return validate.getResults();
 	}
 

@@ -15,8 +15,8 @@ type Nav = {
 	nextPage?: string,
 };
 
-type ToCItem = { href: string, text: string };
-type ToCLevel = Array<ToCItem>;
+type ToCItem = ?{ href?: ?string, text?: ?string };
+type ToCLevel = Array<?ToCItem>;
 
 type Header = {
 	tag: string,
@@ -51,10 +51,10 @@ export type FileData = {
 	},
 	secMenu?: Array<Child>,
 	nav?: {
-		top: ?Nav,
-		bottom: ?Nav,
+		top?: ?Nav,
+		bottom?: ?Nav,
 	},
-	toc?: ?Array<ToCLevel>,
+	toc?: ?Array<?ToCLevel>,
 	headers?: Array<Header>,
 	parent?: ?string,
 	children?: ?Array<Child> | ?{ [string]: FileData },

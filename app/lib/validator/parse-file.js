@@ -125,7 +125,7 @@ export const getNavs = async ($, path, errors) => {
 export const getToC = async ($) => {
 	const tocRef = $('.module-table-contents');
 
-	if (tocRef.length === 0) return [];
+	if (tocRef.length === 0 || tocRef.find('ul > ul').length > 0) return [];
 
 	const itemsByLevel = [];
 	const uls = tocRef.find('ul');
@@ -139,12 +139,17 @@ export const getToC = async ($) => {
 
 		if (!itemsByLevel[listLevel]) itemsByLevel[listLevel] = [];
 
-		const tocItems = ulRef.children()
+		const tocItems = ulRef.children('li')
 			.toArray()
 			.map((li) => ({
 				href: $(li).children('a').first().attr('href'),
 				text: $(li).children('a').first().html(),
 			}));
+
+		if (tocItems[0][0] && !tocItems[0][0].href) {
+			console.log(tocRef.html());
+			console.log(tocItems);
+		}
 
 		itemsByLevel[listLevel].push(...tocItems); // check for <a> tag in case some landing pages have lists?
 	});
@@ -176,8 +181,8 @@ export const getChildren = async ($, path, tomName) => {
 			text: $(a).text(),
 		}));
 
-	// TOM56 & 4095 have abnormal "children" structure
-	if (!/TOM(?:56|4095)/.test(tomName)) {
+	// TOM56, 4095 & 4031 have abnormal "children" structure
+	if (!/TOM(?:56|4095|4031)/.test(tomName)) {
 		return getNormalChildren();
 	} else { // They have landing pages that don't conform
 		const regex = /asl_5600-[ef]\.html/;
@@ -203,13 +208,27 @@ export const getChildren = async ($, path, tomName) => {
 					.first()    // ul
 					.children() // lis
 					.toArray()
-					.map(li => {
+					.map((li) => {
 						const a = $(li).children('a').get(0);
 						const href = join(`${path}/..`, a.attribs.href.trim());
 						const text = $(a).text();
 
 						return { href, text };
 					});
+			} else {
+				return getNormalChildren();
+			}
+		} else if (tomName === 'TOM4031') {
+			const regex = /exami_4031\.5-[ef]\.html/;
+
+			if (regex.test(fileName)) {
+				return contentRef
+					.find('div.span-6 a')
+					.toArray()
+					.map((a) => ({
+						href: join(`${path}/..`, a.attribs.href.trim()),
+						text: $(a).text(),
+					}));
 			} else {
 				return getNormalChildren();
 			}
