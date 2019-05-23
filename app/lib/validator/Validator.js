@@ -283,10 +283,11 @@ const checkToC: CheckFunc = async (fileData) => {
 	}, {});
 
 	for (const [ level, entries ] of fileData.toc.entries()) {
-		const tocItems = entries.map((item) => ({
+		const tocItems = entries.map((item) => (!item.href && !item.text) ? null : ({
 			href: item.href,
 			text: item.text.replace(/\s+/g, ' ').trim()
-		}));
+		})).filter((i) => !!i);
+		
 		for (const tocItem of tocItems) {
 			// check if href is missing
 			const hrefIsMissing =
@@ -389,13 +390,18 @@ export const validatePage = async (fileData, tomData, progress) => {
 	];
 
 	const validationTasks = validations.map((validation) => validation(fileData, tomData));
-	const results: Array<ValidationResult> =
-		(await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
+	try {
+		const results: Array<ValidationResult> =
+			(await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
 
-	progress.incrementProgress();
+		progress.incrementProgress();
 
-	return {
-		path: fileData.path,
-		results,
-	};
+		return {
+			path: fileData.path,
+			results,
+		};
+	} catch (e) {
+		console.log(`Error validating ${fileData.path}`);
+		throw e;
+	}
 };

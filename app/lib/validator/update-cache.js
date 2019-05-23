@@ -1,8 +1,9 @@
 // @flow
-import { basename } from "path";
+import cheerio from 'cheerio';
+import { basename } from 'path';
 import { pathExists, readFile } from 'fs-extra';
+import { landingPages } from './paths';
 import { wrapContent } from './util';
-import cheerio from "cheerio";
 import { FileData, TOMDataType } from './types';
 import {
 	getBreadcrumbs,
@@ -52,27 +53,39 @@ const parseNewData = async (path, isHomepage, isLanding, parentData, tomName) =>
 	return data;
 };
 
-const createNewFileData = async (path, parentData, tomName) => ({
-	path,
-	depth: parentData.depth + 1,
-	isLanding: false,
-	parent: parentData.path,
-	...(await parseNewData(path, false, false, parentData, tomName)),
-});
+const createNewFileData = async (path, parentData, tomName) => {
+	const isLanding = landingPages[tomName] // have to format the paths the same
+		&& landingPages[tomName]
+			.map((pagePath) => basename(pagePath))
+			.includes(basename(path));
+	return {
+		path,
+		depth: parentData.depth + 1,
+		isLanding,
+		parent: parentData.path,
+		...(await parseNewData(path, false, isLanding, parentData, tomName)),
+	};
+};
 
-export async function updateCachedData(path: string, tomData: TOMDataType): Promise<FileData> {
+export async function updateCachedData(path: string, tomData: TOMDataType): Promise<?FileData> {
 	const { files, tomName, secMenu } = tomData;
+	const isLanding = landingPages[tomName] // have to format the paths the same
+		&& landingPages[tomName]
+			.map((pagePath) => basename(pagePath))
+			.includes(basename(path));
 
-	const oldFileData: FileData = files[path];
+	const oldFileData: ?FileData = files[path]; // if it's been deleted, it's now undefined and can be skipped
+	if (!oldFileData) return;
+
 	const parentData: ?FileData = oldFileData.parent ? files[oldFileData.parent] : null;
 
-	const newFileData = await parseNewData(path, oldFileData.isHomepage, oldFileData.isLanding, parentData, tomName);
+	const newFileData = await parseNewData(path, oldFileData.isHomepage, isLanding, parentData, tomName);
 
 	const combinedData: FileData = { ...oldFileData, ...newFileData };
 
 	files[path] = combinedData;
 
-	if (oldFileData.isLanding) {
+	if (isLanding) {
 		// check that each href was in the old children
 		//  if not, check if the file existed in the tomData, and if not, parse and add the file to tomData.files
 		const oldChildren = oldFileData.children || [];
@@ -144,7 +157,7 @@ async function cascadeAddition(path, parentData, tomName, filesRef) {
 		filesRef[path] = fileData;
 
 		if (fileData.isLanding && fileData.children) {
-			const additionTasks = fileData.children.map((child) => cascadeAddition(child, fileData, tomName, filesRef));
+			const additionTasks = fileData.children.map((child) => cascadeAddition(child.href, fileData, tomName, filesRef));
 
 			return await Promise.all(additionTasks);
 		}
@@ -159,7 +172,7 @@ async function cascadeRemoval(path, filesRef) {
 		delete filesRef[path];
 
 		if (children) {
-			const removalTasks = children.map((child) => cascadeRemoval(child, filesRef));
+			const removalTasks = children.map((child) => cascadeRemoval(child.href, filesRef));
 
 			return await Promise.all(removalTasks);
 		}

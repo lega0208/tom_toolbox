@@ -6,8 +6,7 @@ const recurseDir = async (dir, totalFiles = 0) => {
 	const items = (await readdir(dir)).map((item) => join(dir, item));
 	const numFiles =
 		items.filter(async (item) => (await stat(item)).isFile())
-			.length; // does this actually work as intended? wouldn't returning a promise always return
-							 // a truthy value and therefore not actually filter anything?
+			.length;
 
 	const sum = totalFiles + numFiles;
 

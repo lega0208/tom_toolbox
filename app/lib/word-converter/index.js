@@ -16,6 +16,7 @@ export default function WordConverter(html: string, opts?: optsType): any {
 	const _html = cleanPreLists(html);
 
 	const $ = cheerio.load(_html, { decodeEntities: false });
+
 	const funcs = [
 		boldFigureCaptions,
 		handleComments,
@@ -25,6 +26,7 @@ export default function WordConverter(html: string, opts?: optsType): any {
 		cleanTOC,
 		wetTransforms,
 		removeEmptyPs,
+		unwrapImgs,
 		removeImagePs,
 	];
 	funcs.forEach(func => func($, opts));
@@ -46,6 +48,17 @@ function removeImagePs($) {
 		);
 }
 
+function unwrapImgs($) {
+	$('img').each((i, img) => {
+		const imgRef = $(img);
+		const parentRef = imgRef.parent();
+		
+		if (!parentRef.text().trim() && parentRef.get(0).tagName === 'v:shape' && imgRef.siblings().length === 0) {
+			parentRef.replaceWith(img);
+		}
+	});
+}
+
 function handleComments($) {
 	// Get rid of comment anchors
 	$('a').filter(
@@ -64,7 +77,7 @@ function boldFigureCaptions($) {
 	$('p.FigureCaption').each((i, caption) => {
 		const captionRef = $(caption);
 
-		if (captionRef.next().get(0).tagName === 'table') {
+		if (captionRef.next().get(0) && captionRef.next().get(0).tagName === 'table') {
 			captionRef.prependTo(captionRef.next());
 			caption.tagName = 'caption';
 		} else {

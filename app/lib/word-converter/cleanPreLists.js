@@ -10,17 +10,29 @@ export default function preListClean(html) {
 		removeTags,
 		handleKbd,
 		fixStrongSpaces,
+		removeDeleted,
+		removeImgJunk,
 	];
 	return funcs.reduce((acc, func) => func(acc), html);
 }
 
 function replaceImgSrcs(html) {
-	const regex = /<!--\[if gte vml 1\]>[\s\S]+?<v:imagedata src="(.+?)"[\s\S]+?<img[^>]+?><!(?:--)?\[endif\](?:--)?>/gi;
+	const regex = /(?:<!--\[if gte vml 1\]>[\s\S]+?)?<v:imagedata src="(.+?)"[\s\S]*?(?:<img[^>]+?><!(?:--)?\[endif\](?:--)?>|\/>)/gi;
 
 	while (regex.test(html)) {
 		html = html.replace(regex, '<img src="$1">');
 	}
 	return html;
+}
+
+function removeImgJunk(html) {
+	const regex = /<v:shapetype[\s\S]+?<\/v:shapetype>/g;
+	
+	while (regex.test(html)) {
+		console.log('Found img junk');
+		html = html.replace(regex, '');
+	}
+	return html;	
 }
 
 function removeListComments(html) {
@@ -42,7 +54,6 @@ function addClassQuotes(html) {
 }
 
 function removeEmptyTags(html) {
-
 	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>\s*?<\/\1>/;
 	while (regex.test(html)) {
 		if (regex.exec(html) && !regex.exec(html)[0].includes('mso-spacerun')) {
@@ -70,6 +81,7 @@ function removeTags(html) {
 		'font',
 		'span',
 		'o:p',
+		'ins',
 	].reduce((acc, tag) => {
 		const regex = new RegExp(`<${tag}[\\s\\S]*?>([\\s\\S]*?)</${tag}>`, 'g');
 		while(regex.test(html)) {
@@ -77,6 +89,12 @@ function removeTags(html) {
 		}
 		return html;
 	}, html);
+}
+
+function removeDeleted(html) {
+	const regex = /<del[\s\S]+?<\/del>/g;
+	
+	return html.replace(regex, '');
 }
 
 function handleKbd(html) {

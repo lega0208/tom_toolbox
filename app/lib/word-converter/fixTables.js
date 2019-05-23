@@ -2,23 +2,31 @@ export default function fixTableHTML($) {
 	const tablesRef = $('table');
 
 	tablesRef.each((i, table) => {
+		const theadRef = $('thead', table);
 		const tbodyRef = $('tbody', table);
-		// check that first row contains headers
-		const headerRow = tbodyRef.children().first();
-		// if first two <td>s are bold, it's most likely a header row
-		const first = headerRow.children().first().children().first(); // is <p>
-		const second = first.parent().next().children().first(); // is <p>
+		
+		if (!theadRef.length) {
+			// check that first row contains headers
+			const headerRow = tbodyRef.children().first();
+			// if first two <td>s are bold, it's most likely a header row
+			const first = headerRow.children().first().children().first(); // is <p>
+			const second = first.parent().next().children().first(); // is <p>
 
-		if (first.find('strong').length && second.find('strong').length) {
-			// prepend thead to table
-			$('<thead />').insertBefore(tbodyRef);
-			// move header row to thead
-			$('thead', table).append(headerRow);
-			// change <td>s to <th>s
-			$('thead > tr', table).find('td').each((i, item) => {
-				item.tagName = 'th';
-			});
+			if (first.find('strong').length && second.find('strong').length) {
+				// prepend thead to table
+				$('<thead />').insertBefore(tbodyRef);
+				// move header row to thead
+				$('thead', table).append(headerRow);
+			}
 		}
+		
+		// change <td>s to <th>s
+		$('thead > tr', table).find('td').each((i, item) => {
+			const strong = $('strong', item).first();
+			strong.replaceWith(strong.contents());
+			item.tagName = 'th';
+		});
+		
 		// if first cell of the row is bolded, it's probably a header
 		tbodyRef.children().each((i, tr) => {
 			const trRef = $(tr);
@@ -38,7 +46,9 @@ export default function fixTableHTML($) {
 			const parent = children.parent();
 			// remove empty children
 			children.each(
-				(i, child) => !$(child).text().trim() ? $(child).remove() : null
+				(i, child) => (!$(child).text().trim() && $(child).find('img').length === 0)
+				? $(child).remove()
+				: null
 			);
 
 			// need to recalculate children or something apparently

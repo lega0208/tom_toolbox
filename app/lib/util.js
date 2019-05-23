@@ -9,7 +9,7 @@ export const batchAwait = async (arr, func, queueSize = 10) => {
 			const queue = arr.splice(0, queueSize);
 			const awaitedQueue = await Promise.all(queue.map(func));
 			returnVals.push(...awaitedQueue);
-			console.log('batch completed')
+			console.log('batch completed');
 		}
 
 		return returnVals;
@@ -36,15 +36,21 @@ export function beautify(html) {
 		preserve_newlines: false,
 	};
 
-	return beautify(html, config).replace(/\s*(<img.+?>)/g, '\r\n$1');
+	return beautify(html, config)
+		.replace(/(\s*)(<(?!td)[^>]+?>)(<img[^>]+?>)(<\/(?!td)[^>]+?>)/g, '$1$2$1\t$3$1$4'); // this may be error prone
+}
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'); // $& means the whole matched string
 }
 
 export function findAndReplace(text, acroMap) {
 	const reduceFunc = (replacedText, [acro, def]) => {
-		const regex = new RegExp(`([\\s>\\W])${acro}(?!<\/abbr>|[A-Z])`, 'g'); // todo: optimize regex with lookbehind
-		const firstLastRegex = new RegExp(`^${acro}|${acro}$`, 'gm');   // Also probably only have one find/replace function
+		const escapedAcro = escapeRegExp(acro);
+		const regex = new RegExp(`([\\s>\\W])${escapedAcro}(?!<\/abbr>|[A-Z])`, 'g'); // todo: optimize regex with lookbehind
+		const firstLastRegex = new RegExp(`^${escapedAcro}|${escapedAcro}$`, 'gm');   // Also probably only have one find/replace function
 		const parenRegex = new RegExp(`\\(${def}\\)`, 'g');
-
+		
 		if (!regex.test(text)) {
 			replacedText = replacedText.replace(firstLastRegex, def);
 		} else {

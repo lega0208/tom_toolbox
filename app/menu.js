@@ -53,8 +53,8 @@ export default class MenuBuilder {
 					try {
 						const path = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'] });
 						if (typeof path !== 'undefined') {
-							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DIRECTORATE_SERVICES/,
-								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD\\SPCI\\DIRECTORATE_SERVICES');
+							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DSS/,
+								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS');
 							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => (
 								e ? console.error(e)
 									: console.log(`"${fixedPath}" saved as new db path`)

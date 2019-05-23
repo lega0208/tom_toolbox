@@ -29,15 +29,15 @@ async function verifyCache(cacheFilePath: string) {
 	const outdatedFiles: Array<FileData> = [];
 
 	const fileObjects = Object.values(files);
-	const getStatTasks = fileObjects.map((file) => {
+	const getStatTasks = fileObjects.map(async (file) => {
 		try {
-			return stat(file.path)
+			return await stat(file.path)
 		} catch (e) {
 			console.error(e);
 		}
-	});
+	}); // handle invalid file paths better
 
-	const fileStats = await Promise.all(getStatTasks);
+	const fileStats = (await Promise.all(getStatTasks)).filter((file) => !!file);
 
 	for (const [ i, fileStat ] of fileStats.entries()) {
 		const lastModified = fileStat.mtime;

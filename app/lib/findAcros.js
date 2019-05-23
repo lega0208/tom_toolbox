@@ -45,20 +45,22 @@ function findNonStandard(string: string): Array<string> {
     'GoC',
 		'i\\.e',
 		'i\\.e\\.',
-    'p\\. ex\\.',
+    'p\\.\\sex\\.',
     'p\\.ex\\.',
     'Tel\\.',
   ];
 
   return nonStandardAcros.map(acro => { // replace all backslashes
 			const regex: RegExp = new RegExp(`${acro}(?!\\s*?</abbr>)`);
-
 			if (regex.test(string)) {
 				let replacedAcro: string = acro + '';
 				let replaceRegex: RegExp = /\\\./g;
 				while ((replaceRegex.test(replacedAcro))) {
 					replacedAcro = replacedAcro.replace(replaceRegex, '.');
 				}
+				let replaceSpace: RegExp = /\\s/g;
+				replacedAcro = replacedAcro.replace(replaceSpace, ' ');
+	
 				return replacedAcro;
 			} else {
 				return null;
