@@ -10,7 +10,7 @@ const defaultState = {
 	},
 	initConverterState: {
 		lang: 'en',
-		wetVersion: 2,
+		wetVersion: 4,
 	},
 };
 const { initScriptsState, initConverterState } = defaultState;

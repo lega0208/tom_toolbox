@@ -36,7 +36,7 @@ function removeImgJunk(html) {
 }
 
 function removeListComments(html) {
-	const msoListIgnore = /<!\-{0,2}[if !supportLists\]-{0,2}>[\s\S]+?<!-{0,2}\[endif\]-{0,2}>/g;
+	const msoListIgnore = /<!-{0,2}\[if !supportLists]-{0,2}>[\s\S]+?<!-{0,2}\[endif]-{0,2}>/g;
 
 	while (msoListIgnore.test(html)) {
 		html = html.replace(msoListIgnore, '');

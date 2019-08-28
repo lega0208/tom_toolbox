@@ -37,7 +37,10 @@ export function beautify(html) {
 	};
 
 	return beautify(html, config)
-		.replace(/(\s*)(<(?!td)[^>]+?>)(<img[^>]+?>)(<\/(?!td)[^>]+?>)/g, '$1$2$1\t$3$1$4'); // this may be error prone
+		.replace(/(\s*)(<(?!td)[^>]+?>)(<img[^>]+?>)(<\/(?!td)[^>]+?>)/g, '$1$2$1\t$3$1$4')
+		.replace(/\r?\n(\t+?<h\d class="panel-title")/g, '$1')
+		.replace(/(?<=<div class="alert alert-info">\r?\n)\r?\n(\s+<h\d>)/g, '$1')
+		.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1'); // this may be error prone
 }
 
 function escapeRegExp(string) {
@@ -47,8 +50,8 @@ function escapeRegExp(string) {
 export function findAndReplace(text, acroMap) {
 	const reduceFunc = (replacedText, [acro, def]) => {
 		const escapedAcro = escapeRegExp(acro);
-		const regex = new RegExp(`([\\s>\\W])${escapedAcro}(?!<\/abbr>|[A-Z])`, 'g'); // todo: optimize regex with lookbehind
-		const firstLastRegex = new RegExp(`^${escapedAcro}|${escapedAcro}$`, 'gm');   // Also probably only have one find/replace function
+		const regex = new RegExp(`([\\s>\\W])${escapedAcro}(?!<\/abbr>|\\p{Uppercase_Letter})`, 'gu'); // todo: optimize regex with lookbehind
+		const firstLastRegex = new RegExp(`^${escapedAcro}(?!\\p{Uppercase_Letter})|(?<!\\p{Uppercase_Letter})${escapedAcro}$`, 'gum');   // Also probably only have one find/replace function
 		const parenRegex = new RegExp(`\\(${def}\\)`, 'g');
 		
 		if (!regex.test(text)) {

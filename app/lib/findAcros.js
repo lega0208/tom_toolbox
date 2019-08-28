@@ -6,7 +6,7 @@
 const findAll = (string: string): Array<string> => {
 	const results: [] = [];
 	const regex: RegExp =
-		/(?<=^|[^\p{Uppercase_Letter}])([\p{Uppercase_Letter}-]{2,9})(?!\s*?<\/(?:abbr|kbd)>)(?=[^\p{Uppercase_Letter}]|$)/gum;
+		/(?<=^|[^\p{Uppercase_Letter}])(\p{Uppercase_Letter}{2,9})(?!\s*?<\/(?:abbr|kbd)>)(?=[^\p{Uppercase_Letter}]|$)/gum;
 
 	let result: ?[];
 

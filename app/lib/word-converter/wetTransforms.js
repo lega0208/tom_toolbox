@@ -38,7 +38,7 @@ function fixNotes($, wetVersion) {
 					pRef.children('strong').each((i, strong) => {
 						const strongRef = $(strong);
 						if (/note|remarque/i.test(strongRef.text())) {
-							strong.tagName = 'h4';
+							strong.tagName = 'h3';
 							strongRef.text(strongRef.text().replace(/((?:note|remarque)(?: ?\d)?)\s*:/i, '$1'));
 							strongRef.insertBefore(p);
 						}
@@ -48,6 +48,7 @@ function fixNotes($, wetVersion) {
 				divRef.children('.Note').removeAttr('class');
 				divRef.addClass('alert alert-info');
 				break;
+
 			case 2:
 				divRef.children('.Note').removeAttr('class');
 				divRef.addClass('module-note');
@@ -57,6 +58,7 @@ function fixNotes($, wetVersion) {
 					$('<div class="clear"/>').insertAfter(div);
 				}
 				break;
+
 			default: console.error('Wrong wetVersion?');
 		}
 	});
@@ -64,7 +66,7 @@ function fixNotes($, wetVersion) {
 
 function addWETClasses($, wetVersion) {
 	// add list classes
-	const listClass = wetVersion === 4 ? 'mrgn-tp-sm' : 'margin-top-medium';
+	const listClass = wetVersion === 4 ? 'mrgn-tp-md' : 'margin-top-medium';
 	const listPClass = wetVersion === 4 ? 'mrgn-lft-0' : 'indent-none';
 	// add spacing to <li>s, but not the ones in the TOC
 	$('li').not('div.panel-body > ul li, div.module-table-contents > ul li').addClass(listClass);
@@ -79,5 +81,6 @@ function addWETClasses($, wetVersion) {
 
 		// add table classes
 		$('table').addClass('table table-bordered');
+		$('th').addClass('text-center bg-primary');
 	}
 }

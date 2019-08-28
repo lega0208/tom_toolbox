@@ -64,5 +64,10 @@ export default function fixTableHTML($) {
 		$('td, th').each(
 			(i, el) => $(el).html($(el).html().trim())
 		);
+		const $table = $(table);
+		const $parent = $table.parent();
+		if ($table.siblings().length === 0 && !$parent.attr('class')) {
+			$parent.replaceWith($table);
+		}
 	});
 }

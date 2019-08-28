@@ -56,6 +56,8 @@ function wrapLists($) {
 				return;
 			}
 			const nextNonListItem = elRef.nextAll().not((i, elem) => {
+				if (/h\d/.test(elem.tagName)) return false;
+
 				const elemRef = $(elem);
 				const elClass = elemRef.attr('class');
 				const classList = listClasses.filter(className => !(className === otherTypeClass));
@@ -68,6 +70,9 @@ function wrapLists($) {
 					console.error('neither things did a thing? (wrapList)');
 				}
 			}).first();
+
+			console.log(nextNonListItem.length);
+
 			const restOfList = elRef.nextUntil(nextNonListItem);
 			$(`<${tag}/>`).insertBefore(el)
 				.append(el)
