@@ -1,5 +1,6 @@
 // @flow
 import { basename, dirname, relative, resolve } from 'path';
+import { pathExists } from 'fs-extra';
 import {
 	AdditionalErrorMessage,
 	FileData,
@@ -8,7 +9,7 @@ import {
 	ValidationError,
 	ValidationResult,
 } from 'lib/validator/types';
-import { pathExists } from 'fs-extra';
+import { batchAwait } from 'lib/util';
 
 const makeError = (message: string, additionalMessages?: Array<AdditionalErrorMessage> = []): ValidationError => ({
 	message,
@@ -18,6 +19,9 @@ const makeError = (message: string, additionalMessages?: Array<AdditionalErrorMe
 type CheckFunc = (fileData: FileData, tomData?: ?TOMDataType) => Promise<Array<ValidationError>>;
 
 class ValidationCheck {
+	title: string;
+	errors: Array<ValidationError>;
+
 	constructor(title: string) {
 		this.title = title;
 		this.errors = [];
@@ -60,7 +64,7 @@ const checkTitles: CheckFunc = async ({ title: { titleTag, metadata, h1 } }) => 
 const checkDates: CheckFunc = async ({ date: { top, bottom } }) => {
 	const validate = new ValidationCheck('Date');
 
-	validate.pushErrorIf(!top, 'Date in missing in "dcterms.modified" metadata.');
+	validate.pushErrorIf(!top, 'Date missing in "dcterms.modified" metadata.');
 	validate.pushErrorIf(!bottom, 'Date in missing in the <time> tag (at the bottom of the page).');
 	validate.pushErrorIf(top !== bottom, 'Dates do not match:', [
 		{ header: 'Top (metadata):', message: top },
@@ -76,7 +80,7 @@ const checkLangLink: CheckFunc = async ({ path, langLink }) => {
 	const otherLang = filename.replace(/.+-([ef])\.html/, '$1') === 'e' ? 'f' : 'e';
 	const expectedLangLink = filename.replace(/-([ef])\.html/, `-${otherLang}.html`);
 
-	validate.pushErrorIf(langLink !== expectedLangLink, 'Other language link does not match what is expected:', [
+	validate.pushErrorIf(langLink !== expectedLangLink, 'Second language link does not match what is expected:', [
 		{ header: 'Expected:', message: expectedLangLink },
 		{ header: 'Actual:', message: langLink },
 	]);
@@ -138,29 +142,35 @@ const checkSecMenu: CheckFunc = async (fileData, tomData: TOMDataType) => {
 				{ header: 'Text:', message: expectedItem.text },
 				{ header: 'Href:', message: relative(dirPath, expectedItem.href) },
 			]);
+
 		if (itemIsMissing) continue;
 
 		validate.pushErrorIf(expectedItem.text !== actualSecMenu[i].text,
-			'Text of section menu item differs from what is on the home page:', [
+			'Text of section menu item differs from what is on the home page:',
+			[
 				{ header: 'Expected:', message: expectedItem.text },
 				{ header: 'Actual:', message: fileData.secMenu[i].text },
 			]);
+
 		validate.pushErrorIf(expectedItem.href !== actualSecMenu[i].href,
-			'Href of section menu item differs from what is on the home page:', [
+			'Href of section menu item differs from what is on the home page:',
+			[
 				{ header: 'Expected:', message: relative(dirPath, expectedItem.href) },
 				{ header: 'Actual:', message: fileData.secMenu[i].href },
 			]);
 
-		if (i === expectedSecMenu.length - 1 && !!fileData.secMenu[i + 1]) { // if last index, check if there are more entries in actual
+		// if last index, check if there are more entries in actual
+		if (i === expectedSecMenu.length - 1 && !!fileData.secMenu[i + 1]) {
 			const extraItems = fileData.secMenu.slice(i + 1);
 
 			for (const extraItem of extraItems) {
 				validate.pushError('Section menu has an item that is not on the home page (either '
 					+ 'the link hasn\'t been added to the home page or the '
-					+ 'page has been deleted but not removed from the section menu):', [
-					{ header: 'Text:', message: extraItem.text },
-					{ header: 'Href:', message: extraItem.href },
-				]);
+					+ 'page has been deleted but not removed from the section menu):',
+					[
+						{ header: 'Text:', message: extraItem.text },
+						{ header: 'Href:', message: extraItem.href },
+					]);
 			}
 		}
 	}

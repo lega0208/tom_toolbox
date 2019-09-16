@@ -1,4 +1,4 @@
-import { cancel, delay, fork, put, take } from 'redux-saga/effects';
+import { cancel, delay, fork, put, take,  } from 'redux-saga/effects';
 import { updateProgress as updateProgressAction } from 'actions/validator';
 import { VALIDATOR } from 'actions/validator';
 

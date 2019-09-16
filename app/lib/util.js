@@ -2,7 +2,7 @@
  * Random utility functions
  */
 /* Take an array of unresolved Promises and await them in batches */
-export const batchAwait = async (arr, func, queueSize = 10) => {
+export const batchAwait = async (arr, func, queueSize = 10, postBatchFunc = () => {}) => {
 	try {
 		const returnVals = [];
 		while (arr.length > 0) {
@@ -10,6 +10,7 @@ export const batchAwait = async (arr, func, queueSize = 10) => {
 			const awaitedQueue = await Promise.all(queue.map(func));
 			returnVals.push(...awaitedQueue);
 			console.log('batch completed');
+			postBatchFunc();
 		}
 
 		return returnVals;

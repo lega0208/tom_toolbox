@@ -2,7 +2,8 @@ import { basename, join, resolve } from 'path';
 import { readFile, readJSON, outputFile, outputJSON } from 'fs-extra';
 import cheerio from 'cheerio';
 import {
-	getBreadcrumbs, getChildren,
+	getBreadcrumbs,
+	getChildren,
 	getDates,
 	getHeaders,
 	getlangLink,

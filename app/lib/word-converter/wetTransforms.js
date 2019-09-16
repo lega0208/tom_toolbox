@@ -38,8 +38,9 @@ function fixNotes($, wetVersion) {
 					pRef.children('strong').each((i, strong) => {
 						const strongRef = $(strong);
 						if (/note|remarque/i.test(strongRef.text())) {
-							strong.tagName = 'h3';
+							strong.tagName = 'p';
 							strongRef.text(strongRef.text().replace(/((?:note|remarque)(?: ?\d)?)\s*:/i, '$1'));
+							strongRef.addClass('h3');
 							strongRef.insertBefore(p);
 						}
 					});

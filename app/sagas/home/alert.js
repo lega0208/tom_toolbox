@@ -1,5 +1,4 @@
-import { call, put, take } from 'redux-saga/effects';
-import delay from '@redux-saga/delay-p';
+import { call, put, take, delay } from 'redux-saga/effects';
 
 export default function* watchAlert() {
 	while (true) {
@@ -8,7 +7,7 @@ export default function* watchAlert() {
 	}
 }
 
-function *triggerAlert({ type, message }) {
+function* triggerAlert({ type, message }) {
 	const successMsg = 'Result has been copied to your clipboard.';
 	const delayAmount = type === 'success' ? 3000 : 10000;
 
@@ -21,6 +20,6 @@ function *triggerAlert({ type, message }) {
 		}
 	});
 	yield put(showAlert(type, message));
-	yield call(delay, delayAmount);
+	yield delay(delayAmount);
 	yield put({ type: 'HIDE_ALERT' })
 }

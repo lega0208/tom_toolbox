@@ -8,7 +8,7 @@ export default Navbar;
 function MyNavbar() {
 	const links = [
 		{ link: '/', text: 'Word to HTML', exact: true },
-		{ link: '/validator', text: 'Validator' },
+		{ link: '/validator', text: 'Error checker' },
 		{ link: '/references', text: 'References' },
 		//{ link: '/tomviewer', text: 'TOM Viewer' },
 	];
