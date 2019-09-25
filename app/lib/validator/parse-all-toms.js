@@ -11,7 +11,7 @@ import {
 	getSecMenu,
 	getTitles,
 	getToC
-} from './parse-file';
+} from './parse-file-wet4';
 import { wrapContent } from './util';
 import { homepages, landingPages } from './paths';
 
@@ -44,6 +44,7 @@ const parseFromHomepage = async (paths, tomName, errors) => {
 
 	for (const homepagePath of [ enHomepage, frHomepage ]) {
 		const fileName = basename(homepagePath);
+		console.log(`Parsing ${fileName}`);
 		const fileContents = await readFile(homepagePath, 'utf8');
 		const pageContents = (await wrapContent(fileContents, fileName)) || fileContents;
 		const $ = cheerio.load(pageContents, { decodeEntities: false });
@@ -83,8 +84,8 @@ const parseFromHomepage = async (paths, tomName, errors) => {
 const parseChildren = async (parentData, tomName, filesObj, errors) => {
 	for (const child of parentData.children) {
 		try {
+			console.log(`Parsing ${basename(child.href)}`);
 			const fileData = await parseFileData(child.href, tomName, parentData, errors);
-			console.log(`Parsing ${basename(fileData.path)}`);
 			filesObj[child.href] = fileData;
 
 			if (fileData.isLanding && fileData.children) {

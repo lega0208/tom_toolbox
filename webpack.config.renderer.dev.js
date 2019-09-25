@@ -45,7 +45,8 @@ export default merge.smart(baseConfig, {
   ],
 
   output: {
-    publicPath: `http://localhost:${port}/dist/`
+    publicPath: `http://localhost:${port}/dist/`,
+	  globalObject: '(typeof self !== "undefined" ? self : this)',
   },
 
   module: {

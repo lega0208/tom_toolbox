@@ -13,18 +13,17 @@ export const Grid = ({ fluid = false, children, xClass }) => (
 	</div>
 );
 
-export const Row = ({ xClass, children }) => (
-	<div className={`row${xClass ? ` ${xClass}` : ''}`}>
+export const Row = ({ xClass, xStyle, children }) => (
+	<div className={`row${xClass ? ` ${xClass}` : ''}`} style={xStyle || {}}>
 		{children}
 	</div>
 );
 
 type colValsType =
-	1|2|3|4|5|6|7|8|9|10|11|12|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12';
+	1|2|3|4|5|6|7|8|9|10|11|12|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'|'auto';
 
 type colPropsType = {
 	col?: colValsType,
-	xs?: colValsType,
 	sm?: colValsType,
 	md?: colValsType,
 	lg?: colValsType,
@@ -38,7 +37,7 @@ export const Col = (props: colPropsType) => {
 			? `${propName !== 'col' ? `col-${propName}-${props[propName]}` : `col-${props[propName]}`}`
 			: '';
 
-	const propStrings = [ 'col', 'xs', 'sm', 'md', 'lg', 'xl' ];
+	const propStrings = [ 'col', 'sm', 'md', 'lg', 'xl' ];
 
 	const classString = propStrings.reduce((acc, propName, i) => {
 		const isLast = i === propStrings.length - 1;
@@ -126,7 +125,7 @@ export const Dropdown = ({ items, click, label, xClass }) => {
 		<div className={'dropdown' + (xClass ? ` ${xClass}` : '')}>
 			<button id="dropdown-toggle"
 			        type="button"
-			        className="btn btn-default dropdown-toggle w-100"
+			        className="btn btn-light dropdown-toggle"
 			        data-toggle="dropdown"
 			        data-offset="0"
 			>
@@ -145,6 +144,25 @@ export const Dropdown = ({ items, click, label, xClass }) => {
 				}
 			</div>
 		</div>
+	);
+};
+
+export const TextInput = ({ value = '', change, label, placeholder = '', xClass = '' }) => {
+	const onChangeFunc = (e) => {
+		e.preventDefault();
+		change(e.target.value);
+	};
+
+	return (
+		<form className={xClass}>
+			<label className="mb-0">{label}</label>
+			<input type="text"
+			       className="form-control form-control-sm"
+			       placeholder={placeholder}
+			       onChange={onChangeFunc}
+			       value={value}
+			/>
+		</form>
 	);
 };
 

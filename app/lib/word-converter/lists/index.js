@@ -13,7 +13,7 @@ function convertPs($) {
 
 		const elemClass = sel.attr('class') || '';
 		if (elemClass.includes('MsoList') || elemClass.includes('Bullet')) {
-			if (!sel.css('mso-list').includes('none')) {
+			if (!sel.css('mso-list') || !sel.css('mso-list').includes('none')) {
 				elem.tagName = 'li';
 			}
 		}

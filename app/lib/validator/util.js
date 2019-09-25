@@ -12,7 +12,7 @@ export const wrapContent = async (htmlString, filename) => {
 	const endRegexMatches = new RegExp(contentRegexEnd).test(htmlString);
 
 	if (!startRegexMatches) console.error(`Start regex didn't match in ${filename}. Uh oh.`);
-	if (!endRegexMatches) console.error(`End regex didn't match in ${filename}. Verify that it still worked.`);
+	if (!endRegexMatches) console.error(`End regex didn't match in ${filename}. Verify if it worked.`);
 
 	const endRegex = endRegexMatches ? contentRegexEnd : contentRegexEndBackup;
 

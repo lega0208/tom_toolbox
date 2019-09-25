@@ -17,6 +17,7 @@ export default function cleanPostLists($) {
 		.removeAttr('valign')
 		.removeAttr('bgcolor')
 		.removeAttr('nowrap')
+		.removeAttr('paragraph')
 		.removeAttr('paragraphcxspfirst')
 		.removeAttr('paragraphcxspmiddle')
 		.removeAttr('paragraphcxsplast')

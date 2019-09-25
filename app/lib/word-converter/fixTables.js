@@ -66,7 +66,7 @@ export default function fixTableHTML($) {
 		);
 		const $table = $(table);
 		const $parent = $table.parent();
-		if ($table.siblings().length === 0 && !$parent.attr('class')) {
+		if ($parent.length > 0 && $parent.get(0).tagName !== 'body' && $table.siblings().length === 0 && !$parent.attr('class')) {
 			$parent.replaceWith($table);
 		}
 	});

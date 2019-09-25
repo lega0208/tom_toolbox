@@ -44,7 +44,7 @@ export function beautify(html) {
 		.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1'); // this may be error prone
 }
 
-function escapeRegExp(string) {
+export function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'); // $& means the whole matched string
 }
 
@@ -84,5 +84,13 @@ export function timeFunction(func) {
 
 		console.log(`Execution time: ${end[0]}s ${end[1] / 1000000}ms`);
 		return returnVal;
+	}
+}
+
+export function measureTime() {
+	const start = process.hrtime();
+	return () => {
+		const end = process.hrtime(start);
+		return `${Math.round((end[0] * 1e3 + end[1] / 1e6) / 10) / 100}s`
 	}
 }

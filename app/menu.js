@@ -1,7 +1,5 @@
 // @flow
-import {
- Menu, shell, BrowserWindow, dialog, session
-} from 'electron';
+import { Menu, shell, BrowserWindow, dialog, session } from 'electron';
 import fs from 'fs-extra';
 import {
 	DB_PATH,
@@ -9,8 +7,10 @@ import {
 	CACHE_FILE,
 	DB_DRIVER_PATH,
 	DB_DRIVER,
-	DB_DRIVER_ALT, TOM_DATA_CACHE,
+	DB_DRIVER_ALT,
+	TOM_DATA_CACHE,
 } from './constants';
+import { clearCache } from './database/cache';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -81,7 +81,7 @@ export default class MenuBuilder {
 			}]
 		}, {
       label: '&View',
-      submenu: (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') ? [{
+      submenu: (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true' || process.env.NODE_ENV === 'production') ? [{
         label: '&Reload',
         accelerator: 'Ctrl+R',
         click: () => {
@@ -126,11 +126,4 @@ function toggleDbDriver() {
 		default: writeDriver(DB_DRIVER);
 	}
 	clearCache();
-}
-
-function clearCache() {
-	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
-	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
-	fs.emptyDirSync(TOM_DATA_CACHE);
-	session.defaultSession.clearStorageData({ storages: ['localStorage'] });
 }

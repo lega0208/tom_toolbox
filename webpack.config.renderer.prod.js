@@ -31,7 +31,7 @@ export default merge.smart(baseConfig, {
 				},
 				cache: true,
 				sourceMap: true, // set to true if you want JS source maps
-				parallel: 2,
+				parallel: true,
 			}),
 			new OptimizeCSSAssetsPlugin({})
 		]

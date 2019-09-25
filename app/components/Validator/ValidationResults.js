@@ -19,7 +19,7 @@ const AdditionalMessage = ({ msg, i }) => (
 
 const ValidationError = ({ error: { message, additionalMessages = [] } }) => (
 	<React.Fragment>
-		<h5 className="alert-heading text-dark">{message}</h5>
+		<h6 className="alert-heading text-dark">{message}</h6>
 		{
 			(additionalMessages.length > 0) ? (
 				<Grid>
@@ -35,9 +35,9 @@ const ValidationError = ({ error: { message, additionalMessages = [] } }) => (
 	</React.Fragment>
 );
 
-export default ({ title, errors }) => (
-	<div className="alert alert-danger">
-		<h4 className="alert-heading text-dark">{title}</h4>
+export default ({ title, errors, filtered }) => (
+	<div className={`alert alert-danger${filtered ? ' d-none' : ''}`}>
+		<h5 className="alert-heading text-dark">{title}</h5>
 		{
 			errors.map((error, i) => (
 				<React.Fragment key={`rescat-frag-${i}`}>

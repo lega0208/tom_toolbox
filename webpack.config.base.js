@@ -20,6 +20,12 @@ export default {
           cacheDirectory: true
         }
       }
+    }, {
+    	test: /Worker\.js$/,
+	    exclude: /node_modules/,
+	    use: {
+    		loader: 'worker-loader',
+    	}
     }]
   },
 

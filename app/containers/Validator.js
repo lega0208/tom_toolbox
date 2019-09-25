@@ -20,17 +20,19 @@ import {
 	ValidationFilters,
 } from 'components/Validator';
 
-const ResultsEntries = ({ results, validationFilters }) => {
+const ResultsEntries = ({ results, validationFilters, filterSearchText }) => {
 	try {
 		const filteredResults =
-			results.map(
-				(pageResults) => ({
+			results
+				.filter(
+					({ results, path }) =>
+						results.length > 0 && (filterSearchText ? basename(path).includes(filterSearchText) : true)
+				)
+				.map((pageResults) => ({
 					path: pageResults.path,
 					results: pageResults.results
-						.filter(({ title }) => !validationFilters.includes(title))
 				})
-			)
-				.filter((pageResults) => pageResults.results.length > 0);
+			);
 
 		return (
 			<React.Fragment>
@@ -39,6 +41,7 @@ const ResultsEntries = ({ results, validationFilters }) => {
 						<PageResults
 							filename={basename(path)}
 							pageResults={results}
+							validationFilters={validationFilters}
 							key={`results-${i}`}
 						/>
 					))
@@ -46,20 +49,22 @@ const ResultsEntries = ({ results, validationFilters }) => {
 			</React.Fragment>
 		);
 	} catch (e) {
-		console.error('probably can\'t filter results?');
-		console.error(results);
 		console.error(e);
 	}
 };
 
-const Results = ({ results, validationFilters }) => (
-	<React.Fragment>
-		{
-			results.length > 0
-				? <ResultsEntries results={results} validationFilters={validationFilters} />
-				: null
-		}
-	</React.Fragment>
+const Results = ({ results, validationFilters, filterSearchText }) => (
+	<Row xClass="position-relative" xStyle={{top: '300px'}}>
+		<Col col={12}>
+			{
+				results.length > 0
+					? <ResultsEntries results={results}
+					                  validationFilters={validationFilters}
+					                  filterSearchText={filterSearchText} />
+					: null
+			}
+		</Col>
+	</Row>
 );
 
 class Validator extends Component {
@@ -74,23 +79,20 @@ class Validator extends Component {
 		const resultsNotEmpty = this.props.results.length > 0;
 
 		return (
-			<Grid fluid xClass="mt-3">
-				<Row xClass="position-static border border-secondary rounded m-1 py-2">
-					<Col col={2}>
-						<ValidationFilters />
-					</Col>
-					<Col md={9} col={10} xClass="mb-3 py-3">
+			<Grid fluid>
+				<Row xClass="fixed-top border border-secondary rounded m-3 py-1"
+				     xStyle={{top: '58px', backgroundColor: 'white'}}>
+					<Col col={7} xClass="py-3">
 						<h2>Selected TOM: {this.props.selectedTOM || 'None'}</h2>
 						<div className="btn-toolbar mt-3 mb-2 mw-75">
 							<Dropdown items={tomsList}
 							          click={this.props.selectTOM}
-							          label={this.props.selectedTOM || 'Select manual to validate'}
-							          xClass="w-25"
+							          label={this.props.selectedTOM || 'Select manual'}
 							/>
 							<Button bsClass="primary"
 							        xClass="ml-2"
 							        click={() => this.props.selectedTOM && this.props.validateTOMStart()}
-							        text="Validate TOM"
+							        text="Check for errors"
 							        disabled={this.props.toms.length === 0 || this.props.verifyingCache}
 							/>
 							{
@@ -100,22 +102,21 @@ class Validator extends Component {
 							}
 						</div>
 						<hr />
-						<p className="my-2">{this.props.fileCount || 0} total files</p>
-						{
-							this.props.progressStatus
-								? <p>{this.props.progressStatus}</p>
-								: null
-						}
+						<p className="my-1 pull-left">{this.props.fileCount || 0} total files</p>
 						{
 							resultsNotEmpty
-								? <p className="my-2"><strong className="text-danger">{`${this.props.numErrors} errors found`}</strong></p>
+								? <p className="my-1 pull-right"><strong className="text-danger">{`${this.props.numErrors} errors found`}</strong></p>
 								: null
 						}
 						<ProgressBar percent={this.props.progress}/>
-						<Results results={this.props.results} validationFilters={this.props.validationFilters} />
 					</Col>
-					<Clear />
+					<Col sm={5} xClass="p-1">
+						<ValidationFilters />
+					</Col>
 				</Row>
+				<Results results={this.props.results}
+				         validationFilters={this.props.validationFilters}
+				         filterSearchText={this.props.filterSearchText} />
 			</Grid>
 		);
 	}

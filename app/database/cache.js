@@ -2,7 +2,9 @@
 // @flow
 import Trilogy from 'trilogy';
 import { getAcrosModel } from './models';
-import { CACHE_FILE } from '../constants';
+import { CACHE_FILE, LAST_CACHE, TOM_DATA_CACHE } from '../constants';
+import fs from "fs-extra";
+import { session } from 'electron';
 
 class Cache {
   constructor() {
@@ -93,3 +95,14 @@ class Cache {
 
 export default async () => new Cache();
 
+export function clearCache() {
+	const electron = process.type === 'renderer' ? require('electron').remote : require('electron');
+	const currentWindow = electron.getCurrentWindow();
+	const session = currentWindow.webContents.session;
+	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
+	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
+	fs.emptyDirSync(TOM_DATA_CACHE);
+	session.clearStorageData({ storages: ['localStorage'] });
+
+	currentWindow.reload();
+}

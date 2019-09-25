@@ -12,7 +12,7 @@ export default function* startTrackProgress(getProgress) {
 export function* updateProgress(getProgress) {
 	// every 500 ms, dispatch a update progress action
 	while (true) {
-		yield delay(500);
+		yield delay(200);
 		yield put(updateProgressAction(getProgress()))
 	}
 }
@@ -28,8 +28,8 @@ export class ProgressTracker {
 		this.total = num;
 	}
 
-	addCompleted() {
-		this.numCompleted += 1;
+	addCompleted(num = 1) {
+		this.numCompleted += num;
 	}
 	incrementProgress() {
 		this.numCompleted += 1;

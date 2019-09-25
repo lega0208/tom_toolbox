@@ -6,6 +6,7 @@ import { updateCachedData } from './update-cache';
 import { TOM_DATA_CACHE } from '../../constants';
 import { landingPages } from './paths';
 import { TOMDataType, FileData } from './types';
+import { clearCache } from 'database/cache';
 
 export default async function getTOMData(tomName): TOMDataType { // should rename this or extract parts because it mostly updates
 	console.log('tomName:');
@@ -17,6 +18,9 @@ export default async function getTOMData(tomName): TOMDataType { // should renam
 	} catch (e) {
 		console.error('Error getting TOM data:');
 		console.error(e);
+		if (e.message.includes('no such file or directory')) {
+			clearCache();
+		}
 	}
 }
 

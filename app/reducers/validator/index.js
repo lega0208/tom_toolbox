@@ -15,6 +15,7 @@ const initialState = {
 	progressStatus: '',
 	verifyingCache: false,
 	validationFilters: [],
+	filterSearchText: '',
 };
 
 function validator(state = initialState, action) {
@@ -32,6 +33,7 @@ function validator(state = initialState, action) {
 				...state,
 				validationFilters: state.validationFilters.filter((title) => title !== action.payload),
 			};
+		case VALIDATOR.FILTERS.SET_SEARCH: return { ...state, filterSearchText: action.payload };
 
 		case VALIDATOR.GET_TOMS.START: return initialState;
 		case VALIDATOR.GET_TOMS.SUCCESS: return { ...state, toms: action.payload, tomsLoaded: true };

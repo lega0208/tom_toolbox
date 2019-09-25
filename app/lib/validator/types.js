@@ -11,7 +11,6 @@ export type TOMDataType = {
 
 type Nav = {
 	prevPage?: string,
-	homePage: string,
 	nextPage?: string,
 };
 

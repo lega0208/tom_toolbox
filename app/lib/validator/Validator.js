@@ -9,7 +9,6 @@ import {
 	ValidationError,
 	ValidationResult,
 } from 'lib/validator/types';
-import { batchAwait } from 'lib/util';
 
 const makeError = (message: string, additionalMessages?: Array<AdditionalErrorMessage> = []): ValidationError => ({
 	message,
@@ -46,17 +45,28 @@ class ValidationCheck {
 	}
 }
 
-const checkTitles: CheckFunc = async ({ title: { titleTag, metadata, h1 } }) => {
+const checkTitles: CheckFunc = async ({ title: { titleTag, metadata, breadcrumb, h1 } }) => {
 	const validate = new ValidationCheck('Title');
+	titleTag = titleTag.trim();
+	metadata = metadata.trim();
+	breadcrumb = breadcrumb.trim();
+	h1 = h1.trim();
 
 	validate.pushErrorIf(!titleTag, 'Title is missing in <title> tag.');
 	validate.pushErrorIf(!metadata, 'Title is missing in "dcterms.title" metadata.');
+	validate.pushErrorIf(!breadcrumb, 'Title is missing in breadcrumbs.');
 	validate.pushErrorIf(!h1, 'Title is missing in <h1> tag.');
-	validate.pushErrorIf(titleTag !== metadata || titleTag !== h1 || metadata !== h1,
+	validate.pushErrorIf(titleTag !== metadata
+		|| titleTag !== h1
+		|| metadata !== h1
+		|| breadcrumb !== titleTag
+		|| breadcrumb !== metadata
+		|| breadcrumb !== h1,
 		'Titles do not all match:', [
 			{ header: 'title tag:', message: titleTag },
 			{ header: 'dcterms.title metadata:', message: metadata },
-			{ header: 'h1 tag:', message: h1},
+			{ header: 'breadcrumb:', message: breadcrumb },
+			{ header: 'h1 tag:', message: h1 },
 		]);
 
 	return validate.getResults();
@@ -145,7 +155,7 @@ const checkSecMenu: CheckFunc = async (fileData, tomData: TOMDataType) => {
 
 		if (itemIsMissing) continue;
 
-		validate.pushErrorIf(expectedItem.text !== actualSecMenu[i].text,
+		validate.pushErrorIf(expectedItem.text.trim() !== actualSecMenu[i].text.trim(),
 			'Text of section menu item differs from what is on the home page:',
 			[
 				{ header: 'Expected:', message: expectedItem.text },
@@ -387,7 +397,7 @@ const checkChildren = async ({ path, isLanding, children }) => {
 	return validate.getResults();
 };
 
-export const validatePage = async (fileData, tomData, progress) => {
+export const validatePage = async (fileData, tomData) => {
 	const validations = [
 		checkTitles,
 		checkDates,
@@ -403,8 +413,6 @@ export const validatePage = async (fileData, tomData, progress) => {
 	try {
 		const results: Array<ValidationResult> =
 			(await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
-
-		progress.incrementProgress();
 
 		return {
 			path: fileData.path,

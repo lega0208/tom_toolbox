@@ -15,7 +15,7 @@ import {
 	getSecMenu,
 	getTitles,
 	getToC
-} from './parse-file';
+} from './parse-file-wet4';
 
 const parseNewData = async (path, isHomepage, isLanding, parentData, tomName) => {
 	const fileName = basename(path);
