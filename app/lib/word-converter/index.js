@@ -29,9 +29,15 @@ export default function WordConverter(html: string, opts?: optsType): any {
 		unwrapImgs,
 		removeImagePs,
 	];
-	funcs.forEach(func => func($, opts));
 
-	return $('body').html();
+	for (const func of funcs) {
+		func($, opts);
+	}
+
+	return $('body')
+		.html()
+		.replace(/<\/strong>(\s+)?<strong>/g, '$1')
+		.replace(/<strong>(\s+)/g, '$1<strong>');
 }
 
 function removeEmptyPs($) {

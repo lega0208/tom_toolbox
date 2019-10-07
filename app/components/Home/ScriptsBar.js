@@ -20,7 +20,7 @@ function ScriptsBar(props) {
 
 	const ScriptButton = ({ toggleFunc, text, optionProp }) => {
 		const isActive = optionProp ? ' active' : '';
-		const btnClasses = 'btn btn-sm btn-outline-primary px-0 border-dark' + isActive;
+		const btnClasses = 'btn btn-sm btn-outline-primary px-0 ml-0 border-dark' + isActive;
 
 		const Checkbox =
 			() => <FontAwesomeIcon className="align-middle" icon={optionProp ? faCheckSquare : faSquare} />;

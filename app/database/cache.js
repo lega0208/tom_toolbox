@@ -97,11 +97,13 @@ export default async () => new Cache();
 
 export function clearCache() {
 	const electron = process.type === 'renderer' ? require('electron').remote : require('electron');
-	const currentWindow = electron.getCurrentWindow();
+	const currentWindow = electron.BrowserWindow.getAllWindows()[0];
 	const session = currentWindow.webContents.session;
+
 	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
 	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
 	fs.emptyDirSync(TOM_DATA_CACHE);
+
 	session.clearStorageData({ storages: ['localStorage'] });
 
 	currentWindow.reload();
