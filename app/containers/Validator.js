@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { basename } from 'path';
-import { getTOMsStart, selectTOM, validateTOMStart } from 'actions/validator';
+import { getTOMsStart, getTOMsPaths, selectTOM, validateTOMStart } from 'actions/validator';
 import {
 	Grid,
 	Row,
@@ -104,8 +104,10 @@ class Validator extends Component {
 						<hr />
 						<p className="my-1 pull-left">{this.props.fileCount || 0} total files</p>
 						{
-							resultsNotEmpty
-								? <p className="my-1 pull-right"><strong className="text-danger">{`${this.props.numErrors} errors found`}</strong></p>
+							this.props.progressStatus === 'Validation complete:'
+								? resultsNotEmpty
+									? <p className="my-1 pull-right"><strong className="text-danger">{`${this.props.numErrors} errors found`}</strong></p>
+									: <p className="my-1 pull-right"><strong className="text-success">{`No errors found`}</strong></p>
 								: null
 						}
 						<ProgressBar percent={this.props.progress}/>
@@ -126,6 +128,7 @@ const mapState = ({ validator }) => (validator);
 
 const mapDispatch = {
 	getTOMsStart,
+	getTOMsPaths,
 	selectTOM,
 	validateTOMStart,
 };

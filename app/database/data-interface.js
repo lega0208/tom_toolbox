@@ -36,7 +36,7 @@ function getDBDriver() {
 	}
 }
 
-class DataInterface { // this done?
+class DataInterface {
   constructor(dbPath) {
 		this.dbPath = dbPath || getDBPath() || DEFAULT_DB_PATH;
 		this.dbDriver = getDBDriver();
@@ -112,10 +112,3 @@ class DataInterface { // this done?
 	}
 }
 export default new DataInterface();
-
-// export type acrosResult = {
-// 	ID: number,
-// 	Acronym: string,
-// 	Definition: string,
-// 	Language: ?string
-// }

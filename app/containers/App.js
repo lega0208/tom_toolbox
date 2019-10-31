@@ -6,6 +6,14 @@ type Props = {
 	children: Children
 };
 export default class App extends Component<Props> {
+	componentDidMount() {
+		// check cache
+	}
+
+	componentWillUnmount() {
+		// close
+	}
+
   render() {
     return (
       <React.Fragment>

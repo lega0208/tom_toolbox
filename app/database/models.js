@@ -46,3 +46,15 @@ export async function getTOMDataModel(db) {
 		},
 	});
 }
+
+export async function getLandingPagesModel(db) {
+	const landingPagesSchema = {
+		ID: { type: 'increments', nullable: false, primary: true },
+		filepath: { type: String, nullable: false, unique: true },
+		tomName: { type: String, nullable: false },
+		isHomepage: { type: Boolean }
+	};
+	return db.model('landingPages', landingPagesSchema, {
+		index: { isHomepage: 'isHomepage', tomName: 'tomName' }
+	});
+}

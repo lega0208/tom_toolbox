@@ -3,8 +3,7 @@
 import Trilogy from 'trilogy';
 import { getAcrosModel } from './models';
 import { CACHE_FILE, LAST_CACHE, TOM_DATA_CACHE } from '../constants';
-import fs from "fs-extra";
-import { session } from 'electron';
+import fs from 'fs-extra';
 
 class Cache {
   constructor() {
@@ -84,6 +83,10 @@ class Cache {
 				console.error(`Error in insertAll transaction:\n${e}`);
 			}
 		}
+	}
+
+	async clear() {
+  	return await this.db.clear('Acronyms');
 	}
 
   close() {

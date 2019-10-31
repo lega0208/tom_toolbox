@@ -42,6 +42,7 @@ async function cacheData(dbCache, lastCache) {
 	try {
 		const data = (lastCache ? await getUpdatedData(lastCache) : await getUpdatedData()) || [];
 		console.log(`Results found: ${data.length}`);
+		await dbCache.clear();
 		await dbCache.insertAll(data);
 		await writeLastCache();
 	} catch (e) {

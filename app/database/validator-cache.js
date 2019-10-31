@@ -23,10 +23,6 @@ class Cache {
 			console.log(`${results.length} results found`);
 
 			return results;
-			//return results.map((entry) => ({
-			//	...entry,
-			//	$: eval(`(${entry.$})`), // stringify function
-			//}));
 		} catch (e) {
 			console.error(e);
 			return [];
@@ -46,10 +42,6 @@ class Cache {
 	}
 
 	async insertAll(arr) {
-		//arr = arr.map((entry) => ({
-		//	...entry,
-		//	$: entry.$ + '', // stringify function
-		//}));
 		let totalRowsAffected = 0;
 
 		while (arr.length > 0) {

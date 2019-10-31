@@ -44,7 +44,7 @@ class Home extends Component {
 			  }
 		  }
 	  });
-		setTimeout(this.props.checkCache, 250);
+		setTimeout(this.props.checkCache, 100);
   }
 
   render() {

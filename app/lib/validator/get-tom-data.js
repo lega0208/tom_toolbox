@@ -4,7 +4,6 @@ import { basename, join } from 'path';
 import { batchAwait } from '../util';
 import { updateCachedData } from './update-cache';
 import { TOM_DATA_CACHE } from '../../constants';
-import { landingPages } from './paths';
 import { TOMDataType, FileData } from './types';
 import { clearCache } from 'database/cache';
 
@@ -67,7 +66,6 @@ async function verifyCache(cacheFilePath: string) {
 
 async function updateTOMData(outdatedFiles: Array<FileData>, tomData): Promise<void> {
 	console.log('Updating TOM data');
-	const files = tomData.files;
 	const filesByDepth: Array<?Array<FileData>> = (
 		outdatedFiles.reduce((acc, file) => {
 			console.log(`${basename(file.path)} is outdated, updating.`);
@@ -90,16 +88,5 @@ async function updateTOMData(outdatedFiles: Array<FileData>, tomData): Promise<v
 				throw e;
 			}
 		}
-
-		//const updateTasks: Array<Promise<FileData>> = depth.map((file) => updateCachedData(file.path, tomData, landingPages));
-		//// test out different queue sizes, it might be fine doing huge amounts at once
-		////console.log('About to await batchAwait:');
-		////const updatedFiles: Array<FileData> = await batchAwait(updateTasks, 100);
-		//const updatedFiles: Array<FileData> = await Promise.all(updateTasks); // test performance difference
-		////console.log('batchAwait awaited.');
-		//
-		//for (const file of updatedFiles) {
-		//	files[file.path] = file; // make sure this actually mutates tomData
-		//}
 	}
 }
