@@ -48,13 +48,17 @@ export async function getTOMDataModel(db) {
 }
 
 export async function getLandingPagesModel(db) {
+	console.log('getLandingPagesModel');
 	const landingPagesSchema = {
 		ID: { type: 'increments', nullable: false, primary: true },
 		filepath: { type: String, nullable: false, unique: true },
 		tomName: { type: String, nullable: false },
 		isHomepage: { type: Boolean }
 	};
-	return db.model('landingPages', landingPagesSchema, {
+	const model = db.model('LandingPages', landingPagesSchema, {
 		index: { isHomepage: 'isHomepage', tomName: 'tomName' }
 	});
+	console.log(model);
+
+	return model;
 }

@@ -13,11 +13,17 @@ import {
 	getToC
 } from './parse-file-wet4';
 import { wrapContent } from './util';
-import { homepages, landingPages } from './paths';
+import getPathsCache from 'database/paths-cache';
 
 export const parseAllTOMs = async (outputPath = '.') => { // run from menu?
 	//const outputObj = {};
 	const errors = [];
+
+	const cache = await getPathsCache();
+	const homepages = (await cache.getHomepagesByTom()).reduce((acc, page) => ({
+		...acc,
+		[page.tomName]: [ page.filepath1, page.filepath2 ]
+	}), {});
 
 	for (const [tomName, tomHomepages] of Object.entries(homepages)) {
 		const tomDataObj = await parseFromHomepage(tomHomepages, tomName, errors);

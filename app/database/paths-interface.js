@@ -1,4 +1,4 @@
-import { DISTRIB_PATH } from '../../app/constants';
+import { DISTRIB_PATH, PATHS_DB_PATH } from '../../app/constants';
 import ADODB from 'node-adodb-electronfork';
 
 process.env.DEBUG = 'ADODB';
@@ -7,7 +7,7 @@ class DataInterface {
 	constructor(dbPath) {
 		this.dbPath = dbPath;
 		// todo: get data provider dynamically (check if driver exists)
-		this.datasource = `Provider=Microsoft.${'Ace.OLEDB.12'}.0;Data Source=${this.dbPath};Persist Security Info=False;`;
+		this.datasource = `Provider=Microsoft.Ace.OLEDB.12.0;Data Source=${this.dbPath};Persist Security Info=False;`;
 
 		try {
 			this.db = ADODB.open(this.datasource);
@@ -35,34 +35,22 @@ class DataInterface {
 			throw new Error('No active database connection');
 		}
 	}
+	close() {
+		this.db.close();
+	}
 }
 
 // Will probably need to move this to a cache function, and then just read the cache from here
 export async function getPaths() {
-	const db = new DataInterface(`${DISTRIB_PATH}PagesDB.accdb`);
-	const homepages = {};
-	const landingPages = {};
-	const timestamp = Date.now();
+	console.log('getting paths from accdb');
+	try {
+		const db = new DataInterface(PATHS_DB_PATH);
 
-	for (const homepage of (await db.getAll('homepages'))) {
-		if (!homepages[homepage.tomName]) {
-			homepages[homepage.tomName] = [];
-		}
-		homepages[homepage.tomName].push(homepage.filepath);
+		return await db.getAll('LandingPages');
+	} catch (e) {
+		console.error('Error getting paths from paths DB');
+		console.error(e);
 	}
-
-	for (const landingPage of (await db.getAll('landingPages'))) {
-		if (!landingPages[landingPage.tomName]) {
-			landingPages[landingPage.tomName] = [];
-		}
-		landingPages[landingPage.tomName].push(landingPage.filepath);
-	}
-
-	return {
-		homepages,
-		landingPages,
-		timestamp,
-	};
 }
 
 export default new DataInterface(`${DISTRIB_PATH}PagesDB.accdb`);

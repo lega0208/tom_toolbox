@@ -16,5 +16,6 @@ export const DB_DRIVER = 'Ace.OLEDB.12';
 export const DB_DRIVER_ALT = 'Jet.OLEDB.4';
 export const LAST_CACHE = inAppDir('.lastCache');
 export const CACHE_FILE = inAppDir('cache.db');
-export const PATHS_CACHE_FILE = inAppDir('paths-cache.db');
+export const PATHS_DB_PATH = `${DISTRIB_PATH}PagesDB.accdb`;
+export const PATHS_CACHE_PATH = inAppDir('paths-cache.db');
 export const TOM_DATA_CACHE = inAppDir('TOM_Data');

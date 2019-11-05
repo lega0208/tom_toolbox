@@ -1,10 +1,10 @@
-import Trilogy from 'trilogy';
+import { connect } from 'trilogy';
 import { getTOMDataModel } from './models';
 import { CACHE_FILE } from '../constants';
 
 class Cache {
 	constructor() {
-		this.db = new Trilogy(CACHE_FILE, { client: 'sql.js' });
+		this.db = connect(CACHE_FILE, { client: 'sql.js' });
 		this.ensureTable().then(() => console.log('tomData table exists.')); // Promise
 	}
 

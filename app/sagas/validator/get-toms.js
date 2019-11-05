@@ -3,7 +3,7 @@ import { basename, dirname, join, resolve } from 'path';
 import { call, take, put } from 'redux-saga/effects';
 import { VALIDATOR, getTOMsSuccess, getTOMsError } from 'actions/validator';
 import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
-import { homepages } from 'lib/validator/paths';
+import getPathsCache from 'database/paths-cache';
 
 export default function* watchGetTOMs() {
 	while (true) {
@@ -28,8 +28,9 @@ async function getToms() {
 	} else if ((await readdir(TOM_DATA_CACHE)).length === 0) {
 		await copyDataCache();
 	}
+	const pathsCache = getPathsCache();
 
-	return Object.keys(homepages);
+	return await pathsCache.getTomNames();
 }
 
 async function copyDataCache() {

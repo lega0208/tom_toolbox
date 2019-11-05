@@ -258,6 +258,11 @@ export default merge.smart(baseConfig, {
       verbose: true,
       disableDotRule: false,
     },
+	  setup(app) {
+    	app.get('/dist/sql-wasm.wasm', (req, res) => {
+    		res.sendFile(path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm')); // wow all of this is dumb
+	    })
+	  },
     before() {
       if (process.env.START_HOT) {
         console.log('Staring Main Process...');

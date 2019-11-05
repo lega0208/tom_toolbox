@@ -30,7 +30,7 @@
     "test-watch": "npm test -- --watch"
   },
   "browserslist": [
-    "electron 2.0"
+    "electron >= 3.1.9"
   ],
   "build": {
     "productName": "TOM_Toolbox",
@@ -106,12 +106,13 @@
     "babili-webpack-plugin": "^0.1.2",
     "chalk": "^2.0.1",
     "concurrently": "^3.6.1",
+    "copy-webpack-plugin": "^5.0.4",
     "cross-env": "^5.2.0",
     "cross-spawn": "^6.0.4",
     "css-loader": "^0.28.10",
     "cssnano": "^3.10.0",
     "devtron": "^1.4.0",
-    "electron": "^2.0.18",
+    "electron": "^3.1.9",
     "electron-builder": "^19.8.0",
     "electron-debug": "^2.0.0",
     "electron-devtools-installer": "^2.2.0",
@@ -164,9 +165,9 @@
     "url-loader": "^1.1.1",
     "webpack": "^4.25.1",
     "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-middleware": "^3.1.3",
-    "webpack-dev-server": "^3.2.1",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-middleware": "^3.7.2",
+    "webpack-dev-server": "^3.9.0",
     "webpack-merge": "^4.1.4",
     "worker-loader": "^2.0.0"
   },
@@ -200,7 +201,7 @@
     "redux-thunk": "^2.3.0"
   },
   "devEngines": {
-    "node": ">=7.x",
+    "node": ">=8.10",
     "npm": ">=4.x",
     "yarn": ">=0.21.3"
   }

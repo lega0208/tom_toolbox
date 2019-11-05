@@ -42,9 +42,6 @@ if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true')
      .catch(console.log);
  };
 
-// add harmony flags todo: remove when electron is updated to version >=3.0.0
-app.commandLine.appendSwitch('js-flags', '--harmony_regexp_lookbehind --harmony_regexp_property');
-
 /**
  * Add event listeners...
  */
@@ -73,7 +70,7 @@ app.on('ready', async () => {
   });
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);
-
+	mainWindow.show();
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', async () => {

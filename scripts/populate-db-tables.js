@@ -78,7 +78,7 @@ const db = new DataInterface(`${DISTRIB_PATH}PagesDB.accdb`);
 (async function main() {
 	const homepages = (await db.getAll('homepages')).map(({ filepath }) => filepath);
 
-	const data = (await db.getAll('landingPages'));
+	const data = (await db.getAll('LandingPages'));
 
 	const csv = data.map(({ filepath, tomName }, i) => {
 		const basePath = '\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\';

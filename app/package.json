@@ -13,7 +13,8 @@
   "license": "MIT",
   "dependencies": {
     "node-adodb-electronfork": "^4.1.0",
-    "sql.js": "^0.4.0",
-    "trilogy": "^1.4.4"
+    "sql.js": "^1.0.0",
+    "sqlite3": "^4.1.0",
+    "trilogy": "^2.0.2"
   }
 }

@@ -4,11 +4,12 @@
 
 import path from 'path';
 import webpack from 'webpack';
+import CopyPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
 import { dependencies as externals } from './app/package.json';
 
 export default {
-  externals: Object.keys(externals || {}),
+  externals: Object.keys(externals || {}).filter(item => item !== 'sql.js'),
 
   module: {
     rules: [{
@@ -25,7 +26,7 @@ export default {
 	    exclude: /node_modules/,
 	    use: {
     		loader: 'worker-loader',
-    	}
+    	},
     }]
   },
 
@@ -75,6 +76,23 @@ export default {
 			Util: 'exports-loader?Util!bootstrap/js/dist/util'
     }),
 		new MomentLocalesPlugin(),
+	  new webpack.NormalModuleReplacementPlugin(/\.\.\/migrate/, '../util/noop.js'),
+	  new webpack.NormalModuleReplacementPlugin(/\.\.\/seed/, '../util/noop.js'),
+	  new webpack.IgnorePlugin(/mariasql/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/mssql/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/mysql/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/mysql2/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/oracle/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/oracledb/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/postgres/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/pg-query-stream/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/redshift/, /[\/\\]knex[\/\\]/),
+	  new webpack.IgnorePlugin(/strong-oracle/, /[\/\\]knex[\/\\]/),
+
+	  new CopyPlugin([{
+	  	from: path.join(__dirname, 'app', 'sql-wasm.wasm'),
+	  	to: path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm'),
+	  }]),
   ],
 	// profile: true,
 };

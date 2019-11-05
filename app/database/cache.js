@@ -1,13 +1,13 @@
 /* eslint-disable flowtype-errors/show-errors */
 // @flow
-import Trilogy from 'trilogy';
+import { connect } from 'trilogy';
 import { getAcrosModel } from './models';
-import { CACHE_FILE, LAST_CACHE, TOM_DATA_CACHE } from '../constants';
+import { CACHE_FILE, LAST_CACHE, PATHS_CACHE_PATH, TOM_DATA_CACHE } from '../constants';
 import fs from 'fs-extra';
 
 class Cache {
   constructor() {
-    this.db = new Trilogy(CACHE_FILE, { client: 'sql.js' });
+    this.db = connect(CACHE_FILE, { client: 'sql.js' });
 	  this.ensureTable()
 		  .then(() => console.log('Acronyms table exists'))
 		  .catch(e => console.error(`Error ensuring Acronyms table exists:\n${e}`));
@@ -96,7 +96,8 @@ class Cache {
   }
 }
 
-export default async () => new Cache();
+let cache;
+export default async () => cache || (cache = new Cache());
 
 export function clearCache() {
 	const electron = process.type === 'renderer' ? require('electron').remote : require('electron');
@@ -106,6 +107,7 @@ export function clearCache() {
 	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
 	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
 	fs.emptyDirSync(TOM_DATA_CACHE);
+	fs.unlinkSync(PATHS_CACHE_PATH);
 
 	session.clearStorageData({ storages: ['localStorage'] });
 
