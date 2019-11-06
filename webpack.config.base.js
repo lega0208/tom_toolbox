@@ -88,10 +88,9 @@ export default {
 	  new webpack.IgnorePlugin(/pg-query-stream/, /[\/\\]knex[\/\\]/),
 	  new webpack.IgnorePlugin(/redshift/, /[\/\\]knex[\/\\]/),
 	  new webpack.IgnorePlugin(/strong-oracle/, /[\/\\]knex[\/\\]/),
-
 	  new CopyPlugin([{
-	  	from: path.join(__dirname, 'app', 'sql-wasm.wasm'),
-	  	to: path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm'),
+		  from: path.join(__dirname, 'app', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+		  to: path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm'),
 	  }]),
   ],
 	// profile: true,

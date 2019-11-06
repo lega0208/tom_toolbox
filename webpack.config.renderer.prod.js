@@ -11,6 +11,7 @@ import merge from 'webpack-merge';
 
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
+import CopyPlugin from 'copy-webpack-plugin';
 
 CheckNodeEnv('production');
 

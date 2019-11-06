@@ -33,6 +33,8 @@ if (!(fs.existsSync(dll) && fs.existsSync(manifest))) {
 }
 
 export default merge.smart(baseConfig, {
+	mode: 'development',
+
   devtool: 'inline-source-map',
 
   target: 'electron-renderer',
@@ -197,7 +199,6 @@ export default merge.smart(baseConfig, {
       }
     ]
   },
-  mode: 'development',
   plugins: [
     new webpack.DllReferencePlugin({
       context: process.cwd(),
@@ -243,12 +244,21 @@ export default merge.smart(baseConfig, {
     port,
     publicPath,
     compress: true,
-    stats: 'minimal',
+    stats: {
+    	colors: true,
+	    logging: 'warn',
+	    errorDetails: true,
+	    outputPath: true,
+	    publicPath: true,
+    },
     inline: true,
     lazy: false,
     hot: true,
     headers: { 'Access-Control-Allow-Origin': '*' },
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: [
+    	path.join(__dirname, 'app', 'dist'),
+	    path.join(__dirname, 'app')
+    ],
     watchOptions: {
       aggregateTimeout: 300,
       ignored: /node_modules/,
@@ -258,11 +268,6 @@ export default merge.smart(baseConfig, {
       verbose: true,
       disableDotRule: false,
     },
-	  setup(app) {
-    	app.get('/dist/sql-wasm.wasm', (req, res) => {
-    		res.sendFile(path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm')); // wow all of this is dumb
-	    })
-	  },
     before() {
       if (process.env.START_HOT) {
         console.log('Staring Main Process...');
