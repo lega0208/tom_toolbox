@@ -9,7 +9,7 @@ type Props = {
 export default class App extends Component<Props> {
 	componentDidMount() {
 		this.cache = getPathsCache();
-		setTimeout(() => this.cache.validateCache().then(() => console.log('cache validated?')), 100);
+		this.cache.validateCache().then(() => console.log('[LandingPages] cache validated'))
 	}
 
 	componentWillUnmount() {

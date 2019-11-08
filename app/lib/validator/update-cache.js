@@ -2,7 +2,7 @@
 import cheerio from 'cheerio';
 import { basename } from 'path';
 import { pathExists, readFile } from 'fs-extra';
-import { landingPages } from './paths';
+import getLandingPagesDb from 'database/paths-cache';
 import { wrapContent } from './util';
 import { FileData, TOMDataType } from './types';
 import {
@@ -54,10 +54,8 @@ const parseNewData = async (path, isHomepage, isLanding, parentData, tomName) =>
 };
 
 const createNewFileData = async (path, parentData, tomName) => {
-	const isLanding = landingPages[tomName] // have to format the paths the same
-		&& landingPages[tomName]
-			.map((pagePath) => basename(pagePath))
-			.includes(basename(path));
+	const db = getLandingPagesDb();
+	const isLanding = await db.getPageData(path).length === 1;
 	return {
 		path,
 		depth: parentData.depth + 1,
@@ -69,17 +67,18 @@ const createNewFileData = async (path, parentData, tomName) => {
 
 export async function updateCachedData(path: string, tomData: TOMDataType): Promise<?FileData> {
 	const { files, tomName, secMenu } = tomData;
-	const isLanding = landingPages[tomName] // have to format the paths the same
-		&& landingPages[tomName]
-			.map((pagePath) => basename(pagePath))
-			.includes(basename(path));
+
+	const db = getLandingPagesDb();
+	const fileLandingData = await db.getPageData(path);
+	const isLanding = fileLandingData.length === 1;
+	const isHomepage = isLanding && fileLandingData[0].isHomepage;
 
 	const oldFileData: ?FileData = files[path]; // if it's been deleted, it's now undefined and can be skipped
 	if (!oldFileData) return;
 
 	const parentData: ?FileData = oldFileData.parent ? files[oldFileData.parent] : null;
 
-	const newFileData = await parseNewData(path, oldFileData.isHomepage, isLanding, parentData, tomName);
+	const newFileData = await parseNewData(path, isHomepage, isLanding, parentData, tomName);
 
 	const combinedData: FileData = { ...oldFileData, ...newFileData };
 

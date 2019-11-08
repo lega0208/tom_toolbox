@@ -35,7 +35,6 @@ export async function getTOMDataModel(db) {
 		},
 		$: String, // stringified function
 		tomName: String,
-		updated_at: Date,
 	};
 
 	return db.model('tomData', tomDataSchema, {
@@ -48,17 +47,25 @@ export async function getTOMDataModel(db) {
 }
 
 export async function getLandingPagesModel(db) {
-	console.log('getLandingPagesModel');
-	const landingPagesSchema = {
-		ID: { type: 'increments', nullable: false, primary: true },
-		filepath: { type: String, nullable: false, unique: true },
-		tomName: { type: String, nullable: false },
-		isHomepage: { type: Boolean }
-	};
-	const model = db.model('LandingPages', landingPagesSchema, {
-		index: { isHomepage: 'isHomepage', tomName: 'tomName' }
-	});
-	console.log(model);
+	try {
+		const landingPagesSchema = {
+			ID: { type: 'increments', nullable: false, primary: true },
+			filepath: { type: String, nullable: false, unique: true },
+			tomName: { type: String, nullable: false },
+			isHomepage: Boolean,
+			created_at: { type: Date, nullable: false, defaultTo: Date.now() },
+		};
 
-	return model;
+		return db.model('LandingPages', landingPagesSchema, {
+			index: [
+				['filepath'],
+				['isHomepage', 'tomName'],
+				['tomName', 'isHomepage'],
+				['created_at'],
+			],
+		});
+	} catch (e) {
+		console.error('Error getting LandingPages model');
+		console.error(e);
+	}
 }

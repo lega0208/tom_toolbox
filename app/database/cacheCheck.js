@@ -21,7 +21,6 @@ export default async function checkCache(forceCache: ?boolean): void {
 	} catch (e) {
 		throw new Error(e);
 	}
-	await dbCache.close();
 }
 
 async function shouldCheck() {

@@ -14,9 +14,8 @@ class Cache {
   }
 
 	async ensureTable() {
-		const acrosModel = await getAcrosModel(this.db);
-		if (!this.db.hasModel('Acronyms')) {
-			return acrosModel.create();
+		if (!await this.db.hasModel('Acronyms')) {
+			return await getAcrosModel(this.db);
 		}
 	}
 
