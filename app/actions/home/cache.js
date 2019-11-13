@@ -9,4 +9,4 @@ export const CACHE = {
  * Cache actions
  */
 
-export const checkCache = () => ({ type: CACHE.CHECK });
+export const checkCache = (z) => ({ type: CACHE.CHECK, z });

@@ -44,7 +44,11 @@ class Home extends Component {
 			  }
 		  }
 	  });
-		setTimeout(this.props.checkCache, 100);
+  	console.log('about to check cache?');
+  	const z = console.log;
+  	z('logging with z');
+	  this.props.checkCache(z);
+	  console.log('after checking cache?');
   }
 
   render() {

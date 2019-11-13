@@ -1,12 +1,31 @@
 import { connect } from 'trilogy';
 import { stat, exists } from 'fs-extra';
 import { getLandingPagesModel } from './models';
-import { getPaths } from 'database/paths-interface';
 import { PATHS_CACHE_PATH, PATHS_DB_PATH } from '../constants';
+import Worker from './paths-cache.Worker';
 
-class Cache {
+let worker;
+async function getPaths() {
+	console.log('getPaths in paths-cache.js');
+	if (!worker) worker = new Worker();
+
+	return new Promise((res, rej) => {
+		worker.onmessage = (msg) => {
+			if (msg.data.error) {
+				rej(msg.data.error);
+			} else {
+				res(msg.data.result);
+			}
+		};
+
+		worker.postMessage({ getPaths: true });
+	});
+}
+
+class PathsCache {
 	constructor() {
 		this.db = connect(PATHS_CACHE_PATH, { client: 'sql.js' });
+		console.log('paths-cache constructor');
 
 		this.ensureTable()
 			.then(() => console.log('Landing table exists:'))
@@ -18,14 +37,14 @@ class Cache {
 		if (!(await this.db.hasModel('LandingPages'))) {
 			const model = await getLandingPagesModel(this.db);
 
-			if (process.env.NODE_ENV === 'development') {
-				model.onQuery(console.log, { includeInternal: true });
-			}
-			console.log(model);
+			//if (process.env.NODE_ENV === 'development') {
+			//	model.onQuery(console.log, { includeInternal: true });
+			//}
 		}
 	}
 
 	async validateCache() {
+		console.log('Validating cache');
 		const landings = await getLandingPagesModel(this.db);
 		const dbLastModified = (await stat(PATHS_DB_PATH)).mtime;
 		const cacheExists = await exists(PATHS_CACHE_PATH);
@@ -127,7 +146,8 @@ class Cache {
 	}
 }
 
-let cache;
-
-export default () => cache || (cache = new Cache());
+export default () => {
+	console.log('new cache');
+	return new PathsCache();
+};
 

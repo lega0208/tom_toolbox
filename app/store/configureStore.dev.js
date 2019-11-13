@@ -21,16 +21,17 @@ const configureStore = (initialState) => {
   const sagaMiddleware = createSagaMiddleware();
   middleware.push(sagaMiddleware);
 
-  // Logging Middleware
-  const logger = createLogger({
-    level: 'info',
-    collapsed: true
-  });
-  middleware.push(logger);
 
   // Router Middleware
   const router = routerMiddleware(history);
   middleware.push(router);
+
+	// Logging Middleware
+	const logger = createLogger({
+		level: 'error',
+		collapsed: true,
+	});
+	middleware.push(logger);
 
   // Redux DevTools Configuration
   const actionCreators = {

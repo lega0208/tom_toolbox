@@ -1,13 +1,37 @@
 import moment from 'moment';
 import { ensureFile, readFile, outputFile } from 'fs-extra';
-import db from './data-interface';
 import cache from './cache';
 import { LAST_CACHE } from '../constants';
+import Worker from './cache.Worker';
+
+let worker = new Worker();
+async function queryDb(query) {
+	if (!worker) worker = new Worker();
+
+	return new Promise((res, rej) => {
+		worker.onmessage = (msg) => {
+			if (msg.data.error) {
+				rej(msg.data.error);
+			} else {
+				res(msg.data.result);
+			}
+		};
+
+		worker.postMessage({ query });
+	});
+}
 
 export default async function checkCache(forceCache: ?boolean): void {
-	const dbCache = await cache();
+	const dbCache = cache();
+	console.log('checking cache??');
 	try {
 		const lastCache = await readLastCache() || '';
+
+		// If the Toolbox is updated, localStorage isn't cleared, so we need to clear it here
+		if (!lastCache) {
+			localStorage.setItem('lastCheck', moment('1970-01-01').toISOString())
+		}
+
 		if ((await shouldCheck()) && (!lastCache || forceCache)) {
 			console.log('No lastCache, caching data');
 			await cacheData(dbCache);
@@ -74,11 +98,11 @@ async function getUpdatedData(lastCache) {
 		const _lastCache = moment(lastCache).format('YYYY-MM-DD');
 		const query =
 			`SELECT [Acronym], [Definition], [Language] FROM Acronyms WHERE [Date Modified] > DateValue('${_lastCache}')`;
-		return db.query(query);
+		return queryDb(query);
 	}
 	try {
 		const query = 'SELECT [Acronym], [Definition], [Language] FROM Acronyms';
-		return db.query(query);
+		return queryDb(query);
 	} catch (e) {
 		console.error(`Error getting updated data:`);
 		throw e;
@@ -91,7 +115,7 @@ async function shouldUpdateCache(lastCache = '1970-01-01') {
 		return false;
 	}
 	const query = 'SELECT MAX ([Date Modified]) FROM Acronyms';
-	const resultArr = (await db.query(query)) || [];
+	const resultArr = (await queryDb(query)) || [];
 	const result = (resultArr.length && resultArr[0].hasOwnProperty('Expr1000')) ? resultArr[0].Expr1000 : null;
 
 	if (result) {

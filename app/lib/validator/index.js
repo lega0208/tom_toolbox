@@ -1,6 +1,6 @@
 import { FileData, TOMDataType, TOMResults } from 'lib/validator/types';
 import { ProgressTracker } from 'sagas/validator/progress';
-import Worker from './Worker.js';
+import Worker from './Worker';
 import { measureTime } from 'lib/util';
 
 let worker;

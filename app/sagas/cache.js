@@ -1,21 +1,34 @@
 import { call, fork, join, take, put, select } from 'redux-saga/effects';
 import { CACHE, setWarning, hideWarning } from 'actions/home';
 import cacheCheck from 'database/cacheCheck';
+import getPathsCache from 'database/paths-cache';
 
 export default function* cache() {
+	console.error(console);
 	while (true) {
-		yield take(CACHE.CHECK);
+		const { z } = yield take(CACHE.CHECK);
 
-		console.log('Starting to check cache');
+		z('hi');
+
+		console.log('Starting to check [Acronyms] cache');
+		window.console.log('Trying this');
 		try {
-			const cacheCheckTask = yield fork(cacheCheck);
+			yield call(cacheCheck);
 			const isWarningShown = yield select(({ home: { warning: { show } } }) => (show));
-			yield join(cacheCheckTask);
 
 			if (isWarningShown) {
 				yield put(hideWarning());
 			}
-			console.log('Done checking cache');
+			console.log('Done checking [Acronyms] cache');
+			console.error('maybe?');
+
+			console.log('Starting to check [LandingPages] cache');
+			const pathsCache = yield call(getPathsCache);
+			yield call([pathsCache, pathsCache.validateCache]);
+
+			console.log('Done checking [LandingPages] cache');
+			yield call(z, 'hello?');
+			yield put({ type: 'DONE_CHECKING', payload: { z, pathsCache, someVal: 1 }});
 		} catch (e) {
 			yield call(handleCacheError, e);
 		}

@@ -237,7 +237,8 @@ export default merge.smart(baseConfig, {
 
   node: {
     __dirname: false,
-    __filename: false
+    __filename: false,
+	  console: true,
   },
 
   devServer: {
@@ -246,7 +247,7 @@ export default merge.smart(baseConfig, {
     compress: true,
     stats: {
     	colors: true,
-	    logging: 'warn',
+	    logging: 'normal',
 	    errorDetails: true,
 	    outputPath: true,
 	    publicPath: true,

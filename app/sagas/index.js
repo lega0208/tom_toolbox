@@ -5,6 +5,7 @@ import watchValidator from './validator';
 import cache from './cache';
 
 export default function* rootSaga() {
+	console.error('rootSaga');
 	yield all([
 		fork(watchHome),
 		//fork(watchTOMViewer),

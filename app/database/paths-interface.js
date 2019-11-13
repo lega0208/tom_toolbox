@@ -21,6 +21,7 @@ class DataInterface {
 	}
 	async getAll(table) {
 		const statement = `SELECT * FROM ${table};`;
+		console.log('getAll from accdb');
 		return this.query(statement);
 	}
 	async query(statement) {
@@ -40,12 +41,12 @@ class DataInterface {
 	}
 }
 
+const db = new DataInterface(PATHS_DB_PATH);
+
 // Will probably need to move this to a cache function, and then just read the cache from here
 export async function getPaths() {
 	console.log('getting paths from accdb');
 	try {
-		const db = new DataInterface(PATHS_DB_PATH);
-
 		return await db.getAll('LandingPages');
 	} catch (e) {
 		console.error('Error getting paths from paths DB');
@@ -53,4 +54,4 @@ export async function getPaths() {
 	}
 }
 
-export default new DataInterface(`${DISTRIB_PATH}PagesDB.accdb`);
+export default db;

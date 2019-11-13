@@ -25,7 +25,7 @@ class Cache {
 				return this.where('Language', lang).orWhere('Language', null);
 			})
 			.count('Acronym');
-    return (await this.db.raw(countQuery, true))[0]['count("Acronym")'];
+    return (await this.db.raw(countQuery, true))[0]['count(`Acronym`)'];
   }
 
   async getDef(acro, lang) {
@@ -95,8 +95,7 @@ class Cache {
   }
 }
 
-let cache;
-export default async () => cache || (cache = new Cache());
+export default () => new Cache();
 
 export function clearCache() {
 	const electron = process.type === 'renderer' ? require('electron').remote : require('electron');
