@@ -244,6 +244,7 @@ export default merge.smart(baseConfig, {
     port,
     publicPath,
     compress: true,
+	  disableHostCheck: true,
     stats: {
     	colors: true,
 	    logging: 'warn',

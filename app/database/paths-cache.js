@@ -3,13 +3,14 @@ import { stat, exists } from 'fs-extra';
 import { getLandingPagesModel } from './models';
 import { getPaths } from 'database/paths-interface';
 import { PATHS_CACHE_PATH, PATHS_DB_PATH } from '../constants';
+import { measureTime } from 'lib/util';
 
 class Cache {
 	constructor() {
 		this.db = connect(PATHS_CACHE_PATH, { client: 'sql.js' });
 
 		this.ensureTable()
-			.then(() => console.log('Landing table exists:'))
+			.then(() => console.log('Landing table exists'))
 			.catch(e => console.error(`Error ensuring Acronyms table exists:\n${e}`));
 	}
 
@@ -21,23 +22,28 @@ class Cache {
 			if (process.env.NODE_ENV === 'development') {
 				model.onQuery(console.log, { includeInternal: true });
 			}
-			console.log(model);
 		}
 	}
 
 	async validateCache() {
+		const measureTimeEnd = measureTime();
 		const landings = await getLandingPagesModel(this.db);
 		const dbLastModified = (await stat(PATHS_DB_PATH)).mtime;
-		const cacheExists = await exists(PATHS_CACHE_PATH);
 		const cacheLastModified = (await stat(PATHS_CACHE_PATH)).mtime;
-		const hasData = (await landings.count()) > 0;
+		console.log(`cacheLastModified took ${measureTimeEnd()}`);
+		const count = landings.count();
+		console.log(`landings.count() took ${measureTimeEnd()}`);
 
-		if (!cacheExists || dbLastModified > cacheLastModified || !hasData) {
+		if (dbLastModified > cacheLastModified || (await count) < 1) {
 			console.log('Updating LandingPages cache');
 			await this.clear();
+			console.log(`Clearing cache took ${measureTimeEnd()}`);
 			await this.updateCache();
-			console.log(`[LandingPages] updated, and now has ${await landings.count()} rows of data`)
+			console.log(`Updating cache took ${measureTimeEnd()}`);
+			console.log(`[LandingPages] updated, and now has ${await landings.count()} rows of data`);
+			console.log(`landings.count() took ${measureTimeEnd()}`);
 		} else {
+			console.log(`validateCache took ${measureTimeEnd()}`);
 			console.log('LandingPages cache already up to date');
 		}
 	}

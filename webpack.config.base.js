@@ -8,8 +8,16 @@ import CopyPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
 import { dependencies as externals } from './app/package.json';
 
+externals['redux-logger'] = true;
+
 export default {
-  externals: Object.keys(externals || {}).filter(item => item !== 'sql.js'),
+  externals: Object.keys(externals || {}),
+
+	optimization: {
+		splitChunks: {
+			chunks: 'all',
+		},
+	},
 
   module: {
     rules: [{

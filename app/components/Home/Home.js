@@ -37,7 +37,8 @@ class Home extends Component {
 				  // an event listener and do necessary checks
 				  case 'v': this.props.initConverter();
 					  break;
-				  case 'c': console.log('COPY!! :O');
+				  case 'c':
+				  	console.log('COPY!! :O');
 					  break;
 				  case 'z': this.props.undo();
 					  break;
@@ -92,4 +93,5 @@ const mapDispatch = {
 	checkCache,
 	showPreview: triggerShowPreview,
 };
+
 export default connect(mapState, mapDispatch)(Home);

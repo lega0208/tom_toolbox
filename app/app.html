@@ -32,7 +32,10 @@
         scripts.push(
           (process.env.HOT)
             ? 'http://localhost:' + port + '/dist/renderer.dev.js'
-            : './dist/renderer.prod.js'
+            : './dist/renderer.prod.js',
+	        (process.env.HOT)
+		        ? 'http://localhost:' + port + '/dist/vendors~main.renderer.dev.js'
+		        : './dist/vendors~main.renderer.prod.js',
         );
 
         document.write(

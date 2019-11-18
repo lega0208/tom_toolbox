@@ -1,8 +1,8 @@
 import { all, fork } from 'redux-saga/effects';
 import watchHome from './home';
-//import watchTOMViewer from './tom-viewer';
 import watchValidator from './validator';
 import cache from './cache';
+//import watchTOMViewer from './tom-viewer';
 
 export default function* rootSaga() {
 	yield all([

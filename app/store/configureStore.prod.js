@@ -1,6 +1,5 @@
 // @flow
 import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
 import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'react-router-redux';
@@ -14,7 +13,6 @@ const sagaMiddleware = createSagaMiddleware();
 // Middleware registry
 const middleware = [
   router,
-  thunk,
   sagaMiddleware
 ];
 

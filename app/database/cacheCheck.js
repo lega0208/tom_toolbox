@@ -1,10 +1,12 @@
 import moment from 'moment';
-import { ensureFile, readFile, outputFile } from 'fs-extra';
+import { ensureFile, exists, readFile, outputFile, stat } from 'fs-extra';
+import { measureTime } from 'lib/util';
 import db from './data-interface';
 import cache from './cache';
-import { LAST_CACHE } from '../constants';
+import { LAST_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
 
 export default async function checkCache(forceCache: ?boolean): void {
+	const measureTimeEnd = measureTime();
 	const dbCache = await cache();
 	try {
 		const lastCache = await readLastCache() || '';
@@ -18,6 +20,7 @@ export default async function checkCache(forceCache: ?boolean): void {
 		} else {
 			console.log('Data not cached');
 		}
+		console.log(`cacheCheck took ${measureTimeEnd()}`);
 	} catch (e) {
 		throw new Error(e);
 	}
@@ -26,7 +29,6 @@ export default async function checkCache(forceCache: ?boolean): void {
 async function shouldCheck() {
 	// todo: switch to file or something
 	const lastCheck = localStorage.getItem('lastCheck') || null;
-	console.log(`lastCheck: ${lastCheck}`);
 
 	if (lastCheck) {
 		const _lastCheck = moment(lastCheck);
@@ -86,22 +88,22 @@ async function getUpdatedData(lastCache) {
 }
 
 async function shouldUpdateCache(lastCache = '1970-01-01') {
-	if (moment().isSame(lastCache, 'day')) {
-		console.log('Already cached data today.');
-		return false;
-	}
-	const query = 'SELECT MAX ([Date Modified]) FROM Acronyms';
-	const resultArr = (await db.query(query)) || [];
-	const result = (resultArr.length && resultArr[0].hasOwnProperty('Expr1000')) ? resultArr[0].Expr1000 : null;
+	const measureTimeEnd = measureTime();
+	const dbPath = (await exists(DB_PATH)) ? (await readFile(DB_PATH)) : DEFAULT_DB_PATH;
 
-	if (result) {
-		const lastUpdate = moment(result);
-		console.log(`Last update: ${lastUpdate.format('YYYY-MM-DD')}`);
-		const _lastCache = moment(lastCache);
-		console.log(`Last cache: ${_lastCache.format('YYYY-MM-DD')}`);
+	if (await exists(dbPath)) {
+		const dbLastModified = await stat(DB_PATH).mtime;
+		if (Date.parse(lastCache) > Date.parse(dbLastModified)) {
+			console.log('Cache already up to date');
+			console.log(`shouldUpdateCache took ${measureTimeEnd()}`);
+			return false;
+		}
 
-		return lastUpdate.isAfter(_lastCache, 'day');
-	} else {
-		throw new Error('Error getting result from database.')
+		console.log(`Last update: ${moment(dbLastModified).format('YYYY-MM-DD')}`);
+		console.log(`Last cache: ${moment(lastCache).format('YYYY-MM-DD')}`);
+		console.log(`shouldUpdateCache took ${measureTimeEnd()}`);
+		return true;
 	}
+
+	throw new Error('Database not found.')
 }

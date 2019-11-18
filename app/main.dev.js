@@ -13,6 +13,7 @@
 import { app, BrowserWindow, } from 'electron';
 import MenuBuilder from './menu';
 
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 console.log('Starting main process');
 
 let mainWindow = null;
@@ -33,7 +34,7 @@ if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true')
    const installer = require('electron-devtools-installer');
    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
    const extensions = [
-     'REACT_DEVELOPER_TOOLS',
+     //'REACT_DEVELOPER_TOOLS',
      'REDUX_DEVTOOLS'
    ];
 
@@ -65,7 +66,7 @@ app.on('ready', async () => {
     width: 1229,
     height: 874,
 		webPreferences: {
-			nodeIntegrationInWorker: true
+			nodeIntegrationInWorker: true,
 		}
   });
 
