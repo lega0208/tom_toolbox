@@ -1,16 +1,13 @@
 // @flow
-import { Menu, shell, BrowserWindow, dialog, session } from 'electron';
+import { Menu, shell, BrowserWindow, dialog } from 'electron';
 import fs from 'fs-extra';
 import {
 	DB_PATH,
-	LAST_CACHE,
-	CACHE_FILE,
 	DB_DRIVER_PATH,
 	DB_DRIVER,
 	DB_DRIVER_ALT,
-	TOM_DATA_CACHE,
 } from './constants';
-import { clearCache } from './database/cache';
+import { clearCache } from './database/util';
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;
@@ -53,13 +50,13 @@ export default class MenuBuilder {
 					try {
 						const path = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'] });
 						if (typeof path !== 'undefined') {
+							clearCache();
 							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DSS/,
 								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS');
 							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => (
 								e ? console.error(e)
 									: console.log(`"${fixedPath}" saved as new db path`)
 							));
-							clearCache();
 							this.mainWindow.webContents.reload();
 						} else console.error('path chosen is undefined');
 					} catch (e) {

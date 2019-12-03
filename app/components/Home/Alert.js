@@ -28,6 +28,12 @@ function Alert({ alert, warning }) {
 				type === 'success' ? 'Success!' : '';
 	const message = alert.message;
 	const display = alert.show ? 'show' : 'hide';
+	const emoji =
+		type === 'success'
+			? ' 😃'
+			: type === 'danger'
+				? ' 😧'
+				: '';
 
 	return (
 		<div className="container mb-5">
@@ -38,7 +44,7 @@ function Alert({ alert, warning }) {
 						<div className="col-auto" />
 						<div className="col">
 							<div className={`mb-1 mt-2 px-3 py-2 alert alert-${type} fade ${display}`} role="alert">
-								<h3 className="alert-heading mt-0">{title}</h3>
+								<h3 className="alert-heading mt-0">{title + emoji}</h3>
 								<p className="mb-0">{message}</p>
 							</div>
 						</div>

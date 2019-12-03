@@ -3,6 +3,7 @@
  */
 export default function preListClean(html) {
 	const funcs = [
+		removeNestedAnchorsComments,
 		replaceImgSrcs,
 		removeEmptyTags,
 		addClassQuotes,
@@ -16,6 +17,12 @@ export default function preListClean(html) {
 	return funcs.reduce((acc, func) => func(acc), html);
 }
 
+function removeNestedAnchorsComments(html) {
+	const regex = /<!\[if !supportNestedAnchors]>[\s\S]+?<!\[endif]>/gi;
+
+	return html.replace(regex, '')
+}
+
 function replaceImgSrcs(html) {
 	const regex = /(?:<!--\[if gte vml 1\]>[\s\S]+?)?<v:imagedata src="(.+?)"[\s\S]*?(?:<img[^>]+?><!(?:--)?\[endif\](?:--)?>|\/>)/gi;
 
@@ -27,12 +34,12 @@ function replaceImgSrcs(html) {
 
 function removeImgJunk(html) {
 	const regex = /<v:shapetype[\s\S]+?<\/v:shapetype>/g;
-	
+
 	while (regex.test(html)) {
 		console.log('Found img junk');
 		html = html.replace(regex, '');
 	}
-	return html;	
+	return html;
 }
 
 function removeListComments(html) {
@@ -93,7 +100,7 @@ function removeTags(html) {
 
 function removeDeleted(html) {
 	const regex = /<del[\s\S]+?<\/del>/g;
-	
+
 	return html.replace(regex, '');
 }
 

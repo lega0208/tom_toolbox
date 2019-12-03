@@ -4,13 +4,15 @@ import Worker from './Worker.js';
 import { measureTime } from 'lib/util';
 
 let worker;
-const validateWithWorker = (files, tomData, progress) => new Promise((res, rej) => {
+const validateWithWorker = (files, tomData, setProgress) => new Promise((res, rej) => {
 	try {
 		if (!worker) worker = new Worker();
 
 		worker.onmessage = (msg) => {
+			console.log('message from worker:');
+			console.log(msg);
 			if (typeof msg.data === 'number') {
-				progress.addCompleted(msg.data);
+				setProgress(msg.data);
 			} else {
 				res(msg.data);
 			}

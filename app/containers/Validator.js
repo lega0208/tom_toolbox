@@ -1,18 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { basename } from 'path';
-import { getTOMsStart, getTOMsPaths, selectTOM, validateTOMStart } from 'actions/validator';
+import { getTOMsStart, selectTOM, validateTOMStart } from 'actions/validator';
 import {
 	Grid,
 	Row,
 	Col,
-	Clear,
 	Button,
 	Dropdown,
 	LoadingSpinner,
-	ListGroup,
-	ListGroupItem,
-	Checkbox,
 } from 'components/bsComponents';
 import {
 	ProgressBar,
@@ -128,7 +124,6 @@ const mapState = ({ validator }) => (validator);
 
 const mapDispatch = {
 	getTOMsStart,
-	getTOMsPaths,
 	selectTOM,
 	validateTOMStart,
 };

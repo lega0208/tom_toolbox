@@ -54,7 +54,6 @@ function* preWordConvert() {
 function* startWordConvert() {
 	const { clipboard, options } = yield select(({ home: { clipboard, options } }) => ({ clipboard, options }));
 	const opts = options.converter;
-
 	const result = yield call(WordConverter, clipboard, opts);
 
 	yield* postWordConvert(result);

@@ -1,22 +1,25 @@
-/* eslint-disable flowtype-errors/show-errors */
+
 // @flow
-import { readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
 import moment from 'moment';
-import { ensureFileSync } from 'fs-extra';
+import { ensureFileSync, readFileSync, writeFileSync, copy, exists, stat } from 'fs-extra';
 import ADODB from 'node-adodb-electronfork';
 import {
+	APP_DIR,
 	DB_PATH,
 	DEFAULT_DB_PATH,
 	DB_DRIVER_PATH,
 	DB_DRIVER,
-} from '../constants';
+	LOCAL_DB_PATH,
+} from '@constants';
+import { measureTime } from 'lib/util';
 
 process.env.DEBUG = 'ADODB';
 
 function getDBPath() {
-	ensureFileSync(DB_PATH);
 	try {
-		return readFileSync(DB_PATH, 'utf-8');
+		ensureFileSync(DB_PATH);
+		return readFileSync(DB_PATH, 'utf-8') || DEFAULT_DB_PATH;
 	} catch (e) {
 		console.error(e);
 	}
@@ -36,22 +39,52 @@ function getDBDriver() {
 	}
 }
 
+export async function getDbLastModified(localPath = '') {
+	const dbPath = localPath ? localPath : getDBPath();
+
+	return stat(dbPath).then(stat => stat.mtimeMs);
+}
+
+async function copyToAppDir() {
+	const localDbExists = await exists(LOCAL_DB_PATH);
+	const dbLastModified = await getDbLastModified();
+	const localDbLastModified = await getDbLastModified(LOCAL_DB_PATH);
+	console.log('dbLastModified:');
+	console.log(dbLastModified);
+	console.log('localDbLastModified:');
+	console.log(localDbLastModified);
+	if (!localDbExists || await getDbLastModified() > await getDbLastModified(LOCAL_DB_PATH)) {
+		console.log('Updating local Access DB');
+		const dbPath = getDBPath();
+		return await copy(dbPath, LOCAL_DB_PATH);
+	}
+}
+
 class DataInterface {
   constructor(dbPath) {
-		this.dbPath = dbPath || getDBPath() || DEFAULT_DB_PATH;
+		this.dbPath = dbPath || getDBPath();
 		this.dbDriver = getDBDriver();
-		// todo: get data provider dynamically (check if driver exists)
-		this.datasource = `Provider=Microsoft.${this.dbDriver}.0;Data Source=${this.dbPath};Persist Security Info=False;`;
+		this.datasource = `Provider=Microsoft.${this.dbDriver}.0;Data Source=${LOCAL_DB_PATH};Persist Security Info=False;`;
 		console.log(`db path: ${this.dbPath}`);
 		console.log(`db driver: ${this.dbDriver}`);
-		try {
-			this.db = ADODB.open(this.datasource);
-		} catch (e) {
-			throw e;
-		}
+		this.init().then(() => {});
   }
-  async select(query) {
-    await this.query(query);
+
+  async init() {
+	  try {
+	  	const measureCopying = measureTime();
+		  await copyToAppDir();
+		  console.log(`copying to app dir took ${measureCopying()}`);
+		  this.db = ADODB.open(this.datasource);
+	  } catch (e) {
+	  	console.error('Error initializing dataInterface 😐');
+		  throw e;
+	  }
+  }
+
+  async select(fields, table, constraints = '') {
+  	constraints = constraints && ` ${constraints}`;
+    await this.query(`SELECT ${fields} from ${table}${constraints}`);
   }
   async insert(table, values: {Acronym: string, Definition: string, Language: ?string}) {
 		const { Acronym, Definition, Language } = values;
@@ -63,15 +96,11 @@ class DataInterface {
 			`INSERT INTO ${table} ${fields} VALUES ('${Acronym}', '${Definition}', '${Language}', '${date}', '${time}');`;
 
     try {
-			await this.execute(statement);
+			return await this.execute(statement);
 		} catch (e) {
 			console.error(`Error inserting in db:\n${e}`);
 			throw e;
 		}
-
-		// todo: change to scalar
-		const getMaxID = `SELECT Max([ID]) from ${table}`; // not sure how I feel about an insert function returning a query result
-    return this.query(getMaxID);
   }
   async update(table, field, value, id) {
     const statement = `UPDATE ${table} SET ${field}=${value} WHERE [ID]='${id}'`;
@@ -81,10 +110,29 @@ class DataInterface {
     const statement = `DELETE FROM ${table} WHERE [ID]=${id}`;
 		await this.execute(statement);
   }
-  async getAll() {
-    const statement = 'SELECT * FROM Acronyms;';
-		return this.query(statement);
+  async getAll(table, fields) {
+  	const acroFields = '[Acronym], [Definition], [Language]';
+  	const landingsFields = '[filepath], [tomName], [isHomepage]';
+
+  	if (!fields) {
+  		switch (table) {
+			  case 'Acronyms':
+				  fields = acroFields;
+				  break;
+			  case 'LandingPages':
+				  fields = landingsFields;
+				  break;
+			  default:
+			  	fields = '*';
+		  }
+	  }
+	  console.log(`SELECT ${fields} FROM ${table};`);
+		return this.query(`SELECT ${fields} FROM ${table};`);
   }
+	async getAllUpdated(table, since = '1970-01-01') {
+		const statement = `SELECT * FROM ${table} WHERE [lastModified] > DateValue('${0}');`; // todo
+		return this.query(statement);
+	}
 	async execute(statement) {
 		if (this.db) {
 			try {
@@ -101,7 +149,10 @@ class DataInterface {
 	async query(statement) {
 		if (this.db) {
 			try {
-				return await this.db.query(statement);
+				const measureQuery = measureTime();
+				const result = await this.db.query(statement);
+				console.log(`db query took ${measureQuery()}`);
+				return result;
 			} catch (e) {
 				console.error(`Error in DataInterface\nQuery: ${statement}`);
 				throw e;
@@ -111,4 +162,7 @@ class DataInterface {
 		}
 	}
 }
-export default new DataInterface();
+
+const dataInterface = new DataInterface();
+
+export default dataInterface;

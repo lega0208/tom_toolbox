@@ -8,16 +8,11 @@ import CopyPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
 import { dependencies as externals } from './app/package.json';
 
-externals['redux-logger'] = true;
+//externals['redux-logger'] = true;
 
 export default {
-  externals: Object.keys(externals || {}),
-
-	optimization: {
-		splitChunks: {
-			chunks: 'all',
-		},
-	},
+  //externals: Object.keys(externals || {}),
+	externals: ['redux-logger', 'lodash', 'bluebird', 'node-adodb-electronfork'],
 
   module: {
     rules: [{
@@ -86,20 +81,18 @@ export default {
 		new MomentLocalesPlugin(),
 	  new webpack.NormalModuleReplacementPlugin(/\.\.\/migrate/, '../util/noop.js'),
 	  new webpack.NormalModuleReplacementPlugin(/\.\.\/seed/, '../util/noop.js'),
-	  new webpack.IgnorePlugin(/mariasql/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/mssql/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/mysql/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/mysql2/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/oracle/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/oracledb/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/postgres/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/pg-query-stream/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/redshift/, /[\/\\]knex[\/\\]/),
-	  new webpack.IgnorePlugin(/strong-oracle/, /[\/\\]knex[\/\\]/),
-	  new CopyPlugin([{
-		  from: path.join(__dirname, 'app', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
-		  to: path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm'),
-	  }]),
+	  new webpack
+		  .IgnorePlugin(
+		  	/mariasql|mssql|mysql2?|oracle(?:db)?|postgres|pg-query-stream|redshift|strong-oracle/,
+			  /[\/\\]knex[\/\\]/
+		  ),
+	  new webpack.IgnorePlugin(/polyfill/, /[\/\\]@babel[\/\\]/),
+	  new CopyPlugin([
+	  	{
+			  from: path.join(__dirname, 'app', 'node_modules', 'sql.js', 'dist', 'sql-wasm.wasm'),
+			  to: path.join(__dirname, 'app', 'dist', 'sql-wasm.wasm'),
+		  },
+	  ]),
   ],
 	// profile: true,
 };

@@ -8,7 +8,7 @@ import { measureTime } from 'lib/util';
 class Cache {
 	constructor() {
 		this.db = connect(PATHS_CACHE_PATH, { client: 'sql.js' });
-
+		console.log('pathsCache connected');
 		this.ensureTable()
 			.then(() => console.log('Landing table exists'))
 			.catch(e => console.error(`Error ensuring Acronyms table exists:\n${e}`));
@@ -28,8 +28,8 @@ class Cache {
 	async validateCache() {
 		const measureTimeEnd = measureTime();
 		const landings = await getLandingPagesModel(this.db);
-		const dbLastModified = (await stat(PATHS_DB_PATH)).mtime;
-		const cacheLastModified = (await stat(PATHS_CACHE_PATH)).mtime;
+		const dbLastModified = (await stat(PATHS_DB_PATH)).mtimeMs;
+		const cacheLastModified = (await stat(PATHS_CACHE_PATH)).mtimeMs;
 		console.log(`cacheLastModified took ${measureTimeEnd()}`);
 		const count = landings.count();
 		console.log(`landings.count() took ${measureTimeEnd()}`);

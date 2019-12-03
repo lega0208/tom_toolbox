@@ -62,7 +62,8 @@ export type FileData = {
 export type AdditionalErrorMessage = { header: string, message: string } | string;
 export type ValidationError = { message: string, additionalMessages: Array<AdditionalErrorMessage> };
 export type ValidationResult = { title: string, errors: Array<ValidationError> }
-export type PageResults = { path: string, results: Array<ValidationResult> };
+export type ValidationResults = Array<ValidationResult>;
+export type PageResults = { path: string, results: ValidationResults };
 export type TOMResults = Array<PageResults>;
 
 export type ValidationFunction = (fileData: FileData) => Promise<?ValidationResult>;

@@ -7,11 +7,11 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import merge from 'webpack-merge';
-// import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+//import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
-import CopyPlugin from 'copy-webpack-plugin';
+//import CopyPlugin from 'copy-webpack-plugin';
 
 CheckNodeEnv('production');
 
@@ -190,9 +190,6 @@ export default merge.smart(baseConfig, {
      * Babli is an ES6+ aware minifier based on the Babel toolchain (beta)
      */
     // new BabiliPlugin(),
-    // new BundleAnalyzerPlugin({
-    //   analyzerMode: process.env.OPEN_ANALYZER === 'true' ? 'static' : 'disabled',
-    //   openAnalyzer: process.env.OPEN_ANALYZER === 'true'
-    // }),
+    // new BundleAnalyzerPlugin(),
   ],
 });

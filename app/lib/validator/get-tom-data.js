@@ -1,11 +1,10 @@
 // @flow
 import { outputJSON, readFile, readJSON, stat } from 'fs-extra';
 import { basename, join } from 'path';
-import { batchAwait } from '../util';
 import { updateCachedData } from './update-cache';
-import { TOM_DATA_CACHE } from '../../constants';
+import { TOM_DATA_CACHE } from '@constants';
 import { TOMDataType, FileData } from './types';
-import { clearCache } from 'database/cache';
+import { clearCache } from 'database/util';
 
 export default async function getTOMData(tomName): TOMDataType { // should rename this or extract parts because it mostly updates
 	console.log('tomName:');
@@ -43,7 +42,7 @@ async function verifyCache(cacheFilePath: string) {
 	const fileStats = (await Promise.all(getStatTasks)).filter((file) => !!file);
 
 	for (const [ i, fileStat ] of fileStats.entries()) {
-		const lastModified = fileStat.mtime;
+		const lastModified = fileStat.mtimeMs;
 		const file = fileObjects[i];
 
 		if (lastModified > file.lastUpdated) {

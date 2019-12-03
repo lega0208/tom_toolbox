@@ -8,6 +8,7 @@ import {
 	TOMDataType,
 	ValidationError,
 	ValidationResult,
+	ValidationResults,
 } from 'lib/validator/types';
 
 const makeError = (message: string, additionalMessages?: Array<AdditionalErrorMessage> = []): ValidationError => ({
@@ -76,7 +77,7 @@ const checkDates: CheckFunc = async ({ date: { top, bottom } }) => {
 
 	validate.pushErrorIf(!top, 'Date missing in "dcterms.modified" metadata.');
 	validate.pushErrorIf(!bottom, 'Date in missing in the <time> tag (at the bottom of the page).');
-	validate.pushErrorIf(top !== bottom, 'Dates do not match:', [
+	validate.pushErrorIf(top.trim() !== bottom.trim(), 'Dates do not match:', [
 		{ header: 'Top (metadata):', message: top },
 		{ header: 'Bottom (<time> tag):', message: bottom },
 	]);
@@ -307,7 +308,7 @@ const checkToC: CheckFunc = async (fileData) => {
 			href: item.href,
 			text: item.text.replace(/\s+/g, ' ').trim()
 		})).filter((i) => !!i);
-		
+
 		for (const tocItem of tocItems) {
 			// check if href is missing
 			const hrefIsMissing =
@@ -397,7 +398,7 @@ const checkChildren = async ({ path, isLanding, children }) => {
 	return validate.getResults();
 };
 
-export const validatePage = async (fileData, tomData) => {
+export const validatePage = async (fileData, tomData): PageResults => {
 	const validations = [
 		checkTitles,
 		checkDates,
@@ -411,7 +412,7 @@ export const validatePage = async (fileData, tomData) => {
 
 	const validationTasks = validations.map((validation) => validation(fileData, tomData));
 	try {
-		const results: Array<ValidationResult> =
+		const results: ValidationResults =
 			(await Promise.all(validationTasks)).filter(({ errors }) => errors.length > 0);
 
 		return {
@@ -419,7 +420,7 @@ export const validatePage = async (fileData, tomData) => {
 			results,
 		};
 	} catch (e) {
-		console.log(`Error validating ${fileData.path}`);
+		console.error(`Error validating ${fileData.path}`);
 		throw e;
 	}
 };

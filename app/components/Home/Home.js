@@ -7,7 +7,12 @@ import ScriptsBar from './ScriptsBar';
 import BottomButtonRow from './BottomButtonRow';
 import HomeModal from './Modal';
 import { Grid, Row, Col } from 'components/bsComponents';
-import { initConverter, checkCache, undo, triggerShowPreview } from 'actions/home';
+import {
+	initConverter,
+	checkCache,
+	undo,
+	triggerShowPreview
+} from 'actions/home';
 
 // const { Menu, MenuItem } = remote;
 
@@ -45,7 +50,7 @@ class Home extends Component {
 			  }
 		  }
 	  });
-		setTimeout(this.props.checkCache, 100);
+	  this.props.checkCache()
   }
 
   render() {

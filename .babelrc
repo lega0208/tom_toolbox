@@ -1,13 +1,24 @@
 {
   "presets": [
     ["env", {
-      "targets": { "node": "10.2" },
-      "useBuiltIns": true
+      "targets": {
+        "node": "10.2.0",
+        "chrome": 66,
+        "electron": "3.1.9"
+      },
+      "useBuiltIns": true,
+      "exclude": ["transform-regenerator"],
+      "debug": true
     }],
-    "stage-0",
     "react"
   ],
-  "plugins": ["add-module-exports", "dynamic-import-webpack"],
+  "plugins": [
+    "add-module-exports",
+    "dynamic-import-webpack",
+    "transform-object-rest-spread",
+    "transform-export-extensions",
+    "transform-class-properties"
+  ],
   "env": {
     "production": {
       "presets": ["react-optimize"],

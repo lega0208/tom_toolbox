@@ -1,37 +1,68 @@
 /* eslint-disable flowtype-errors/show-errors */
 // @flow
 import { connect } from 'trilogy';
-import { getAcrosModel } from './models';
-import { CACHE_FILE, LAST_CACHE, PATHS_CACHE_PATH, TOM_DATA_CACHE } from '../constants';
-import fs from 'fs-extra';
+import accDb from 'database/data-interface';
+import { getAcrosModel, getLandingPagesModel } from './models';
+import { CACHE_FILE } from '@constants';
+
+type Acronym = {
+	ID: number,
+	Acronym: string,
+	Definition: string,
+	Language: ?string,
+	created_at?: Date,
+};
+
+type LandingPage = {
+	ID: number,
+	filepath: string,
+	tomName: string,
+	isHomepage: boolean,
+	created_at?: Date,
+};
 
 class Cache {
   constructor() {
     this.db = connect(CACHE_FILE, { client: 'sql.js' });
-	  this.ensureTable()
-		  .then(() => console.log('Acronyms table exists'))
-		  .catch(e => console.error(`Error ensuring Acronyms table exists:\n${e}`));
+    this.tablesEnsured = false;
   }
 
-	async ensureTable() {
-		if (!await this.db.hasModel('Acronyms')) {
-			return await getAcrosModel(this.db);
+	get acros() {
+		return this.db.getModel('Acronyms');
+	}
+
+	get landings() {
+		return this.db.getModel('LandingPages');
+	}
+
+	getDb() {
+  	return this.db;
+	}
+
+	async ensureTables() {
+		if (!await this.db.hasModel('Acronyms') || !await this.db.hasModel('LandingPages')) {
+			console.time('getModels');
+			return getAcrosModel(this.db)
+				.then(() => getLandingPagesModel(this.db))
+				.then(() => this.tablesEnsured = true)
+				.then(() => console.timeEnd('getModels'));
 		}
 	}
 
   async getAcroCount(acro, lang) {
     const countQuery = this.db.knex('Acronyms').where({ Acronym: acro })
 			.andWhere(function() {
-				return this.where('Language', lang).orWhere('Language', null);
+				return this.where('Language', lang).orWhereNull('Language');
 			})
 			.count('Acronym');
-    return (await this.db.raw(countQuery, true))[0]['count("Acronym")'];
+
+    return (await this.db.raw(countQuery, true))[0]['count(`Acronym`)'];
   }
 
   async getDef(acro, lang) {
     const defQuery = this.db.knex('Acronyms').where({ Acronym: acro })
 			.andWhere(function() {
-				return this.where('Language', lang).orWhere('Language', null);
+				return this.where('Language', lang).orWhereNull('Language');
 			})
 			.select('Definition');
     const def = await this.db.raw(defQuery, true);
@@ -47,36 +78,48 @@ class Cache {
 			const defsQuery = this.db.knex('Acronyms')
 				.whereIn('Acronym', acros)
 				.andWhere(function() {
-					return this.whereIn('Language', [lang, null]);
+					return this.where({ Language: lang }).orWhereNull('Language');
 				})
 				.select('Acronym', 'Definition');
-			return this.db.raw(defsQuery, true);
+
+			return await this.db.raw(defsQuery, true);
 		}
 			const defsQuery = this.db.knex('Acronyms').where({ Acronym: acros })
 				.andWhere(function() {
-					return this.whereIn('Language', [lang, null]);
+					return this.where({ Language: lang }).orWhereNull('Language');
 				})
 				.select('Acronym', 'Definition'); // SELECT 'Definition' from 'Acronyms' where 'Acronym' = acro
 			 												            // AND WHERE 'Language' IN (lang, null);
 			return this.db.raw(defsQuery, true);
   }
 
-  async insertOne(data: {ID: number, Acronym: string, Definition: string, Language: ?string}) {
-  	const acroModel = await getAcrosModel(this.db);
+  async repopulate(tableName) {
+  	console.log(`repopulating ${tableName}`);
+  	if (!this.tablesEnsured) await this.ensureTables();
+	  const model = this.db.getModel(tableName);
+	  await model.clear();
+
+	  return await accDb.getAll(tableName)
+		  .then(data => {
+		  	return this.insertAll(tableName, data);
+		  });
+  }
+
+  async insert(modelName: 'acros' | 'landings', data: Acronym | LandingPage) {
   	try {
-			return await acroModel.create(data);
+			return await this[modelName].create(data);
 		} catch (e) {
   		console.error(`Error in acroModel.create():\n${e}`);
 		}
 	}
 
-	async insertAll(arr) {
+	async insertAll(table, arr) {
   	while (arr.length > 0) {
 			const queue = arr.splice(0, 499);
-			const query = this.db.knex('Acronyms').insert(queue);
+			const query = this.db.knex(table).insert(queue);
 
 			try {
-				this.db.raw(query, false);
+				await this.db.raw(query, false);
 				console.log('insertAll transaction completed.');
 			} catch (e) {
 				console.error(`Error in insertAll transaction:\n${e}`);
@@ -84,8 +127,8 @@ class Cache {
 		}
 	}
 
-	async clear() {
-  	return await this.db.clear('Acronyms');
+	async clear(table) {
+  	return await this.db.getModel(table).clear();
 	}
 
   close() {
@@ -95,20 +138,91 @@ class Cache {
   }
 }
 
-let cache;
-export default async () => cache || (cache = new Cache());
+const cache = new Cache();
+let tablesEnsured = false;
+const ensureTask = cache.ensureTables();
 
-export function clearCache() {
-	const electron = process.type === 'renderer' ? require('electron').remote : require('electron');
-	const currentWindow = electron.BrowserWindow.getAllWindows()[0];
-	const session = currentWindow.webContents.session;
+const getEnsuredCache = async () => {
+	if (!tablesEnsured) {
+		await ensureTask;
+		tablesEnsured = true;
+	}
 
-	fs.writeFileSync(CACHE_FILE, '', 'utf-8');
-	fs.writeFileSync(LAST_CACHE, '', 'utf-8');
-	fs.emptyDirSync(TOM_DATA_CACHE);
-	fs.unlinkSync(PATHS_CACHE_PATH);
+	return cache;
+};
 
-	session.clearStorageData({ storages: ['localStorage'] });
+export default getEnsuredCache;
 
-	currentWindow.reload();
+class PathsCache {
+	constructor(db) {
+		this.db = db;
+		this.landings = this.db.getModel('LandingPages');
+		this.landingFilepaths = null;
+		this.tomNames = null;
+		this.homepagesByTom = null;
+	}
+
+	async getHomepagesByTom() {
+		if (this.homepagesByTom === null) {
+			const query = this.db.knex
+				.with('SortedTable', qb => qb.select('*').from('LandingPages').orderBy(['tomName', 'filepath']))
+				.select('A.tomName, A.filepath as filepath1, B.filepath as filepath2')
+				.from('SortedTable A, SortedTable B')
+				.whereNot('A.ID', 'B.ID')
+				.andWhere({
+					'A.tomName': 'B.tomName',
+					'A.isHomepage': true,
+					'B.isHomepage': true,
+				})
+				.orderBy('A.tomName');
+
+			const queryResults = await this.db.raw(query, true);
+
+			this.homepagesByTom = queryResults.reduce((acc, page) => ({
+				...acc,
+				[page.tomName]: [ page.filepath1, page.filepath2 ]
+			}), {});
+		}
+		return this.homepagesByTom
+	}
+
+	async getTomNames() {
+		if (this.tomNames === null) {
+			const query = this.db.knex('LandingPages').distinct('tomName');
+
+			this.tomNames = (await this.db.raw(query, true))
+				.map(({ tomName }) => tomName);
+		}
+
+		return this.tomNames;
+	}
+
+	async getLandingPages(pathsOnly = false) {
+		if (pathsOnly) {
+			if (this.landingFilepaths === null) {
+				this.landingFilepaths = (await this.landings.get('filepath'))
+					.map(({ filepath }) => filepath);
+			}
+			return this.landingFilepaths;
+		}
+
+		return await this.landings.find();
+	}
+
+	async getPageData(filepath) {
+		return this.landings.findOne({ filepath });
+	}
+
+	async checkIfLanding(filepath) {
+		const queryResult = await this.landings.find({ filepath });
+		console.log('pathsCache.checkIfLanding() results:');
+		console.log(queryResult);
+		return queryResult.length > 0;
+	}
+}
+
+let pathsCache;
+export async function getPathsCache() {
+	const db = (await getEnsuredCache()).getDb();
+	return pathsCache || (pathsCache = new PathsCache(db));
 }

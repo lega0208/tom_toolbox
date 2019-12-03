@@ -2,7 +2,7 @@
 import cheerio from 'cheerio';
 import { basename } from 'path';
 import { pathExists, readFile } from 'fs-extra';
-import getLandingPagesDb from 'database/paths-cache';
+import { getPathsCache } from 'database/cache';
 import { wrapContent } from './util';
 import { FileData, TOMDataType } from './types';
 import {
@@ -54,8 +54,9 @@ const parseNewData = async (path, isHomepage, isLanding, parentData, tomName) =>
 };
 
 const createNewFileData = async (path, parentData, tomName) => {
-	const db = getLandingPagesDb();
-	const isLanding = await db.getPageData(path).length === 1;
+	console.log(`This should be abs path: -> ${path}`);
+	const pathsCache = await getPathsCache();
+	const isLanding = await pathsCache.checkIfLanding(path);
 	return {
 		path,
 		depth: parentData.depth + 1,
@@ -67,11 +68,10 @@ const createNewFileData = async (path, parentData, tomName) => {
 
 export async function updateCachedData(path: string, tomData: TOMDataType): Promise<?FileData> {
 	const { files, tomName, secMenu } = tomData;
-
-	const db = getLandingPagesDb();
-	const fileLandingData = await db.getPageData(path);
-	const isLanding = fileLandingData.length === 1;
-	const isHomepage = isLanding && fileLandingData[0].isHomepage;
+	const pathsCache = await getPathsCache();
+	const fileLandingData = await pathsCache.getPageData(path);
+	const isLanding = !!fileLandingData;
+	const isHomepage = isLanding && fileLandingData.isHomepage;
 
 	const oldFileData: ?FileData = files[path]; // if it's been deleted, it's now undefined and can be skipped
 	if (!oldFileData) return;

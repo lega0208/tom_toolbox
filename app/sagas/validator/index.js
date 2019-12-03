@@ -1,12 +1,9 @@
 import { all, call, fork, put, select, take } from 'redux-saga/effects';
-import { stat } from 'fs-extra';
 import {
 	VALIDATOR,
 	validateTOMError,
 	validateTOMSuccess,
-	setResults,
 	setTOMData,
-	setSubchapterChoices,
 	startVerifyCache,
 	verifyCacheSuccess,
 	verifyCacheError,
@@ -33,8 +30,7 @@ function* watchStartValidate() {
 		const tomData = yield call(getTOMDataSaga, selectedTOM);
 
 		try {
-			const results = yield call(validate, tomData);
-			yield put(setResults(results));
+			yield call(validate, tomData);
 			yield put(validateTOMSuccess());
 		} catch (e) {
 			console.error('Error validating ' + tomData.tomName);

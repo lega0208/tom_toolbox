@@ -15,6 +15,7 @@ import merge from 'webpack-merge';
 import { spawn, execSync } from 'child_process';
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
+//import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 CheckNodeEnv('development');
 
@@ -233,6 +234,8 @@ export default merge.smart(baseConfig, {
     new webpack.LoaderOptionsPlugin({
       debug: true
     }),
+
+	  //new BundleAnalyzerPlugin(),
   ],
 
   node: {

@@ -1,8 +1,9 @@
 import moment from 'moment';
 import { ensureFile, exists, readFile, outputFile, stat } from 'fs-extra';
 import { measureTime } from 'lib/util';
-import db from './data-interface';
-import cache from './cache';
+import db from 'database/data-interface';
+import cache from 'database/cache';
+import { getMoment } from 'database/util';
 import { LAST_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
 
 export default async function checkCache(forceCache: ?boolean): void {
@@ -92,7 +93,7 @@ async function shouldUpdateCache(lastCache = '1970-01-01') {
 	const dbPath = (await exists(DB_PATH)) ? (await readFile(DB_PATH)) : DEFAULT_DB_PATH;
 
 	if (await exists(dbPath)) {
-		const dbLastModified = await stat(DB_PATH).mtime;
+		const dbLastModified = await stat(DB_PATH).mtimeMs;
 		if (Date.parse(lastCache) > Date.parse(dbLastModified)) {
 			console.log('Cache already up to date');
 			console.log(`shouldUpdateCache took ${measureTimeEnd()}`);

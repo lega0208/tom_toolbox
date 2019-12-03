@@ -46,7 +46,10 @@ function validator(state = initialState, action) {
 		case VALIDATOR.SET.RESULTS:
 			return {
 				...state,
-				results: action.payload,
+				results: action.payload.filter(
+					pageResults => pageResults.results
+						.reduce((hasErrors, results) => results.errors.length > 0 || hasErrors, false)
+				),
 				numErrors:
 					action.payload
 						.reduce((acc, pageResults) => (

@@ -1,9 +1,9 @@
-import { copy, pathExists, readdir, readJSON, readFile, outputJSON } from 'fs-extra';
+import { copy, pathExists, readdir, readFile } from 'fs-extra';
 import { basename, dirname, join, resolve } from 'path';
 import { call, take, put } from 'redux-saga/effects';
 import { VALIDATOR, getTOMsSuccess, getTOMsError } from 'actions/validator';
 import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
-import getPathsCache from 'database/paths-cache';
+import { getPathsCache } from 'database/cache';
 
 export default function* watchGetTOMs() {
 	while (true) {
@@ -28,8 +28,7 @@ async function getToms() {
 	} else if ((await readdir(TOM_DATA_CACHE)).length === 0) {
 		await copyDataCache();
 	}
-	const pathsCache = getPathsCache();
-
+	const pathsCache = await getPathsCache();
 	return await pathsCache.getTomNames();
 }
 

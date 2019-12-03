@@ -13,17 +13,13 @@ import {
 	getToC
 } from './parse-file-wet4';
 import { wrapContent } from './util';
-import getPathsCache from 'database/paths-cache';
+import { getPathsCache } from 'database/cache';
 
 export const parseAllTOMs = async (outputPath = '.') => { // run from menu?
 	//const outputObj = {};
 	const errors = [];
-
-	const cache = await getPathsCache();
-	const homepages = (await cache.getHomepagesByTom()).reduce((acc, page) => ({
-		...acc,
-		[page.tomName]: [ page.filepath1, page.filepath2 ]
-	}), {});
+	const pathsCache = await getPathsCache();
+	const homepages = await pathsCache.getHomepagesByTom();
 
 	for (const [tomName, tomHomepages] of Object.entries(homepages)) {
 		const tomDataObj = await parseFromHomepage(tomHomepages, tomName, errors);
@@ -110,14 +106,8 @@ const parseFileData = async (path, tomName, parentData, errors) => {
 	const pageContents = (await wrapContent(fileContents, fileName)) || fileContents;
 	const $ = cheerio.load(pageContents, { decodeEntities: false });
 
-	if (!landingPages[tomName]) {
-		console.error(`${tomName} not in landingPages??\nin ${fileName}`);
-	}
-
-	const dirPath = path.replace(new RegExp(`(.+${tomName}).+`), '$1' );
-	const isLanding = landingPages[tomName]
-		.map((filePath) => resolve(dirPath, filePath))
-		.includes(path);
+	const pathsCache = await getPathsCache();
+	const isLanding = await pathsCache.checkIfLanding(path);
 
 	return {
 		path,

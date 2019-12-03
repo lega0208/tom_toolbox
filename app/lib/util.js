@@ -2,12 +2,12 @@
  * Random utility functions
  */
 /* Take an array of unresolved Promises and await them in batches */
-export const batchAwait = async (arr, func, queueSize = 10, postBatchFunc = () => {}) => {
+export const batchAwait = async (arr, mapFunc, queueSize = 10, postBatchFunc = () => {}) => {
 	try {
 		const returnVals = [];
 		while (arr.length > 0) {
 			const queue = arr.splice(0, queueSize);
-			const awaitedQueue = await Promise.all(queue.map(func));
+			const awaitedQueue = await Promise.all(queue.map(mapFunc));
 			returnVals.push(...awaitedQueue);
 			console.log('batch completed');
 			postBatchFunc();
@@ -24,6 +24,55 @@ export const waitForEach = (processFunc, [head, ...tail]) =>
 		? Promise.resolve()
 		: processFunc(head).then(() => waitForEach(processFunc, tail));
 
+function formatHtml(html) {
+	const lines = html.split('\r\n');
+	const getPrevLine = (i) => lines[i - 1] || null;
+	const getPrevPrevLine = (i) => lines[i - 2] || null;
+	const getNextLine = (i) => lines[i + 1] || null;
+	const isHeader = (line = '') => /^\s*<h\d>/.test(line);
+	const isBlankLine = (line = '') => /^\s*$/.test(line);
+	const removePrevLine = (i) => lines[i - 1] = '{removed}';
+
+	for (const [ i, line ] of lines.entries()) {
+		const prevLine = getPrevLine(i);
+		const prevPrevLine = getPrevPrevLine(i);
+		const nextLine = getNextLine(i);
+
+		// remove lines if multiple headers
+		if (isHeader(line)
+			&& prevLine !== null
+			&& prevPrevLine !== null
+			&& isBlankLine(getPrevLine(i))
+			&& isHeader(getPrevPrevLine(i))
+		) {
+			removePrevLine(i);
+		}
+
+		// add line before p>strong
+		if (/^<p[^>]*?><strong>.+<\/strong><\/p>/.test(line) && prevLine !== null && !isBlankLine(prevLine)) {
+			lines[i] = '\r\n' + line;
+		}
+
+		// line after top-level list
+		if (/^<\/[uo]l>$/.test(line) && getNextLine(i) !== null) {
+			lines[i] += '\r\n';
+		}
+
+		const clearfixRE = /^<div class="clearfix/;
+		// line after img (if not clearfix)
+		if (/^<img/.test(line) && nextLine !== null && !clearfixRE.test(nextLine)) {
+			lines[i] += '\r\n';
+		}
+
+		// line after clearfix
+		if (clearfixRE.test(line) && nextLine !== null) {
+			lines[i] += '\r\n';
+		}
+	}
+
+	return lines.filter((line) => !/^{removed}$/.test(line)).join('\r\n');
+}
+
 export function beautify(html) {
 	const beautify = require('js-beautify').html;
 	const config = {
@@ -37,11 +86,13 @@ export function beautify(html) {
 		preserve_newlines: false,
 	};
 
-	return beautify(html, config)
-		.replace(/(\s*)(<(?!td)[^>]+?>)(<img[^>]+?>)(<\/(?!td)[^>]+?>)/g, '$1$2$1\t$3$1$4')
-		.replace(/\r?\n(\t+?<h\d class="panel-title")/g, '$1')
-		.replace(/(?<=<div class="alert alert-info">\r?\n)\r?\n(\s+<h\d>)/g, '$1')
-		.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1'); // this may be error prone
+	return formatHtml(
+		beautify(html, config)
+			.replace(/(\s*)(<(?!td)[^>]+?>)(<img[^>]+?>)(<\/(?!td)[^>]+?>)/g, '$1$2$1\t$3$1$4')
+			.replace(/\r?\n(\t+?<h\d class="panel-title")/g, '$1')
+			.replace(/(?<=<div class="alert alert-info">\r?\n)\r?\n(\s+<h\d>)/g, '$1')
+			.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1') // this may be error prone
+	);
 }
 
 export function escapeRegExp(string) {
@@ -54,7 +105,7 @@ export function findAndReplace(text, acroMap) {
 		const regex = new RegExp(`([\\s>\\W])${escapedAcro}(?!<\/abbr>|\\p{Uppercase_Letter})`, 'gu'); // todo: optimize regex with lookbehind
 		const firstLastRegex = new RegExp(`^${escapedAcro}(?!\\p{Uppercase_Letter})|(?<!\\p{Uppercase_Letter})${escapedAcro}$`, 'gum');   // Also probably only have one find/replace function
 		const parenRegex = new RegExp(`\\(${def}\\)`, 'g');
-		
+
 		if (!regex.test(text)) {
 			replacedText = replacedText.replace(firstLastRegex, def);
 		} else {

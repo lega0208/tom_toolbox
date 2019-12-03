@@ -1,14 +1,9 @@
-export async function getCacheInfoModel(db) {
-	return db.model('CacheInfo', {
-		CacheDate: Date,
-		LastCache: Boolean
-	});
-}
+
 export async function getAcrosModel(db) {
 	const acroSchema = {
 		'ID': {
 			type: Number,
-			unique: true,
+			primary: true,
 		},
 		'Acronym': String,
 		'Definition': String,
@@ -17,10 +12,31 @@ export async function getAcrosModel(db) {
 	return db.model('Acronyms', acroSchema, {
 		index: [
 			'Acronym',
-			['Acronym', 'Language']
+			['Acronym', 'Language'],
 		],
-		primary: ['ID'],
 	});
+}
+
+export async function getLandingPagesModel(db) {
+	try {
+		const landingPagesSchema = {
+			ID: { type: 'increments', nullable: false, primary: true },
+			filepath: { type: String, nullable: false, unique: true },
+			tomName: { type: String, nullable: false },
+			isHomepage: Boolean,
+		};
+
+		return db.model('LandingPages', landingPagesSchema, {
+			index: [
+				'filepath',
+				['isHomepage', 'tomName'],
+				['tomName', 'isHomepage'],
+			],
+		});
+	} catch (e) {
+		console.error('Error getting LandingPages model');
+		console.error(e);
+	}
 }
 
 export async function getTOMDataModel(db) {
@@ -46,26 +62,3 @@ export async function getTOMDataModel(db) {
 	});
 }
 
-export async function getLandingPagesModel(db) {
-	try {
-		const landingPagesSchema = {
-			ID: { type: 'increments', nullable: false, primary: true },
-			filepath: { type: String, nullable: false, unique: true },
-			tomName: { type: String, nullable: false },
-			isHomepage: Boolean,
-			created_at: { type: Date, nullable: false, defaultTo: Date.now() },
-		};
-
-		return db.model('LandingPages', landingPagesSchema, {
-			index: [
-				['filepath'],
-				['isHomepage', 'tomName'],
-				['tomName', 'isHomepage'],
-				['created_at'],
-			],
-		});
-	} catch (e) {
-		console.error('Error getting LandingPages model');
-		console.error(e);
-	}
-}
