@@ -47,12 +47,7 @@ export async function getDbLastModified(localPath = '') {
 
 async function copyToAppDir() {
 	const localDbExists = await exists(LOCAL_DB_PATH);
-	const dbLastModified = await getDbLastModified();
-	const localDbLastModified = await getDbLastModified(LOCAL_DB_PATH);
-	console.log('dbLastModified:');
-	console.log(dbLastModified);
-	console.log('localDbLastModified:');
-	console.log(localDbLastModified);
+
 	if (!localDbExists || await getDbLastModified() > await getDbLastModified(LOCAL_DB_PATH)) {
 		console.log('Updating local Access DB');
 		const dbPath = getDBPath();
@@ -78,6 +73,7 @@ class DataInterface {
 		  this.db = ADODB.open(this.datasource);
 	  } catch (e) {
 	  	console.error('Error initializing dataInterface 😐');
+	  	console.error(e);
 		  throw e;
 	  }
   }

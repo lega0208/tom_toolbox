@@ -16,9 +16,9 @@ import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
 CheckNodeEnv('production');
 
 export default merge.smart(baseConfig, {
-	mode: 'production',
-  devtool: 'source-map',
-	optimization: {
+    mode: 'production',
+    devtool: 'source-map',
+    optimization: {
 		minimizer: [
 			new UglifyJsPlugin({
 				uglifyOptions: {
@@ -64,9 +64,10 @@ export default merge.smart(baseConfig, {
 	        {
 		        loader: 'css-loader',
 		        options: {
-			        modules: true,
+			        modules: {
+                localIdentName: '[name]__[local]__[hash:base64:5]',
+              },
 			        importLoaders: 1,
-			        localIdentName: '[name]__[local]__[hash:base64:5]',
 		        }
 	        }
         ],
@@ -81,9 +82,6 @@ export default merge.smart(baseConfig, {
 		        options: {
 			        sourceMap: true,
 			        importLoaders: 2,
-			        alias: {
-				        '../node_modules/bootstrap/scss': 'bootstrap'
-			        }
 		        },
 	        },
 	        {
@@ -102,9 +100,10 @@ export default merge.smart(baseConfig, {
           {
             loader: 'css-loader',
             options: {
-              modules: true,
+              modules: {
+                localIdentName: '[name]__[local]__[hash:base64:5]',
+              },
               importLoaders: 1,
-              localIdentName: '[name]__[local]__[hash:base64:5]',
             }
           },
 	        {
