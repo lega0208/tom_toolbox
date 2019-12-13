@@ -110,7 +110,7 @@ export async function updateCachedData(path: string, tomData: TOMDataType): Prom
 						secMenu[lang] = newChildren;
 						//console.log('new secMenu:');
 						//console.log(secMenu[lang]);
-						break; //  exit the loop if any change is found
+						break; // exit the loop if any change is found
 					}
 				}
 			}

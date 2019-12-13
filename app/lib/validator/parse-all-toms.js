@@ -38,7 +38,7 @@ export const parseAllTOMs = async (outputPath = '.') => { // run from menu?
 	}
 };
 
-const parseFromHomepage = async (paths, tomName, errors) => {
+export const parseFromHomepage = async (paths, tomName, errors) => {
 	const enHomepage = paths[0];
 	const frHomepage = paths[1];
 	const parsedFiles = {};

@@ -45,7 +45,7 @@ function Images(props) {
 							</label>
 						</div>
 						<div className="col-3 col-sm-5 col-md-7 ml-0">
-							<img src={oldPath} className="w-100" />
+							<img key={`img-${index}`} src={`${oldPath}?t=${new Date().getTime()}`} className="img-fluid" alt="" />
 						</div>
 					</div>
 					<div className="row">

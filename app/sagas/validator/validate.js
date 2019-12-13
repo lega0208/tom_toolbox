@@ -73,7 +73,6 @@ function* validateWithWorkerSaga(files, tomData) {
 		while (true) {
 			const message = yield take(chan);
 			if (message.results) {
-				console.log('results ya?');
 				yield put(setResults(message.results));
 				return;
 			}

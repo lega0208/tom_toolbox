@@ -154,7 +154,7 @@ export const TextInput = ({ value = '', change, label, placeholder = '', xClass 
 	};
 
 	return (
-		<form className={xClass}>
+		<form className={xClass} onSubmit={e => e.preventDefault()}>
 			<label className="mb-0">{label}</label>
 			<input type="text"
 			       className="form-control form-control-sm"

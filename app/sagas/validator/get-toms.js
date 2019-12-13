@@ -2,7 +2,7 @@ import { copy, pathExists, readdir, readFile } from 'fs-extra';
 import { basename, dirname, join, resolve } from 'path';
 import { call, take, put } from 'redux-saga/effects';
 import { VALIDATOR, getTOMsSuccess, getTOMsError } from 'actions/validator';
-import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH } from '@constants';
+import { TOM_DATA_CACHE, DB_PATH, DEFAULT_DB_PATH, DISTRIB_PATH } from '@constants';
 import { getPathsCache } from 'database/cache';
 
 export default function* watchGetTOMs() {
@@ -23,11 +23,25 @@ export default function* watchGetTOMs() {
 
 // todo: add: if shared-drive cache is newer than local cache lastModified
 async function getToms() {
+  const externalTomDataCache = join(DISTRIB_PATH, 'TOM_Data');
+  const tomDataFilepaths = await readdir(externalTomDataCache);
+  const tomDataCacheFilepaths = await readdir(TOM_DATA_CACHE);
+
 	if (!(await pathExists(TOM_DATA_CACHE))) {
 		await copyDataCache();
-	} else if ((await readdir(TOM_DATA_CACHE)).length === 0) {
+	} else if (tomDataCacheFilepaths.length === 0) {
 		await copyDataCache();
-	}
+	} else if (tomDataFilepaths.length !== tomDataCacheFilepaths.length) {
+	  const uncachedTomFiles = tomDataFilepaths.filter(path => !tomDataCacheFilepaths.includes(path));
+	  console.log('uncached tom files:');
+	  console.log(uncachedTomFiles.join('\n'));
+
+	  const copyTasks =
+              uncachedTomFiles
+                  .map(file => copy(resolve(externalTomDataCache, file), resolve(TOM_DATA_CACHE, file)));
+	  await Promise.all(copyTasks);
+  }
+
 	const pathsCache = await getPathsCache();
 	return await pathsCache.getTomNames();
 }

@@ -1,10 +1,12 @@
 // @flow
-import { outputJSON, readFile, readJSON, stat } from 'fs-extra';
+import { exists, outputJSON, readFile, readJSON, stat } from 'fs-extra';
 import { basename, join } from 'path';
 import { updateCachedData } from './update-cache';
-import { TOM_DATA_CACHE } from '@constants';
+import parseNewTom from './parse-new-tom';
+import { TOM_DATA_CACHE, DISTRIB_PATH } from '@constants';
 import { TOMDataType, FileData } from './types';
 import { clearCache } from 'database/util';
+import { getPathsCache } from 'database/cache';
 
 export default async function getTOMData(tomName): TOMDataType { // should rename this or extract parts because it mostly updates
 	console.log('tomName:');
@@ -12,6 +14,20 @@ export default async function getTOMData(tomName): TOMDataType { // should renam
 	const cacheFilePath = join(TOM_DATA_CACHE, `${tomName}.json`);
 
 	try {
+		if (!await exists(cacheFilePath)) {
+			const pathsCache = await getPathsCache();
+			const homepagePaths = await pathsCache.getHomepages(tomName);
+			console.log('homepagePaths:');
+			console.log(homepagePaths);
+			const tomData = await parseNewTom(homepagePaths, tomName);
+			await outputJSON(cacheFilePath, tomData);
+
+			const externalCacheFilePath = join(DISTRIB_PATH, 'TOM_Data', `${tomName}.json`);
+			await outputJSON(externalCacheFilePath, tomData);
+
+			return tomData;
+		}
+
 		return await verifyCache(cacheFilePath);
 	} catch (e) {
 		console.error('Error getting TOM data:');

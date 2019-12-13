@@ -162,6 +162,14 @@ class PathsCache {
 		this.homepagesByTom = null;
 	}
 
+	async getHomepages(tomName) {
+		if (this.homepagesByTom !== null) {
+			return this.homepagesByTom[tomName];
+		}
+
+		return await this.landings.findIn('filepath', { tomName, isHomepage: true }, { order: 'filepath' });
+	}
+
 	async getHomepagesByTom() {
 		if (this.homepagesByTom === null) {
 			const query = this.db.knex
@@ -215,8 +223,6 @@ class PathsCache {
 
 	async checkIfLanding(filepath) {
 		const queryResult = await this.landings.find({ filepath });
-		console.log('pathsCache.checkIfLanding() results:');
-		console.log(queryResult);
 		return queryResult.length > 0;
 	}
 }

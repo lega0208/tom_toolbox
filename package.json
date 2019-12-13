@@ -57,7 +57,8 @@
       "output": "release"
     },
     "npmRebuild": false,
-    "electronDist": "node_modules/electron/dist"
+    "electronDist": "node_modules/electron/dist",
+    "buildDependenciesFromSource": false
   },
   "author": {
     "name": "Marc Legault",

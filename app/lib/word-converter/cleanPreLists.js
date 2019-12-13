@@ -3,7 +3,7 @@
  */
 export default function preListClean(html) {
 	const funcs = [
-		removeNestedAnchorsComments,
+		removeSupportComments,
 		replaceImgSrcs,
 		removeEmptyTags,
 		addClassQuotes,
@@ -17,8 +17,8 @@ export default function preListClean(html) {
 	return funcs.reduce((acc, func) => func(acc), html);
 }
 
-function removeNestedAnchorsComments(html) {
-	const regex = /<!\[if !supportNestedAnchors]>[\s\S]+?<!\[endif]>/gi;
+function removeSupportComments(html) {
+	const regex = /<!\[if !support(?:NestedAnchors|Footnotes)]>[\s\S]+?<!\[endif]>/gi;
 
 	return html.replace(regex, '')
 }

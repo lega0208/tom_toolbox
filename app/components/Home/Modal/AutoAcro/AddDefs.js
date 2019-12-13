@@ -61,7 +61,7 @@ class AddDefs extends React.Component {
 				)
 			);
 			return (
-				<form id="promptDefs">
+				<form id="promptDefs" onSubmit={e => e.preventDefault()}>
 					{renderedAcros}
 				</form>
 			);
