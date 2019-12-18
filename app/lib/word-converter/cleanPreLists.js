@@ -2,6 +2,8 @@
  * Clean up HTML a bit before parsing lists
  */
 export default function preListClean(html) {
+	console.log('original html:');
+	console.log(html);
 	const funcs = [
 		removeSupportComments,
 		replaceImgSrcs,
@@ -18,7 +20,7 @@ export default function preListClean(html) {
 }
 
 function removeSupportComments(html) {
-	const regex = /<!\[if !support(?:NestedAnchors|Footnotes)]>[\s\S]+?<!\[endif]>/gi;
+	const regex = /<!(?:--)?\[if !support(?:NestedAnchors|Footnotes|Annotations)]>[\s\S]+?<!(?:--)?\[endif]>/gi;
 
 	return html.replace(regex, '')
 }
@@ -33,12 +35,19 @@ function replaceImgSrcs(html) {
 }
 
 function removeImgJunk(html) {
-	const regex = /<v:shapetype[\s\S]+?<\/v:shapetype>/g;
+	console.log('removeImgJunk input:');
+	console.log('before:');
+	console.log(html);
+	const regex =
+			      /<v:shapetype[\s\S]+?<\/v:shapetype>|<!(?:--)?\[if !vml\](?:--)?>[\s\S]+?<!(?:--)?\[endif\](?:--)?>|<\/v:shape><!(?:--)?\[endif\](?:--)?>/g;
+	const regex2 = /<b[^>]+?>\s*(<img[^>]+?>)\s*<\/b>/g;
 
 	while (regex.test(html)) {
-		console.log('Found img junk');
-		html = html.replace(regex, '');
+		html = html.replace(regex, '').replace(regex2, '$1');
 	}
+
+	console.log('after:');
+	console.log(html);
 	return html;
 }
 

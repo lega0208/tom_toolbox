@@ -92,6 +92,7 @@ export function beautify(html) {
 			.replace(/\r?\n(\t+?<h\d class="panel-title")/g, '$1')
 			.replace(/(?<=<div class="alert alert-info">\r?\n)\r?\n(\s+<h\d>)/g, '$1')
 			.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1') // this may be error prone
+			.replace(/^(\s*)(<(?!img).+>)\s*(<img[^>]+>\s*)$/mg, '$1$2\r\n$1$3')
 	);
 }
 
