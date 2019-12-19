@@ -7,6 +7,7 @@ export default function preListClean(html) {
 	const funcs = [
 		removeSupportComments,
 		replaceImgSrcs,
+		//logHtml,
 		removeEmptyTags,
 		addClassQuotes,
 		removeListComments,
@@ -17,6 +18,12 @@ export default function preListClean(html) {
 		removeImgJunk,
 	];
 	return funcs.reduce((acc, func) => func(acc), html);
+}
+
+function logHtml(html) {
+	console.log(html);
+
+	return html;
 }
 
 function removeSupportComments(html) {
@@ -35,9 +42,6 @@ function replaceImgSrcs(html) {
 }
 
 function removeImgJunk(html) {
-	console.log('removeImgJunk input:');
-	console.log('before:');
-	console.log(html);
 	const regex =
 			      /<v:shapetype[\s\S]+?<\/v:shapetype>|<!(?:--)?\[if !vml\](?:--)?>[\s\S]+?<!(?:--)?\[endif\](?:--)?>|<\/v:shape><!(?:--)?\[endif\](?:--)?>/g;
 	const regex2 = /<b[^>]+?>\s*(<img[^>]+?>)\s*<\/b>/g;
@@ -46,8 +50,6 @@ function removeImgJunk(html) {
 		html = html.replace(regex, '').replace(regex2, '$1');
 	}
 
-	console.log('after:');
-	console.log(html);
 	return html;
 }
 
@@ -70,10 +72,17 @@ function addClassQuotes(html) {
 }
 
 function removeEmptyTags(html) {
-	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>\s*?<\/\1>/;
+	// remove strong/b tags that are only bolding whitespace
+	const boldWhitespaceRegex = /<(?:strong|b)(?:\s+[^>]+)?>(\s+)<\/(?:strong|b)>/;
+	while (boldWhitespaceRegex.test(html)) {
+		html = html.replace(boldWhitespaceRegex, '$1');
+	}
+
+	// remove actually empty tags
+	const regex = /<(?!td|th|a )([\S]+?)[^>]*?>(\s*?)<\/\1>/;
 	while (regex.test(html)) {
 		if (regex.exec(html) && !regex.exec(html)[0].includes('mso-spacerun')) {
-			html = html.replace(regex, '');
+			html = html.replace(regex, '$2');
 		} else {
 			html = html.replace(/<span[^>]+?>\s+?<\/span>/, ' ');
 		}
@@ -85,10 +94,11 @@ function removeEmptyTags(html) {
 	}
 
 	// Get rid of strong tags that close and immediately open
-	const strongRegex = /<\/strong><strong>/;
+	const strongRegex = /<\/(strong|b)><\1>/;
 	while (strongRegex.test(html)) {
 		html = html.replace(strongRegex, '');
 	}
+
 
 	return html;
 }
