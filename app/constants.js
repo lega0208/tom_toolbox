@@ -8,7 +8,7 @@ export const APP_DIR = join(`${process.env.USERPROFILE}/`, 'TOM_Toolbox');
 
 const inAppDir = (basename) => join(APP_DIR, basename);
 
-export const DISTRIB_PATH = '\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS\\TOM_online\\HELP\\';
+export const DISTRIB_PATH = '\\\\Omega.dce-eir.net\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS\\TOM_online\\HELP\\';
 export const DEFAULT_DB_PATH = `${DISTRIB_PATH}Toolbox.accdb`;
 export const LOCAL_DB_PATH = inAppDir('Toolbox.accdb');
 export const DB_PATH = inAppDir('.dbpath');

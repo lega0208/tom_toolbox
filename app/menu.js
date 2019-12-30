@@ -52,7 +52,7 @@ export default class MenuBuilder {
 						if (typeof path !== 'undefined') {
 							clearCache();
 							const fixedPath = path[0].replace(/^[^C]:\/\/?.+?DSS/,
-								'\\\\OMEGA\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS');
+								'\\\\Omega.dce-eir.net\\NATDFS\\CRA\\HQ\\ABSB\\ABSB_H0E\\GV1\\IRD2\\CTSD\\DSS');
 							fs.writeFile(DB_PATH, fixedPath, 'utf-8', e => (
 								e ? console.error(e)
 									: console.log(`"${fixedPath}" saved as new db path`)

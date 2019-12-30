@@ -16,7 +16,8 @@ import {
 function* startAutoAcro(text) {
 	try {
 		yield put(startAutoAcroAction(text)); // Just for debugging?
-		const foundAcros = yield call(findAcros, text);
+		const sanitizedText = text.replace(/<a [^>]+?>(.+?)<\/a>|<img[^>]+?>/g, '$1');
+		const foundAcros = yield call(findAcros, sanitizedText);
 
 		if (foundAcros.length < 1) {
 			return text;

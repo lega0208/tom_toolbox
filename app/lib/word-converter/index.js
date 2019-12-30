@@ -35,9 +35,7 @@ export default function WordConverter(html: string, opts?: optsType): any {
 	}
 
 	return $('body')
-		.html()
-		.replace(/<\/strong>(\s+)?<strong>/g, '$1')
-		.replace(/<strong>(\s+)/g, '$1<strong>');
+		.html();
 }
 
 function removeEmptyPs($) {
@@ -58,7 +56,7 @@ function unwrapImgs($) {
 	$('img').each((i, img) => {
 		const imgRef = $(img);
 		const parentRef = imgRef.parent();
-		
+
 		if (!parentRef.text().trim() && parentRef.get(0).tagName === 'v:shape' && imgRef.siblings().length === 0) {
 			parentRef.replaceWith(img);
 		}

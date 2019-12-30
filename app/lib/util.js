@@ -93,6 +93,8 @@ export function beautify(html) {
 			.replace(/(?<=<div class="alert alert-info">\r?\n)\r?\n(\s+<h\d>)/g, '$1')
 			.replace(/(?<=<\/h\d>\r?\n)\r?\n(<h\d)/g, '$1') // this may be error prone
 			.replace(/^(\s*)(<(?!img).+>)\s*(<img[^>]+>\s*)$/mg, '$1$2\r\n$1$3')
+			.replace(/<\/strong>(\s+)?<strong>/g, '$1')
+			.replace(/<strong>(\s+)/g, '$1<strong>')
 	);
 }
 

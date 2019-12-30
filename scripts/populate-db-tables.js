@@ -81,7 +81,7 @@ const db = new DataInterface(`${DISTRIB_PATH}PagesDB.accdb`);
 	const data = (await db.getAll('LandingPages'));
 
 	const csv = data.map(({ filepath, tomName }, i) => {
-		const basePath = '\\\\OMEGA\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\';
+		const basePath = '\\\\Omega.dce-eir.net\\NATDFS\\Services\\Central_storage\\Testing_ABSB_Secure\\IND\\';
 		filepath = `${basePath}${tomName}\\${filepath}`;
 		return `${i+1},${filepath},${tomName},${homepages.includes(filepath)}`
 	}).join('\r\n');
