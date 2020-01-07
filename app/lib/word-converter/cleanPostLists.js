@@ -8,22 +8,26 @@ export default function cleanPostLists($) {
 
 	// remove unnecessary attributes
 	$('*').removeAttr('style')
-		.removeAttr('width')
-		.removeAttr('height')
-		.removeAttr('border')
-		.removeAttr('cellpadding')
-		.removeAttr('cellspacing')
-		.removeAttr('align')
-		.removeAttr('valign')
-		.removeAttr('bgcolor')
-		.removeAttr('nowrap')
-		.removeAttr('paragraph')
-		.removeAttr('paragraphcxspfirst')
-		.removeAttr('paragraphcxspmiddle')
-		.removeAttr('paragraphcxsplast')
-		.removeAttr('type')
-		.not('p.Note, p.MsoToc1, p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5, div.alert, div.module-note')
-		.removeAttr('class');
+	      .removeAttr('width')
+				.removeAttr('height')
+				.removeAttr('border')
+				.removeAttr('cellpadding')
+				.removeAttr('cellspacing')
+				.removeAttr('align')
+				.removeAttr('valign')
+				.removeAttr('bgcolor')
+				.removeAttr('nowrap')
+				.removeAttr('paragraph')
+				.removeAttr('paragraphcxspfirst')
+				.removeAttr('paragraphcxspmiddle')
+				.removeAttr('paragraphcxsplast')
+		    .removeAttr('cxspfirst')
+		    .removeAttr('cxspmiddle')
+		    .removeAttr('cxsplast')
+				.removeAttr('type')
+				.removeAttr('start')
+				.not('p.Note, p.MsoToc1, p.MsoToc2, p.MsoToc3, p.MsoToc4, p.MsoToc5, div.alert, div.module-note')
+				.removeAttr('class');
 
 	// change <b>s to <strong>s
 	$('b').each((i, elem) => elem.tagName = 'strong');

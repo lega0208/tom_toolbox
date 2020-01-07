@@ -4,7 +4,7 @@ export default function fixTableHTML($) {
 	tablesRef.each((i, table) => {
 		const theadRef = $('thead', table);
 		const tbodyRef = $('tbody', table);
-		
+
 		if (!theadRef.length) {
 			// check that first row contains headers
 			const headerRow = tbodyRef.children().first();
@@ -19,14 +19,14 @@ export default function fixTableHTML($) {
 				$('thead', table).append(headerRow);
 			}
 		}
-		
+
 		// change <td>s to <th>s
 		$('thead > tr', table).find('td').each((i, item) => {
 			const strong = $('strong', item).first();
 			strong.replaceWith(strong.contents());
 			item.tagName = 'th';
 		});
-		
+
 		// if first cell of the row is bolded, it's probably a header
 		tbodyRef.children().each((i, tr) => {
 			const trRef = $(tr);
@@ -50,6 +50,16 @@ export default function fixTableHTML($) {
 				? $(child).remove()
 				: null
 			);
+
+			// centre numeric-only cells
+			const numericCellRegex = /^(?<![a-z])[^a-z]+(?![a-z])$/;
+			$('td', table).each((i, td) => {
+				const $td = $(td);
+
+				if (numericCellRegex.test($td.text()) && !!$td.text()) {
+					$td.addClass('text-center');
+				}
+			});
 
 			// need to recalculate children or something apparently
 			const newChildren = parent.children();
