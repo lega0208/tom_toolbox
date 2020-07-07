@@ -114,7 +114,7 @@
     "css-loader": "^3.2.1",
     "cssnano": "^4.1.10",
     "devtron": "^1.4.0",
-    "electron": "^3.1.9",
+    "electron": "^7.2.4",
     "electron-builder": "^19.8.0",
     "electron-debug": "^2.0.0",
     "electron-devtools-installer": "^2.2.0",
