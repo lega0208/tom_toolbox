@@ -6,7 +6,7 @@ import Loadable from 'components/Loadable';
 export default function routes() {
 	const AsyncReferences = Loadable({ loader: () => import('./components/References') });
 	const AsyncHome = Loadable({ loader: () => import('./containers/HomePage') });
-	//const AsyncTOMViewer = Loadable({ loader: () => import('./containers/TOMViewer') });
+	// const AsyncTOMViewer = Loadable({ loader: () => import('./containers/TOMViewer') });
 	const AsyncValidator = Loadable({ loader: () => import('./containers/Validator') });
 
 	return (
